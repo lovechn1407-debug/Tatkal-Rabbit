@@ -13,6 +13,15 @@
   "host_permissions": [
     "https://www.irctc.co.in/*"
   ],
+  "externally_connectable": {
+    "matches": [
+      "https://*.vercel.app/*",
+      "https://tatkal-rabbit.firebaseapp.com/*",
+      "https://tatkal-rabbit.web.app/*",
+      "http://localhost/*",
+      "http://127.0.0.1/*"
+    ]
+  },
   "action": {
     "default_popup": "index.html",
     "default_title": "Tatkal Rabbit"

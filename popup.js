@@ -1447,18 +1447,33 @@ function setupAuthAndSubscription() {
   const btnPaywallGoogleLogin = document.getElementById("btnPaywallGoogleLogin");
   const btnSyncSubscriptionStatus = document.getElementById("btnSyncSubscriptionStatus");
   const btnOpenClientPage = document.getElementById("btnOpenClientPage");
+  const btnPaywallPasteToken = document.getElementById("btnPaywallPasteToken");
+  const btnSetPortalUrl = document.getElementById("btnSetPortalUrl");
 
-  // Open client page helper
-  function openClientWebpage(query = "") {
-    let clientUrl = "web/client.html" + (query ? (query.startsWith("?") ? query : "?" + query) : "");
-    if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.getURL) {
-      clientUrl = chrome.runtime.getURL(clientUrl);
-      if (chrome.tabs && chrome.tabs.create) {
-        chrome.tabs.create({ url: clientUrl });
-        return;
-      }
+  // Get Web Portal URL (supports custom Vercel domain or default)
+  async function getWebPortalUrl() {
+    if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
+      const stored = await chrome.storage.local.get(["tatkal_web_portal_url"]);
+      if (stored.tatkal_web_portal_url) return stored.tatkal_web_portal_url.replace(/\/$/, "");
     }
-    window.open(clientUrl, "_blank");
+    return "https://tatkal-rabbit.vercel.app";
+  }
+
+  // Open Live Web Client Page on Vercel
+  async function openClientWebpage(query = "") {
+    const portalBase = await getWebPortalUrl();
+    const extId = (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.id) ? chrome.runtime.id : "";
+    let cleanQuery = query.startsWith("?") ? query.substring(1) : query;
+    if (extId) {
+      cleanQuery = cleanQuery ? `extId=${extId}&${cleanQuery}` : `extId=${extId}`;
+    }
+    const fullUrl = `${portalBase}/client${cleanQuery ? '?' + cleanQuery : ''}`;
+    
+    if (typeof chrome !== "undefined" && chrome.tabs && chrome.tabs.create) {
+      chrome.tabs.create({ url: fullUrl });
+    } else {
+      window.open(fullUrl, "_blank");
+    }
   }
 
   // Open User Dialog
@@ -1522,6 +1537,51 @@ function setupAuthAndSubscription() {
   };
   if (btnSyncSubscriptionStatus) btnSyncSubscriptionStatus.addEventListener("click", doSync);
   if (btnDialogSyncSub) btnDialogSyncSub.addEventListener("click", doSync);
+
+  // Paste Sync Token Handlers
+  if (btnPaywallPasteToken) {
+    btnPaywallPasteToken.addEventListener("click", async () => {
+      const tokenStr = prompt("Paste your Tatkal Rabbit Extension Sync Token copied from the Web Client Portal:");
+      if (!tokenStr) return;
+      try {
+        const decoded = JSON.parse(atob(tokenStr.trim()));
+        if (decoded && decoded.email) {
+          if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
+            await chrome.storage.local.set({
+              tatkal_auth_user: {
+                uid: decoded.uid,
+                email: decoded.email,
+                displayName: decoded.displayName || decoded.email.split("@")[0],
+                photoURL: decoded.photoURL || ""
+              },
+              tatkal_subscription: decoded.subscription || null
+            });
+          }
+          await refreshSubscriptionState();
+          showToast("🎉 Session synced and extension unlocked!");
+        } else {
+          showToast("Invalid token data", "error");
+        }
+      } catch (e) {
+        showToast("Invalid token format", "error");
+      }
+    });
+  }
+
+  // Change Web Portal URL Handler
+  if (btnSetPortalUrl) {
+    btnSetPortalUrl.addEventListener("click", async () => {
+      const cur = await getWebPortalUrl();
+      const entered = prompt("Enter your Tatkal Rabbit Web Portal URL (Vercel domain):", cur);
+      if (entered && entered.trim()) {
+        const clean = entered.trim().replace(/\/$/, "");
+        if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
+          await chrome.storage.local.set({ tatkal_web_portal_url: clean });
+        }
+        showToast("Portal URL updated to: " + clean);
+      }
+    });
+  }
 
   // Logout
   if (btnDialogLogout) {

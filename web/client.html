@@ -471,19 +471,53 @@
           });
         }
 
+        // Retrieve extension ID from query params or storage
+        const urlParams = new URLSearchParams(window.location.search);
+        let extId = urlParams.get("extId") || localStorage.getItem("tatkal_ext_id");
+        if (urlParams.get("extId")) {
+          localStorage.setItem("tatkal_ext_id", urlParams.get("extId"));
+        }
+
+        function notifyExtension(userObj, subObj) {
+          const targetExtId = extId || localStorage.getItem("tatkal_ext_id");
+          if (!targetExtId) return;
+          if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.sendMessage) {
+            try {
+              chrome.runtime.sendMessage(targetExtId, {
+                type: "TATKAL_AUTH_SYNC",
+                user: userObj,
+                subscription: subObj
+              }, (resp) => {
+                if (chrome.runtime.lastError) {
+                  console.log("Extension connection notice:", chrome.runtime.lastError.message);
+                } else if (resp && resp.ok) {
+                  showToast("⚡ Chrome Extension unlocked successfully!", "success");
+                }
+              });
+            } catch (e) {
+              console.warn("Could not dispatch message to extension:", e);
+            }
+          }
+        }
+
         // Subscribe to real-time user document updates
         onSnapshot(doc(db, "users", user.uid), (snap) => {
           if (snap.exists()) {
             currentUserData = snap.data();
             updateSubscriptionUI(currentUserData.subscription);
+            
+            const userPayload = {
+              uid: user.uid,
+              email: user.email,
+              displayName: user.displayName || user.email.split("@")[0],
+              photoURL: user.photoURL || ""
+            };
+
+            notifyExtension(userPayload, currentUserData.subscription);
+
             if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
               chrome.storage.local.set({
-                tatkal_auth_user: {
-                  uid: user.uid,
-                  email: user.email,
-                  displayName: user.displayName || user.email.split("@")[0],
-                  photoURL: user.photoURL || ""
-                },
+                tatkal_auth_user: userPayload,
                 tatkal_subscription: currentUserData.subscription
               });
             }
@@ -656,16 +690,20 @@
       }
     });
 
-    // Copy Session Sync Data
+    // Copy Session Sync Token for Extension
     document.getElementById("btnCopyAuthSession").addEventListener("click", () => {
       if (!currentUser) return;
       const data = {
         uid: currentUser.uid,
         email: currentUser.email,
-        sub: currentUserData?.subscription || null
+        displayName: currentUser.displayName,
+        photoURL: currentUser.photoURL,
+        subscription: currentUserData?.subscription || null,
+        timestamp: Date.now()
       };
-      navigator.clipboard.writeText(JSON.stringify(data));
-      showToast("Session sync data copied to clipboard!");
+      const token = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+      navigator.clipboard.writeText(token);
+      showToast("🔑 Extension Sync Token copied to clipboard!");
     });
 
     // Theme toggle
