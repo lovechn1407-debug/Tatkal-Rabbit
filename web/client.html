@@ -522,6 +522,8 @@
               });
             }
           }
+        }, (err) => {
+          console.warn("Firestore real-time subscription notice:", err.message);
         });
 
         // Check if query param specifies a plan

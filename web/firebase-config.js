@@ -77,7 +77,11 @@ export async function loginWithGoogle() {
   try {
     const result = await signInWithPopup(auth, googleProvider);
     const user = result.user;
-    await syncUserRecord(user);
+    try {
+      await syncUserRecord(user);
+    } catch (syncErr) {
+      console.warn("Firestore user sync deferred (rules/offline):", syncErr.message);
+    }
     return user;
   } catch (error) {
     console.error("Google Sign-In Error:", error);
@@ -103,38 +107,43 @@ export async function logoutUser() {
 export async function syncUserRecord(user) {
   if (!user) return null;
   const userRef = doc(db, "users", user.uid);
-  const snap = await getDoc(userRef);
+  
+  const fallbackRecord = {
+    uid: user.uid,
+    email: user.email,
+    displayName: user.displayName || user.email.split("@")[0],
+    photoURL: user.photoURL || "",
+    isAdmin: user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase(),
+    subscription: {
+      status: "inactive",
+      plan: "none",
+      validUntil: null,
+      isSuspended: false
+    },
+    bookingHistory: []
+  };
 
-  const now = new Date();
-  if (!snap.exists()) {
-    // New user default record
-    const newUserData = {
-      uid: user.uid,
-      email: user.email,
-      displayName: user.displayName || user.email.split("@")[0],
-      photoURL: user.photoURL || "",
-      createdAt: serverTimestamp(),
-      lastLoginAt: serverTimestamp(),
-      isAdmin: user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase(),
-      subscription: {
-        status: "inactive", // 'active' | 'expired' | 'suspended' | 'inactive'
-        plan: "none",
-        validUntil: null,
-        activatedAt: null,
-        isSuspended: false
-      },
-      bookingHistory: []
-    };
-    await setDoc(userRef, newUserData);
-    return newUserData;
-  } else {
-    // Update login timestamp
-    await updateDoc(userRef, {
-      lastLoginAt: serverTimestamp(),
-      photoURL: user.photoURL || snap.data().photoURL || "",
-      displayName: user.displayName || snap.data().displayName || ""
-    });
-    return snap.data();
+  try {
+    const snap = await getDoc(userRef);
+    if (!snap.exists()) {
+      const newUserData = {
+        ...fallbackRecord,
+        createdAt: serverTimestamp(),
+        lastLoginAt: serverTimestamp()
+      };
+      await setDoc(userRef, newUserData);
+      return newUserData;
+    } else {
+      await updateDoc(userRef, {
+        lastLoginAt: serverTimestamp(),
+        photoURL: user.photoURL || snap.data().photoURL || "",
+        displayName: user.displayName || snap.data().displayName || ""
+      });
+      return snap.data();
+    }
+  } catch (err) {
+    console.warn("Firestore syncUserRecord permission notice:", err.message);
+    return fallbackRecord;
   }
 }
 
