@@ -1,15 +1,15 @@
 {
+  "outputDirectory": "web",
   "cleanUrls": true,
   "rewrites": [
-    { "source": "/", "destination": "/web/index.html" },
-    { "source": "/client", "destination": "/web/client.html" },
-    { "source": "/client.html", "destination": "/web/client.html" },
-    { "source": "/admin", "destination": "/web/admin.html" },
-    { "source": "/admin.html", "destination": "/web/admin.html" },
-    { "source": "/style.css", "destination": "/web/style.css" },
-    { "source": "/firebase-config.js", "destination": "/web/firebase-config.js" },
-    { "source": "/assets/(.*)", "destination": "/web/assets/$1" },
-    { "source": "/web/(.*)", "destination": "/web/$1" }
+    { "source": "/client", "destination": "/client.html" },
+    { "source": "/admin", "destination": "/admin.html" },
+    { "source": "/web", "destination": "/index.html" },
+    { "source": "/web/index.html", "destination": "/index.html" },
+    { "source": "/web/client", "destination": "/client.html" },
+    { "source": "/web/client.html", "destination": "/client.html" },
+    { "source": "/web/admin", "destination": "/admin.html" },
+    { "source": "/web/admin.html", "destination": "/admin.html" }
   ],
   "headers": [
     {

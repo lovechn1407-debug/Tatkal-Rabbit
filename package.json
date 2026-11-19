@@ -1,0 +1,9 @@
+{
+  "name": "tatkal-rabbit",
+  "version": "4.0.0",
+  "private": true,
+  "description": "Tatkal Rabbit IRCTC Fast Tatkal & Cloud Pass Automation",
+  "scripts": {
+    "build": "echo 'Tatkal Rabbit web build successful'"
+  }
+}
