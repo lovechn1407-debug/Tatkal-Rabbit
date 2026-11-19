@@ -1200,103 +1200,96 @@ md-chip-set {
 }
 
 /* ==========================================================================
-   Subscription Paywall Overlay (Locking Commands & Options)
+   19. Sleek Material Design 3 Pass Required Card (Non-Obstructive)
    ========================================================================== */
-.m3-paywall-overlay {
-  position: absolute;
-  top: 96px; /* Below top bar and tabs */
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 90;
-  background: rgba(16, 19, 24, 0.82);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-  animation: fadeInPaywall 0.25s ease-out;
-}
-
-[data-theme="light"] .m3-paywall-overlay {
-  background: rgba(248, 249, 255, 0.88);
-}
-
-@keyframes fadeInPaywall {
-  from { opacity: 0; transform: scale(0.98); }
-  to { opacity: 1; transform: scale(1); }
-}
-
-.m3-paywall-modal {
+.m3-sub-card-container {
   background: var(--md-sys-color-surface-container);
   border: 1.5px solid var(--md-sys-color-outline-variant);
-  border-radius: 20px;
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
-  padding: 20px 18px;
-  width: 100%;
-  max-width: 500px;
-  max-height: calc(100vh - 120px);
-  overflow-y: auto;
+  border-radius: 16px;
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+  position: relative;
+  overflow: hidden;
+  animation: slideDownBanner 0.25s ease-out;
 }
 
-.m3-paywall-badge {
+[data-theme="dark"] .m3-sub-card-container {
+  background: var(--md-sys-color-surface-container-high);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+}
+
+@keyframes slideDownBanner {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Locked Inputs State (Visible & Sharp, Gated from Automation) */
+.m3-content-area.m3-locked-state .m3-card {
+  position: relative;
+}
+
+.m3-content-area.m3-locked-state .m3-chip {
+  cursor: pointer;
+}
+
+/* Verified Active Pass Chip in Header */
+.m3-pass-active-chip {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background-color: var(--md-sys-color-error-container);
-  color: var(--md-sys-color-on-error);
+  padding: 4px 10px;
+  border-radius: 9999px;
+  background-color: var(--md-sys-color-success-container);
+  color: var(--md-sys-color-on-success);
   font-size: 11px;
   font-weight: 700;
+  letter-spacing: 0.03em;
   text-transform: uppercase;
-  padding: 4px 12px;
-  border-radius: 9999px;
+}
+
+/* Banner Header */
+.m3-paywall-banner-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin-bottom: 8px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.m3-paywall-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--md-sys-color-error-container);
+  color: var(--md-sys-color-on-error);
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  text-transform: uppercase;
 }
 
 .m3-paywall-title {
-  font-size: 17px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--md-sys-color-on-surface);
-  margin-bottom: 4px;
 }
 
 .m3-paywall-sub {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--md-sys-color-on-surface-variant);
   line-height: 1.45;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 }
 
-.m3-paywall-google-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  background-color: #ffffff;
-  color: #1f1f1f;
-  font-size: 13.5px;
-  font-weight: 600;
-  padding: 10px 24px;
-  border-radius: 9999px;
-  border: 1px solid #dadce0;
-  cursor: pointer;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
-  transition: all 0.2s ease;
-  margin: 10px auto;
-}
-
-.m3-paywall-google-btn:hover {
-  background-color: #f8f9fa;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-}
-
-/* Paywall Plans Grid */
+/* Plans Grid */
 .m3-paywall-plans-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 8px;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 }
 
 .m3-paywall-plan-card {
@@ -1307,18 +1300,24 @@ md-chip-set {
   text-align: center;
   display: flex;
   flex-direction: column;
-  position: relative;
+  justify-content: space-between;
   transition: all 0.2s ease;
+}
+
+.m3-paywall-plan-card:hover {
+  border-color: var(--md-sys-color-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 91, 193, 0.12);
 }
 
 .m3-paywall-plan-card.featured {
   border-color: var(--md-sys-color-primary);
   background: linear-gradient(180deg, var(--md-sys-color-surface-container) 0%, var(--md-sys-color-surface-container-high) 100%);
-  box-shadow: 0 4px 12px rgba(0, 91, 193, 0.15);
+  box-shadow: 0 3px 10px rgba(0, 91, 193, 0.16);
 }
 
 .m3-paywall-card-badge {
-  font-size: 9px;
+  font-size: 9.5px;
   font-weight: 700;
   text-transform: uppercase;
   color: var(--md-sys-color-primary);
@@ -1326,14 +1325,13 @@ md-chip-set {
 }
 
 .m3-paywall-card-badge.popular {
-  color: #ba1a1a;
+  color: var(--md-sys-color-error);
 }
 
 .m3-paywall-plan-name {
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 700;
   color: var(--md-sys-color-on-surface);
-  margin-bottom: 4px;
 }
 
 .m3-paywall-price-row {
@@ -1341,26 +1339,19 @@ md-chip-set {
   align-items: baseline;
   justify-content: center;
   gap: 4px;
-  margin-bottom: 4px;
+  margin: 3px 0;
 }
 
 .m3-paywall-cut-price {
-  font-size: 11px;
+  font-size: 10px;
   color: var(--md-sys-color-outline);
   text-decoration: line-through;
 }
 
 .m3-paywall-price {
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 800;
   color: var(--md-sys-color-primary);
-}
-
-.m3-paywall-plan-info {
-  font-size: 10px;
-  color: var(--md-sys-color-on-surface-variant);
-  margin-bottom: 8px;
-  flex-grow: 1;
 }
 
 .m3-paywall-buy-btn {
@@ -1370,10 +1361,10 @@ md-chip-set {
   gap: 4px;
   font-size: 11px;
   font-weight: 600;
-  padding: 6px 4px;
+  padding: 5px 8px;
   border-radius: 9999px;
   border: 1px solid var(--md-sys-color-outline-variant);
-  background: var(--md-sys-color-surface-container-high);
+  background: var(--md-sys-color-surface-container-highest);
   color: var(--md-sys-color-on-surface);
   cursor: pointer;
   transition: all 0.2s ease;
@@ -1381,14 +1372,14 @@ md-chip-set {
 }
 
 .m3-paywall-buy-btn:hover {
+  background: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
   border-color: var(--md-sys-color-primary);
-  background-color: var(--md-sys-color-primary-container);
-  color: var(--md-sys-color-on-primary-container);
 }
 
 .m3-paywall-buy-btn.primary {
-  background: var(--md-sys-color-secondary-container);
-  color: var(--md-sys-color-on-secondary-container);
+  background: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
   border-color: transparent;
 }
 
@@ -1398,29 +1389,43 @@ md-chip-set {
   border-color: transparent;
 }
 
+/* Paywall Action Toolbar */
 .m3-paywall-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
   border-top: 1px solid var(--md-sys-color-outline-variant);
   padding-top: 10px;
-  margin-top: 6px;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
-.m3-paywall-text-btn {
-  background: transparent;
-  border: none;
+.m3-paywall-action-btn {
+  background: var(--md-sys-color-surface-container-high);
+  border: 1px solid var(--md-sys-color-outline-variant);
   font-size: 11px;
   font-weight: 600;
   color: var(--md-sys-color-primary);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 4px 6px;
-  border-radius: 4px;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: 9999px;
+  transition: all 0.2s ease;
 }
 
-.m3-paywall-text-btn:hover {
-  text-decoration: underline;
+.m3-paywall-action-btn:hover {
+  background: var(--md-sys-color-primary-container);
+  border-color: var(--md-sys-color-primary);
+}
+
+.m3-paywall-action-btn.prominent {
+  background: var(--md-sys-color-primary);
+  color: #fff;
+  border-color: transparent;
+}
+
+.m3-paywall-action-btn.prominent:hover {
+  background: #004bb1;
 }

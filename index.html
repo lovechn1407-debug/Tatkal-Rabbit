@@ -44,6 +44,12 @@
         <md-icon id="iconTheme">light_mode</md-icon>
       </md-icon-button>
 
+      <!-- Active Pass Status Chip (shown when subscription is active) -->
+      <div id="headerPassActiveChip" class="m3-pass-active-chip" style="display:none;" title="Active Tatkal Rabbit Pass">
+        <span class="m3-pulse-dot" style="background:#00a843;"></span>
+        <span id="headerPassName">PRO PASS</span>
+      </div>
+
       <!-- Google User Profile Avatar Button -->
       <button type="button" id="btnUserAccount" class="m3-user-avatar-btn" title="Google Account & Subscription">
         <img id="headerUserAvatar" src="assets/rabbit_32.png" alt="Profile" class="m3-header-avatar-img" />
@@ -77,6 +83,90 @@
 
   <!-- Scrollable Content Area (With Full Space Available) -->
   <main class="m3-content-area">
+
+    <!-- Inline Material 3 Subscription Lock Card (Options Remain Fully Visible) -->
+    <div id="subscriptionPaywallOverlay" class="m3-sub-card-container" style="display: none;">
+      <div class="m3-paywall-banner-header">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span class="m3-paywall-pill">
+            <md-icon style="font-size: 14px;">lock</md-icon>
+            <span>Pass Required</span>
+          </span>
+          <span class="m3-paywall-title">Tatkal Rabbit Pass Required</span>
+        </div>
+
+        <button type="button" id="btnUnlockClipboard" class="m3-paywall-action-btn prominent" title="One-Click Unlock from Clipboard">
+          <md-icon style="font-size: 14px;">bolt</md-icon>
+          <span>Unlock from Clipboard</span>
+        </button>
+      </div>
+
+      <p class="m3-paywall-sub">
+        All route and passenger options are visible below. Activate any pass to unlock automated high-speed booking:
+      </p>
+
+      <div class="m3-paywall-plans-grid">
+        <!-- 2-Day Pass -->
+        <div class="m3-paywall-plan-card">
+          <span class="m3-paywall-card-badge">Quick Trip</span>
+          <div class="m3-paywall-plan-name">2-Day Pass</div>
+          <div class="m3-paywall-price-row">
+            <span class="m3-paywall-cut-price">&#8377;149</span>
+            <span class="m3-paywall-price">&#8377;49</span>
+          </div>
+          <button type="button" class="m3-paywall-buy-btn" data-plan="2day">
+            <md-icon style="font-size: 13px;">shopping_cart</md-icon>
+            <span>Buy (&#8377;49)</span>
+          </button>
+        </div>
+
+        <!-- Weekly Pass -->
+        <div class="m3-paywall-plan-card featured">
+          <span class="m3-paywall-card-badge">Best Value</span>
+          <div class="m3-paywall-plan-name">Weekly Pass</div>
+          <div class="m3-paywall-price-row">
+            <span class="m3-paywall-cut-price">&#8377;399</span>
+            <span class="m3-paywall-price">&#8377;119</span>
+          </div>
+          <button type="button" class="m3-paywall-buy-btn primary" data-plan="weekly">
+            <md-icon style="font-size: 13px;">bolt</md-icon>
+            <span>Buy (&#8377;119)</span>
+          </button>
+        </div>
+
+        <!-- Monthly Pass -->
+        <div class="m3-paywall-plan-card">
+          <span class="m3-paywall-card-badge popular">Popular</span>
+          <div class="m3-paywall-plan-name">Monthly Pro</div>
+          <div class="m3-paywall-price-row">
+            <span class="m3-paywall-cut-price">&#8377;999</span>
+            <span class="m3-paywall-price">&#8377;299</span>
+          </div>
+          <button type="button" class="m3-paywall-buy-btn accent" data-plan="monthly">
+            <md-icon style="font-size: 13px;">stars</md-icon>
+            <span>Buy (&#8377;299)</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="m3-paywall-footer">
+        <div style="display: flex; gap: 8px;">
+          <button type="button" id="btnPaywallPasteToken" class="m3-paywall-action-btn">
+            <md-icon style="font-size: 14px;">vpn_key</md-icon>
+            <span>Paste Token</span>
+          </button>
+          <button type="button" id="btnSyncSubscriptionStatus" class="m3-paywall-action-btn">
+            <md-icon style="font-size: 14px;">refresh</md-icon>
+            <span>Check Status</span>
+          </button>
+        </div>
+
+        <button type="button" id="btnOpenClientPage" class="m3-paywall-action-btn">
+          <md-icon style="font-size: 14px;">open_in_new</md-icon>
+          <span>Open Web Portal</span>
+        </button>
+      </div>
+    </div>
 
     <!-- PANE 1: JOURNEY -->
     <section id="pane-journey" class="m3-pane active">
@@ -735,114 +825,5 @@
       <md-text-button id="btnCloseUserAccount">Close</md-text-button>
     </div>
   </md-dialog>
-
-  <!-- Subscription Paywall & Auth Protection Overlay -->
-  <div id="subscriptionPaywallOverlay" class="m3-paywall-overlay" style="display: none;">
-    <div class="m3-paywall-modal">
-      <!-- Unauthenticated Mode -->
-      <div id="paywallAuthPrompt" style="display: none; text-align: center;">
-        <div class="m3-paywall-badge">
-          <md-icon style="font-size: 16px;">lock</md-icon>
-          <span>Google Sign-In Required</span>
-        </div>
-        <h3 class="m3-paywall-title">Sign In to Tatkal Rabbit</h3>
-        <p class="m3-paywall-sub">
-          Please sign in with your Google account to verify your subscription and unlock high-speed Tatkal automation.
-        </p>
-        <button type="button" id="btnPaywallGoogleLogin" class="m3-paywall-google-btn">
-          <svg style="width:18px; height:18px; margin-right:8px;" viewBox="0 0 24 24">
-            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-          </svg>
-          <span>Sign In on Web Portal</span>
-        </button>
-
-        <div style="display:flex; justify-content:center; gap:12px; margin-top:10px;">
-          <button type="button" id="btnPaywallPasteToken" class="m3-paywall-text-btn">
-            <md-icon style="font-size:15px;">vpn_key</md-icon>
-            <span>Paste Sync Token</span>
-          </button>
-          <button type="button" id="btnSetPortalUrl" class="m3-paywall-text-btn">
-            <md-icon style="font-size:15px;">settings</md-icon>
-            <span>Portal URL</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Authenticated but No Active Subscription Mode -->
-      <div id="paywallSubPrompt" style="display: none;">
-        <div style="text-align: center; margin-bottom: 12px;">
-          <div class="m3-paywall-badge">
-            <md-icon style="font-size: 16px;">lock</md-icon>
-            <span>Subscription Required</span>
-          </div>
-          <h3 class="m3-paywall-title">Unlock Tatkal Rabbit Automation</h3>
-          <p class="m3-paywall-sub">
-            All commands are locked. Choose a pass below to activate your account and start booking at atomic speed.
-          </p>
-        </div>
-
-        <div class="m3-paywall-plans-grid">
-          <!-- 2-Day Pass -->
-          <div class="m3-paywall-plan-card">
-            <span class="m3-paywall-card-badge">Quick Trip</span>
-            <div class="m3-paywall-plan-name">2-Day Pass</div>
-            <div class="m3-paywall-price-row">
-              <span class="m3-paywall-cut-price">&#8377;149</span>
-              <span class="m3-paywall-price">&#8377;49</span>
-            </div>
-            <div class="m3-paywall-plan-info">48-Hr Full Access</div>
-            <button type="button" class="m3-paywall-buy-btn" data-plan="2day">
-              <md-icon style="font-size: 15px;">shopping_cart</md-icon>
-              <span>Buy (&#8377;49)</span>
-            </button>
-          </div>
-
-          <!-- Weekly Pass -->
-          <div class="m3-paywall-plan-card">
-            <span class="m3-paywall-card-badge">Best Value</span>
-            <div class="m3-paywall-plan-name">Weekly Pass</div>
-            <div class="m3-paywall-price-row">
-              <span class="m3-paywall-cut-price">&#8377;399</span>
-              <span class="m3-paywall-price">&#8377;119</span>
-            </div>
-            <div class="m3-paywall-plan-info">7 Days Unlimited</div>
-            <button type="button" class="m3-paywall-buy-btn primary" data-plan="weekly">
-              <md-icon style="font-size: 15px;">bolt</md-icon>
-              <span>Buy (&#8377;119)</span>
-            </button>
-          </div>
-
-          <!-- Monthly Pass -->
-          <div class="m3-paywall-plan-card featured">
-            <span class="m3-paywall-card-badge popular">Popular</span>
-            <div class="m3-paywall-plan-name">Monthly Pro</div>
-            <div class="m3-paywall-price-row">
-              <span class="m3-paywall-cut-price">&#8377;999</span>
-              <span class="m3-paywall-price">&#8377;299</span>
-            </div>
-            <div class="m3-paywall-plan-info">30 Days VIP Pass</div>
-            <button type="button" class="m3-paywall-buy-btn accent" data-plan="monthly">
-              <md-icon style="font-size: 15px;">stars</md-icon>
-              <span>Buy (&#8377;299)</span>
-            </button>
-          </div>
-        </div>
-
-        <div class="m3-paywall-footer">
-          <button type="button" id="btnSyncSubscriptionStatus" class="m3-paywall-text-btn">
-            <md-icon style="font-size: 16px;">refresh</md-icon>
-            <span>Already Purchased? Sync Status</span>
-          </button>
-          <button type="button" id="btnOpenClientPage" class="m3-paywall-text-btn">
-            <md-icon style="font-size: 16px;">open_in_new</md-icon>
-            <span>Open Client Webpage</span>
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
 </body>
 </html>

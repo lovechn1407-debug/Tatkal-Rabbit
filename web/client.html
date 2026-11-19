@@ -340,6 +340,7 @@
       logoutUser, 
       syncUserRecord, 
       isSubscriptionActive,
+      parseTimestamp,
       SUBSCRIPTION_PLANS 
     } from "./firebase-config.js";
 
@@ -555,7 +556,8 @@
         const planConfig = SUBSCRIPTION_PLANS[sub.plan] || { name: sub.plan.toUpperCase() + " Pass" };
         activePlanName.textContent = planConfig.name;
 
-        const expiryDate = sub.validUntil.toDate ? sub.validUntil.toDate() : new Date(sub.validUntil);
+        const expiryDate = parseTimestamp(sub.validUntil);
+        if (!expiryDate) return;
         activeExpiryDate.textContent = expiryDate.toLocaleString("en-IN", { timeZone: "Asia/Kolkata", dateStyle: "medium", timeStyle: "short" }) + " IST";
 
         // Start live ticker
@@ -663,6 +665,14 @@
           status: "SUCCESS"
         };
 
+        const activeSubObj = {
+          status: "active",
+          plan: plan.id,
+          validUntil: newExpiryDate.toISOString(),
+          activatedAt: new Date().toISOString(),
+          isSuspended: false
+        };
+
         await updateDoc(userRef, {
           "subscription.status": "active",
           "subscription.plan": plan.id,
@@ -672,15 +682,40 @@
           "bookingHistory": arrayUnion(transactionRecord)
         });
 
-        checkoutModal.classList.remove("open");
-        showToast(`🎉 Success! ${plan.name} is now active on your account!`);
+        currentUserData = {
+          ...(currentUserData || {}),
+          subscription: activeSubObj
+        };
+        updateSubscriptionUI(activeSubObj);
 
-        // Save session locally for instant extension recognition
-        localStorage.setItem("tatkal_active_sub", JSON.stringify({
-          plan: plan.id,
-          validUntil: newExpiryDate.toISOString(),
-          status: "active"
-        }));
+        // Auto-notify Extension directly
+        const userPayload = {
+          uid: currentUser.uid,
+          email: currentUser.email,
+          displayName: currentUser.displayName || currentUser.email.split("@")[0],
+          photoURL: currentUser.photoURL || ""
+        };
+        notifyExtension(userPayload, activeSubObj);
+
+        // Auto-generate sync token and copy to clipboard for seamless 1-click extension unlock
+        const tokenData = {
+          uid: currentUser.uid,
+          email: currentUser.email,
+          displayName: userPayload.displayName,
+          photoURL: userPayload.photoURL,
+          subscription: activeSubObj,
+          timestamp: Date.now()
+        };
+        const syncToken = btoa(unescape(encodeURIComponent(JSON.stringify(tokenData))));
+        try {
+          await navigator.clipboard.writeText(syncToken);
+        } catch(e) {}
+
+        // Save session locally
+        localStorage.setItem("tatkal_active_sub", JSON.stringify(activeSubObj));
+
+        checkoutModal.classList.remove("open");
+        showToast(`🎉 Success! ${plan.name} is now active! Sync token copied to clipboard!`);
 
       } catch (err) {
         console.error("Payment error:", err);

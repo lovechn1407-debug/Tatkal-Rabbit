@@ -1528,43 +1528,35 @@ function setupAuthAndSubscription() {
   const doSync = async () => {
     await refreshSubscriptionState();
     if (isSubscriptionValid(currentSubscription)) {
-      showToast("Subscription is Active & Valid!");
-    } else if (currentAuthUser) {
-      showToast("Signed in, but no active pass found.", "warning");
+      showToast("🎉 Tatkal Rabbit Pass is Active & Unlocked!");
     } else {
-      showToast("Please sign in with Google first.", "warning");
+      // Try auto-reading from clipboard
+      const clipSuccess = await tryUnlockFromClipboard();
+      if (!clipSuccess) {
+        showToast("No active pass found. Click 'Open Web Portal' or 'Unlock from Clipboard'.", "warning");
+      }
     }
   };
   if (btnSyncSubscriptionStatus) btnSyncSubscriptionStatus.addEventListener("click", doSync);
   if (btnDialogSyncSub) btnDialogSyncSub.addEventListener("click", doSync);
+
+  // Unlock from Clipboard Button
+  const btnUnlockClipboard = document.getElementById("btnUnlockClipboard");
+  if (btnUnlockClipboard) {
+    btnUnlockClipboard.addEventListener("click", async () => {
+      const ok = await tryUnlockFromClipboard(true);
+      if (!ok) {
+        showToast("No sync token found in clipboard. Copy it from your web portal first.", "warning");
+      }
+    });
+  }
 
   // Paste Sync Token Handlers
   if (btnPaywallPasteToken) {
     btnPaywallPasteToken.addEventListener("click", async () => {
       const tokenStr = prompt("Paste your Tatkal Rabbit Extension Sync Token copied from the Web Client Portal:");
       if (!tokenStr) return;
-      try {
-        const decoded = JSON.parse(atob(tokenStr.trim()));
-        if (decoded && decoded.email) {
-          if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
-            await chrome.storage.local.set({
-              tatkal_auth_user: {
-                uid: decoded.uid,
-                email: decoded.email,
-                displayName: decoded.displayName || decoded.email.split("@")[0],
-                photoURL: decoded.photoURL || ""
-              },
-              tatkal_subscription: decoded.subscription || null
-            });
-          }
-          await refreshSubscriptionState();
-          showToast("🎉 Session synced and extension unlocked!");
-        } else {
-          showToast("Invalid token data", "error");
-        }
-      } catch (e) {
-        showToast("Invalid token format", "error");
-      }
+      applySyncToken(tokenStr.trim());
     });
   }
 
@@ -1587,7 +1579,7 @@ function setupAuthAndSubscription() {
   if (btnDialogLogout) {
     btnDialogLogout.addEventListener("click", async () => {
       if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
-        await chrome.storage.local.remove(["tatkal_auth_user", "tatkal_subscription"]);
+        await chrome.storage.local.remove(["tatkal_auth_user", "tatkal_subscription", "tatkal_active_sub"]);
       }
       currentAuthUser = null;
       currentSubscription = null;
@@ -1619,34 +1611,111 @@ function setupAuthAndSubscription() {
   refreshSubscriptionState();
 }
 
-// Check subscription validity
+// Robust Timestamp Parser
+function parseTimestamp(val) {
+  if (!val) return null;
+  if (typeof val.toDate === "function") return val.toDate();
+  if (typeof val.seconds === "number") return new Date(val.seconds * 1000);
+  if (typeof val._seconds === "number") return new Date(val._seconds * 1000);
+  const parsed = new Date(val);
+  return isNaN(parsed.getTime()) ? null : parsed;
+}
+
+// Check subscription validity with robust seconds & ISO parsing
 function isSubscriptionValid(sub) {
   if (!sub) return false;
   if (sub.isSuspended) return false;
   if (sub.status !== "active") return false;
   if (!sub.validUntil) return false;
 
-  const expiry = sub.validUntil.toDate ? sub.validUntil.toDate() : new Date(sub.validUntil);
+  const expiry = parseTimestamp(sub.validUntil);
+  if (!expiry) return false;
   return expiry.getTime() > Date.now();
+}
+
+// Apply encoded sync token from clipboard or prompt
+async function applySyncToken(tokenStr) {
+  try {
+    let clean = tokenStr.trim();
+    let jsonStr = "";
+    try {
+      jsonStr = decodeURIComponent(escape(atob(clean)));
+    } catch {
+      jsonStr = clean;
+    }
+    const decoded = JSON.parse(jsonStr);
+    const sub = decoded.subscription || decoded.sub || decoded;
+    const expiry = parseTimestamp(sub.validUntil);
+
+    if (sub && sub.status === "active" && expiry && expiry.getTime() > Date.now()) {
+      currentAuthUser = {
+        uid: decoded.uid || "web_user",
+        email: decoded.email || "subscriber@gmail.com",
+        displayName: decoded.displayName || (decoded.email ? decoded.email.split("@")[0] : "Verified Traveler"),
+        photoURL: decoded.photoURL || ""
+      };
+      currentSubscription = sub;
+
+      if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
+        await chrome.storage.local.set({
+          tatkal_auth_user: currentAuthUser,
+          tatkal_subscription: sub
+        });
+      }
+      renderAuthAndSubscriptionUI();
+      showToast("🎉 Tatkal Rabbit Pass Verified & Unlocked!", "success");
+      return true;
+    } else {
+      showToast("Pass in token is expired or inactive", "warning");
+      return false;
+    }
+  } catch (e) {
+    console.warn("Token decode error:", e);
+    return false;
+  }
+}
+
+// Try auto-unlocking from clipboard
+async function tryUnlockFromClipboard(explicit = false) {
+  try {
+    if (navigator.clipboard && navigator.clipboard.readText) {
+      const clipText = await navigator.clipboard.readText();
+      if (clipText && (clipText.includes("eyJ") || clipText.includes("subscription") || clipText.includes("active"))) {
+        return await applySyncToken(clipText);
+      }
+    }
+  } catch (e) {
+    if (explicit) console.warn("Clipboard read permission:", e);
+  }
+  return false;
 }
 
 // Refresh subscription from storage
 async function refreshSubscriptionState() {
   if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
     try {
-      const data = await chrome.storage.local.get(["tatkal_auth_user", "tatkal_subscription"]);
+      const data = await chrome.storage.local.get(["tatkal_auth_user", "tatkal_subscription", "tatkal_active_sub"]);
       currentAuthUser = data.tatkal_auth_user || null;
-      currentSubscription = data.tatkal_subscription || null;
+      currentSubscription = data.tatkal_subscription || data.tatkal_active_sub || null;
     } catch (e) {
       console.warn("Storage get failed:", e);
     }
   }
+
+  // If not valid yet, try auto-reading clipboard token seamlessly
+  if (!isSubscriptionValid(currentSubscription)) {
+    await tryUnlockFromClipboard(false);
+  }
+
   renderAuthAndSubscriptionUI();
 }
 
 // Render UI based on Auth & Subscription State
 function renderAuthAndSubscriptionUI() {
   const headerAvatar = document.getElementById("headerUserAvatar");
+  const headerPassChip = document.getElementById("headerPassActiveChip");
+  const headerPassName = document.getElementById("headerPassName");
+
   const dialogAvatar = document.getElementById("dialogUserAvatar");
   const dialogName = document.getElementById("dialogUserName");
   const dialogEmail = document.getElementById("dialogUserEmail");
@@ -1655,9 +1724,8 @@ function renderAuthAndSubscriptionUI() {
   const dialogActivePlanTitle = document.getElementById("dialogActivePlanTitle");
   const dialogActivePlanExpiry = document.getElementById("dialogActivePlanExpiry");
 
-  const paywallOverlay = document.getElementById("subscriptionPaywallOverlay");
-  const paywallAuthPrompt = document.getElementById("paywallAuthPrompt");
-  const paywallSubPrompt = document.getElementById("paywallSubPrompt");
+  const subBanner = document.getElementById("subscriptionPaywallOverlay");
+  const contentArea = document.querySelector(".m3-content-area");
   const btnStartAutomation = document.getElementById("btnStartAutomation");
 
   const hasUser = Boolean(currentAuthUser && currentAuthUser.email);
@@ -1672,7 +1740,18 @@ function renderAuthAndSubscriptionUI() {
     }
   }
 
-  // Update Dialog
+  // Update Header Pass Chip
+  if (headerPassChip) {
+    if (hasActiveSub && currentSubscription) {
+      headerPassChip.style.display = "inline-flex";
+      const planTxt = currentSubscription.plan ? currentSubscription.plan.toUpperCase() : "PRO";
+      if (headerPassName) headerPassName.textContent = `${planTxt} ACTIVE`;
+    } else {
+      headerPassChip.style.display = "none";
+    }
+  }
+
+  // Update Account Dialog
   if (dialogAvatar) {
     dialogAvatar.src = (hasUser && currentAuthUser.photoURL) ? currentAuthUser.photoURL : "assets/rabbit_32.png";
   }
@@ -1705,32 +1784,33 @@ function renderAuthAndSubscriptionUI() {
       const planName = currentSubscription.plan ? currentSubscription.plan.toUpperCase() + " PASS" : "PRO PASS";
       if (dialogActivePlanTitle) dialogActivePlanTitle.textContent = planName;
       if (dialogActivePlanExpiry && currentSubscription.validUntil) {
-        const exp = currentSubscription.validUntil.toDate ? currentSubscription.validUntil.toDate() : new Date(currentSubscription.validUntil);
-        dialogActivePlanExpiry.textContent = "Valid until: " + exp.toLocaleDateString("en-IN") + " " + exp.toLocaleTimeString("en-IN", { hour: '2-digit', minute: '2-digit' });
+        const exp = parseTimestamp(currentSubscription.validUntil);
+        if (exp) {
+          dialogActivePlanExpiry.textContent = "Valid until: " + exp.toLocaleDateString("en-IN") + " " + exp.toLocaleTimeString("en-IN", { hour: '2-digit', minute: '2-digit' });
+        }
       }
     } else {
       dialogActivePlanBox.style.display = "none";
     }
   }
 
-  // Gating & Paywall Logic
-  if (!paywallOverlay) return;
-
-  if (!hasUser) {
-    // 1. Not signed in: show paywall in Google Sign-In mode
-    paywallOverlay.style.display = "flex";
-    if (paywallAuthPrompt) paywallAuthPrompt.style.display = "block";
-    if (paywallSubPrompt) paywallSubPrompt.style.display = "none";
-    if (btnStartAutomation) btnStartAutomation.disabled = true;
-  } else if (!hasActiveSub) {
-    // 2. Signed in but NO valid subscription: show paywall with 3 plans [ 2 Day, Weekly, Monthly ]
-    paywallOverlay.style.display = "flex";
-    if (paywallAuthPrompt) paywallAuthPrompt.style.display = "none";
-    if (paywallSubPrompt) paywallSubPrompt.style.display = "block";
-    if (btnStartAutomation) btnStartAutomation.disabled = true;
+  // Non-Obstructive Locking System:
+  // All options in all panels remain 100% visible!
+  if (hasActiveSub) {
+    // 1. Subscription is active: HIDE the banner, unlock start button
+    if (subBanner) subBanner.style.display = "none";
+    if (contentArea) contentArea.classList.remove("m3-locked-state");
+    if (btnStartAutomation) {
+      btnStartAutomation.disabled = false;
+      btnStartAutomation.innerHTML = '<md-icon slot="icon">bolt</md-icon> Start IRCTC Automation';
+    }
   } else {
-    // 3. Authenticated & Active Subscription: completely unlocked!
-    paywallOverlay.style.display = "none";
-    if (btnStartAutomation) btnStartAutomation.disabled = false;
+    // 2. Subscription required: SHOW the inline banner card, lock start button
+    if (subBanner) subBanner.style.display = "block";
+    if (contentArea) contentArea.classList.add("m3-locked-state");
+    if (btnStartAutomation) {
+      btnStartAutomation.disabled = false; // Keep clickable to guide user
+      btnStartAutomation.innerHTML = '<md-icon slot="icon">lock</md-icon> Start Automation (Pass Required)';
+    }
   }
 }

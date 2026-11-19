@@ -225,6 +225,7 @@
       logoutUser, 
       ADMIN_EMAIL,
       isSubscriptionActive,
+      parseTimestamp,
       SUBSCRIPTION_PLANS 
     } from "./firebase-config.js";
 
@@ -439,10 +440,12 @@
         }
 
         if (sub.validUntil) {
-          const exp = sub.validUntil.toDate ? sub.validUntil.toDate() : new Date(sub.validUntil);
-          const diffDays = Math.ceil((exp.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-          const daysText = diffDays > 0 ? `(${diffDays} days left)` : "(Ended)";
-          expiryFormatted = `<b>${sub.plan ? sub.plan.toUpperCase() : 'PASS'}</b> &bull; ${exp.toLocaleDateString("en-IN")} ${daysText}`;
+          const exp = parseTimestamp(sub.validUntil);
+          if (exp) {
+            const diffDays = Math.ceil((exp.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+            const daysText = diffDays > 0 ? `(${diffDays} days left)` : "(Ended)";
+            expiryFormatted = `<b>${sub.plan ? sub.plan.toUpperCase() : 'PASS'}</b> &bull; ${exp.toLocaleDateString("en-IN")} ${daysText}`;
+          }
         }
 
         return `
@@ -575,8 +578,8 @@
         let baseDate = now;
 
         if (user.subscription && isSubscriptionActive(user.subscription)) {
-          const curExp = user.subscription.validUntil.toDate ? user.subscription.validUntil.toDate() : new Date(user.subscription.validUntil);
-          if (curExp > now) baseDate = curExp;
+          const curExp = parseTimestamp(user.subscription.validUntil);
+          if (curExp && curExp > now) baseDate = curExp;
         }
 
         const newExpiry = new Date(baseDate.getTime() + (days * 24 * 60 * 60 * 1000));

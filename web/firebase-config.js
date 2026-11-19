@@ -148,6 +148,18 @@ export async function syncUserRecord(user) {
 }
 
 /**
+ * Parse a Firestore timestamp, ISO string, seconds object, or Date
+ */
+export function parseTimestamp(val) {
+  if (!val) return null;
+  if (typeof val.toDate === "function") return val.toDate();
+  if (typeof val.seconds === "number") return new Date(val.seconds * 1000);
+  if (typeof val._seconds === "number") return new Date(val._seconds * 1000);
+  const parsed = new Date(val);
+  return isNaN(parsed.getTime()) ? null : parsed;
+}
+
+/**
  * Check if a subscription is currently valid
  */
 export function isSubscriptionActive(sub) {
@@ -156,7 +168,8 @@ export function isSubscriptionActive(sub) {
   if (sub.status !== "active") return false;
   if (!sub.validUntil) return false;
 
-  const expiry = sub.validUntil.toDate ? sub.validUntil.toDate() : new Date(sub.validUntil);
+  const expiry = parseTimestamp(sub.validUntil);
+  if (!expiry) return false;
   return expiry.getTime() > Date.now();
 }
 
@@ -165,7 +178,8 @@ export function isSubscriptionActive(sub) {
  */
 export function getSubscriptionTimeRemaining(sub) {
   if (!isSubscriptionActive(sub)) return null;
-  const expiry = sub.validUntil.toDate ? sub.validUntil.toDate() : new Date(sub.validUntil);
+  const expiry = parseTimestamp(sub.validUntil);
+  if (!expiry) return null;
   const diffMs = expiry.getTime() - Date.now();
   if (diffMs <= 0) return null;
 
