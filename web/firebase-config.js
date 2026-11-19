@@ -103,19 +103,56 @@ export async function loadLivePricing() {
     }
 
     let data = null;
-    // 1. Try settings/pricing
+
+    // 1. Try public /api/pricing endpoint (0-auth, instant, works for unlogged-in users)
     try {
-      const pricingDoc = await getDoc(doc(db, "settings", "pricing"));
-      if (pricingDoc.exists()) data = pricingDoc.data();
-    } catch (e) {
-      // 2. Fallback to users/system_pricing if settings collection has security rule restriction
+      const origin = (typeof window !== "undefined" && window.location && window.location.origin) ? window.location.origin : "https://tatkal-rabbit.vercel.app";
+      const apiRes = await fetch(`${origin}/api/pricing`, { cache: "no-store" });
+      if (apiRes.ok) {
+        data = await apiRes.json();
+      }
+    } catch (e) {}
+
+    // 2. Try Firestore Public REST API
+    if (!data || !data["2day"]) {
       try {
-        const fallbackDoc = await getDoc(doc(db, "users", "system_pricing"));
-        if (fallbackDoc.exists()) data = fallbackDoc.data();
-      } catch (err) {}
+        const fsRes = await fetch("https://firestore.googleapis.com/v1/projects/tatkal-rabbit/databases/(default)/documents/settings/pricing");
+        if (fsRes.ok) {
+          const json = await fsRes.json();
+          if (json && json.fields) {
+            data = {
+              "2day": {
+                discountedPrice: Number(json.fields["2day"]?.mapValue?.fields?.discountedPrice?.integerValue ?? json.fields["2day"]?.mapValue?.fields?.discountedPrice?.doubleValue ?? 49),
+                originalPrice: Number(json.fields["2day"]?.mapValue?.fields?.originalPrice?.integerValue ?? json.fields["2day"]?.mapValue?.fields?.originalPrice?.doubleValue ?? 149)
+              },
+              "weekly": {
+                discountedPrice: Number(json.fields["weekly"]?.mapValue?.fields?.discountedPrice?.integerValue ?? json.fields["weekly"]?.mapValue?.fields?.discountedPrice?.doubleValue ?? 119),
+                originalPrice: Number(json.fields["weekly"]?.mapValue?.fields?.originalPrice?.integerValue ?? json.fields["weekly"]?.mapValue?.fields?.originalPrice?.doubleValue ?? 399)
+              },
+              "monthly": {
+                discountedPrice: Number(json.fields["monthly"]?.mapValue?.fields?.discountedPrice?.integerValue ?? json.fields["monthly"]?.mapValue?.fields?.discountedPrice?.doubleValue ?? 299),
+                originalPrice: Number(json.fields["monthly"]?.mapValue?.fields?.originalPrice?.integerValue ?? json.fields["monthly"]?.mapValue?.fields?.originalPrice?.doubleValue ?? 999)
+              }
+            };
+          }
+        }
+      } catch (e) {}
     }
 
-    if (data) {
+    // 3. Try Firestore SDK getDoc
+    if (!data || !data["2day"]) {
+      try {
+        const pricingDoc = await getDoc(doc(db, "settings", "pricing"));
+        if (pricingDoc.exists()) data = pricingDoc.data();
+      } catch (e) {
+        try {
+          const fallbackDoc = await getDoc(doc(db, "users", "system_pricing"));
+          if (fallbackDoc.exists()) data = fallbackDoc.data();
+        } catch (err) {}
+      }
+    }
+
+    if (data && data["2day"]) {
       applyPricingToPlans(data);
       if (typeof localStorage !== "undefined") {
         localStorage.setItem("tatkal_custom_pricing", JSON.stringify(data));
@@ -155,7 +192,7 @@ export async function saveLivePricing(newPricing) {
   let saved = false;
   let lastError = null;
 
-  // Try saving to settings/pricing
+  // 1. Try saving to settings/pricing
   try {
     await setDoc(doc(db, "settings", "pricing"), payload, { merge: true });
     saved = true;
@@ -164,7 +201,7 @@ export async function saveLivePricing(newPricing) {
     lastError = err;
   }
 
-  // Also save to users/system_pricing (which is already allowed under users collection)
+  // 2. Also save to users/system_pricing
   try {
     await setDoc(doc(db, "users", "system_pricing"), payload, { merge: true });
     saved = true;
@@ -172,6 +209,18 @@ export async function saveLivePricing(newPricing) {
     console.warn("Could not save to users/system_pricing:", err.message);
     if (!saved) lastError = err;
   }
+
+  // 3. Post to /api/pricing so serverless cache updates immediately
+  try {
+    const origin = (typeof window !== "undefined" && window.location && window.location.origin) ? window.location.origin : "";
+    if (origin) {
+      await fetch(`${origin}/api/pricing`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+    }
+  } catch (e) {}
 
   if (!saved && lastError) {
     throw lastError;

@@ -1512,15 +1512,6 @@ function setupAuthAndSubscription() {
   const btnPaywallPasteToken = document.getElementById("btnPaywallPasteToken");
   const btnSetPortalUrl = document.getElementById("btnSetPortalUrl");
 
-  // Get Web Portal URL (supports custom Vercel domain or default)
-  async function getWebPortalUrl() {
-    if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
-      const stored = await chrome.storage.local.get(["tatkal_web_portal_url"]);
-      if (stored.tatkal_web_portal_url) return stored.tatkal_web_portal_url.replace(/\/$/, "");
-    }
-    return "https://tatkal-rabbit.vercel.app";
-  }
-
   // Open Live Web Client Page on Vercel
   async function openClientWebpage(query = "") {
     const portalBase = await getWebPortalUrl();
@@ -1798,6 +1789,67 @@ async function tryUnlockFromClipboard(explicit = false) {
   return false;
 }
 
+// Web Portal URL Helper (supports custom Vercel domain or default)
+async function getWebPortalUrl() {
+  if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
+    try {
+      const stored = await chrome.storage.local.get(["tatkal_web_portal_url"]);
+      if (stored && stored.tatkal_web_portal_url) return stored.tatkal_web_portal_url.replace(/\/$/, "");
+    } catch (e) {}
+  }
+  return "https://tatkal-rabbit.vercel.app";
+}
+
+// Fetch live pricing from serverless API / Firestore REST for all users (including unauthenticated)
+async function fetchCloudPricing() {
+  const applyAndSave = (pricing) => {
+    if (pricing && pricing["2day"]) {
+      applyCustomPricing(pricing);
+      if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
+        chrome.storage.local.set({ tatkal_custom_pricing: pricing });
+      }
+    }
+  };
+
+  // 1. Try Vercel Serverless /api/pricing
+  try {
+    const portalBase = await getWebPortalUrl();
+    const res = await fetch(`${portalBase}/api/pricing?t=${Date.now()}`, { cache: "no-store" });
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data["2day"]) {
+        applyAndSave(data);
+        return;
+      }
+    }
+  } catch (e) {}
+
+  // 2. Try Firestore REST API directly
+  try {
+    const res = await fetch("https://firestore.googleapis.com/v1/projects/tatkal-rabbit/databases/(default)/documents/settings/pricing");
+    if (res.ok) {
+      const json = await res.json();
+      if (json && json.fields) {
+        const live = {
+          "2day": {
+            discountedPrice: Number(json.fields["2day"]?.mapValue?.fields?.discountedPrice?.integerValue ?? json.fields["2day"]?.mapValue?.fields?.discountedPrice?.doubleValue ?? 49),
+            originalPrice: Number(json.fields["2day"]?.mapValue?.fields?.originalPrice?.integerValue ?? json.fields["2day"]?.mapValue?.fields?.originalPrice?.doubleValue ?? 149)
+          },
+          "weekly": {
+            discountedPrice: Number(json.fields["weekly"]?.mapValue?.fields?.discountedPrice?.integerValue ?? json.fields["weekly"]?.mapValue?.fields?.discountedPrice?.doubleValue ?? 119),
+            originalPrice: Number(json.fields["weekly"]?.mapValue?.fields?.originalPrice?.integerValue ?? json.fields["weekly"]?.mapValue?.fields?.originalPrice?.doubleValue ?? 399)
+          },
+          "monthly": {
+            discountedPrice: Number(json.fields["monthly"]?.mapValue?.fields?.discountedPrice?.integerValue ?? json.fields["monthly"]?.mapValue?.fields?.discountedPrice?.doubleValue ?? 299),
+            originalPrice: Number(json.fields["monthly"]?.mapValue?.fields?.originalPrice?.integerValue ?? json.fields["monthly"]?.mapValue?.fields?.originalPrice?.doubleValue ?? 999)
+          }
+        };
+        applyAndSave(live);
+      }
+    }
+  } catch (e) {}
+}
+
 // Dynamic Custom Pricing Update for Popup UI
 function applyCustomPricing(pricingData) {
   if (!pricingData) return;
@@ -1850,6 +1902,9 @@ async function refreshSubscriptionState() {
       console.warn("Storage get failed:", e);
     }
   }
+
+  // Fetch live pricing in background regardless of logged-in status so unauthenticated users see updated prices
+  fetchCloudPricing();
 
   // If not valid yet, try auto-reading clipboard token seamlessly
   if (!isSubscriptionValid(currentSubscription)) {
