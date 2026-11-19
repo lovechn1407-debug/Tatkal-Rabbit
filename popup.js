@@ -1166,30 +1166,40 @@ function setupMasterActionButtons() {
 
         const shouldWaitTatkal = isTatkal && isAtTatkalWindowMinute(travelClass);
 
-        const response = await chrome.runtime.sendMessage({
-          type: "START_AUTOMATION",
-          payload: {
-            journey: activeJourney,
-            passengers: activePassengers,
-            loginCredentials: creds,
-            tatkalTimedBooking: shouldWaitTatkal ? {
-              openHour: openHour,
-              openMinute: 0,
-              classClickSecond: 7
-            } : undefined,
-            irctcSpaBase: activeJourney.irctcSpaBase || "nget"
+        let response;
+        try {
+          response = await chrome.runtime.sendMessage({
+            type: "START_AUTOMATION",
+            payload: {
+              journey: activeJourney,
+              passengers: activePassengers,
+              loginCredentials: creds,
+              tatkalTimedBooking: shouldWaitTatkal ? {
+                openHour: openHour,
+                openMinute: 0,
+                classClickSecond: 7
+              } : undefined,
+              irctcSpaBase: activeJourney.irctcSpaBase || "nget"
+            }
+          });
+        } catch (msgErr) {
+          // If popup unloads or message channel closes when focusing IRCTC tab, automation is already running!
+          if (msgErr?.message?.includes("message channel closed") || msgErr?.message?.includes("response was received")) {
+            response = { ok: true };
+          } else {
+            throw msgErr;
           }
-        });
+        }
 
         if (!response?.ok) {
           setUiRunningState(false, "Failed to start: " + (response?.error || "Unknown error"));
-          alert("Automation: " + (response?.error || "Failed to start"));
+          showToast(response?.error || "Failed to start automation", "error");
         } else {
           setUiRunningState(true, "Automation active on IRCTC");
         }
       } catch (err) {
         setUiRunningState(false, "Error: " + err.message);
-        alert("Error: " + err.message);
+        showToast(err.message || "Failed to start", "error");
       } finally {
         isActionPending = false;
       }
@@ -1210,7 +1220,7 @@ function setupMasterActionButtons() {
         if (res?.ok) {
           setUiRunningState(true, "Automation resumed");
         } else {
-          alert("Resume: " + (res?.error || "Could not resume"));
+          showToast(res?.error || "Could not resume", "error");
         }
       } finally {
         isActionPending = false;
@@ -1228,24 +1238,27 @@ function setupMasterActionButtons() {
       isActionPending = true;
 
       try {
-        // Instant UI feedback on first click
-        setUiRunningState(false, "Automation stopped");
+        // Immediate UI feedback and full reset to Ready
+        setUiRunningState(false, "Automation stopped", false);
         updateVisualStepper(AutomationStates.IDLE, "Stopped", false);
         const tracker = document.getElementById("automationTracker");
         if (tracker) tracker.classList.remove("visible");
 
-        // Broadcast STOP to all IRCTC tabs immediately (stops in-tab automation loops instantly)
+        // Broadcast STOP to all IRCTC tabs immediately (stops all content loops and resets state)
         if (typeof chrome !== "undefined" && chrome.tabs && chrome.tabs.query) {
-          chrome.tabs.query({ url: "*://*.irctc.co.in/*" }).then(tabs => {
-            tabs.forEach(t => {
-              if (t.id) chrome.tabs.sendMessage(t.id, { type: "STOP_AUTOMATION" }).catch(() => {});
-            });
-          }).catch(() => {});
+          const tabs = await chrome.tabs.query({ url: "*://*.irctc.co.in/*" }).catch(() => []);
+          for (const t of tabs) {
+            if (t.id) chrome.tabs.sendMessage(t.id, { type: "STOP_AUTOMATION" }).catch(() => {});
+          }
         }
 
-        // Also notify background service worker
+        // Notify background service worker to reset snapshot
         await chrome.runtime.sendMessage({ type: "STOP_AUTOMATION" }).catch(() => {});
+        showToast("Automation stopped and reset to ready");
+      } catch (err) {
+        console.warn("Stop error:", err);
       } finally {
+        setUiRunningState(false, "Ready", false);
         isActionPending = false;
       }
     });
@@ -1797,7 +1810,7 @@ function applyCustomPricing(pricingData) {
     const btn = document.getElementById("subBuyBtn_2day");
     if (elP) elP.innerHTML = `&#8377;${p}`;
     if (elC) elC.innerHTML = `&#8377;${c}`;
-    if (btn) btn.innerHTML = `<md-icon style="font-size:14px;">shopping_cart</md-icon> <span>Buy (&#8377;${p})</span>`;
+    if (btn) btn.innerHTML = `<md-icon style="font-size:14px;">flash_on</md-icon> <span>Buy (&#8377;${p})</span>`;
   }
   
   if (pricingData["weekly"]) {
@@ -1819,7 +1832,7 @@ function applyCustomPricing(pricingData) {
     const btn = document.getElementById("subBuyBtn_monthly");
     if (elP) elP.innerHTML = `&#8377;${p}`;
     if (elC) elC.innerHTML = `&#8377;${c}`;
-    if (btn) btn.innerHTML = `<md-icon style="font-size:14px;">stars</md-icon> <span>Buy Pro (&#8377;${p})</span>`;
+    if (btn) btn.innerHTML = `<md-icon style="font-size:14px;">stars</md-icon> <span>Buy VIP (&#8377;${p})</span>`;
   }
 }
 
@@ -1869,39 +1882,41 @@ function renderAuthAndSubscriptionUI() {
   const hasUser = Boolean(currentAuthUser && currentAuthUser.email);
   const hasActiveSub = isSubscriptionValid(currentSubscription);
 
-  // Update Header Days Badge at user profile logo position
+  // Update Header Avatar & Overlapping Days Badge
   const daysBadge = document.getElementById("btnUserAccount");
   const daysText = document.getElementById("headerSubDaysText");
-  if (daysBadge && daysText) {
+
+  // Update Header Avatar Image
+  if (headerAvatar) {
+    if (hasUser && currentAuthUser.photoURL) {
+      headerAvatar.src = currentAuthUser.photoURL;
+    } else {
+      headerAvatar.src = "assets/rabbit_32.png";
+    }
+  }
+
+  // Update Overlapping Days Badge
+  if (daysText) {
     if (!hasUser) {
       daysText.textContent = "LOGIN";
-      daysBadge.className = "tr-header-days-badge login";
-      daysBadge.title = "Not signed in - Click to Login";
+      daysText.className = "tr-avatar-days-badge login";
+      if (daysBadge) daysBadge.title = "Not signed in - Click to Sign In";
     } else if (hasActiveSub && currentSubscription) {
       const exp = parseTimestamp(currentSubscription.validUntil);
       if (exp) {
         const diffMs = exp.getTime() - Date.now();
         const daysLeft = Math.max(1, Math.ceil(diffMs / (24 * 60 * 60 * 1000)));
         daysText.textContent = `${daysLeft}D`;
-        daysBadge.title = `Active Pass: ${daysLeft} days remaining`;
+        if (daysBadge) daysBadge.title = `Active Pass: ${daysLeft} days remaining`;
       } else {
         daysText.textContent = "PRO";
-        daysBadge.title = "Active Pass";
+        if (daysBadge) daysBadge.title = "Active Pass";
       }
-      daysBadge.className = "tr-header-days-badge active";
+      daysText.className = "tr-avatar-days-badge active";
     } else {
       daysText.textContent = "0D";
-      daysBadge.className = "tr-header-days-badge inactive";
-      daysBadge.title = "No active pass - Click to view plans";
-    }
-  }
-
-  // Update Header Avatar
-  if (headerAvatar) {
-    if (hasUser && currentAuthUser.photoURL) {
-      headerAvatar.src = currentAuthUser.photoURL;
-    } else {
-      headerAvatar.src = "assets/rabbit_32.png";
+      daysText.className = "tr-avatar-days-badge inactive";
+      if (daysBadge) daysBadge.title = "No active pass - Click to view plans";
     }
   }
 

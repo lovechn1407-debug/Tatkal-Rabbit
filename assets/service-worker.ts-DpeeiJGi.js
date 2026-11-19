@@ -113,15 +113,23 @@ async function S(e,t){
 
   if(e.type==="GET_STATUS")return C(n);
 
+  if(e.type==="STOP_AUTOMATION"){
+    let r=b??n;
+    if(r)await O(r,e);
+    b=null;
+    await i.saveAutomationSnapshot({context:{state:"IDLE",suspended:!1},statusMessage:"Automation stopped",tabId:void 0,updatedAt:new Date().toISOString()});
+    return{ok:!0,message:"Automation stopped"};
+  }
+
   let r=b??n;
   if(!r)return{ok:!1,error:"No automation tab found. Open IRCTC and try again."};
   let res=await O(r,e);
   if(res.ok&&res.data){
     let t=res.data;
-    (e.type==="STOP_AUTOMATION"||e.type==="RESUME_AUTOMATION")&&await T({
+    e.type==="RESUME_AUTOMATION"&&await T({
       context:t,
       state:t.state,
-      message:e.type==="STOP_AUTOMATION"?t.suspended?"Automation stopped — click Start to run again or Resume to continue":"Automation stopped":"Automation resumed"
+      message:"Automation resumed"
     },r);
   }
   return res;
