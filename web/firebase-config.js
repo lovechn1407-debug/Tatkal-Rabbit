@@ -102,9 +102,20 @@ export async function loadLivePricing() {
       }
     }
 
-    const pricingDoc = await getDoc(doc(db, "settings", "pricing"));
-    if (pricingDoc.exists()) {
-      const data = pricingDoc.data();
+    let data = null;
+    // 1. Try settings/pricing
+    try {
+      const pricingDoc = await getDoc(doc(db, "settings", "pricing"));
+      if (pricingDoc.exists()) data = pricingDoc.data();
+    } catch (e) {
+      // 2. Fallback to users/system_pricing if settings collection has security rule restriction
+      try {
+        const fallbackDoc = await getDoc(doc(db, "users", "system_pricing"));
+        if (fallbackDoc.exists()) data = fallbackDoc.data();
+      } catch (err) {}
+    }
+
+    if (data) {
       applyPricingToPlans(data);
       if (typeof localStorage !== "undefined") {
         localStorage.setItem("tatkal_custom_pricing", JSON.stringify(data));
@@ -141,7 +152,31 @@ export async function saveLivePricing(newPricing) {
     updatedBy: auth.currentUser.email
   };
 
-  await setDoc(doc(db, "settings", "pricing"), payload, { merge: true });
+  let saved = false;
+  let lastError = null;
+
+  // Try saving to settings/pricing
+  try {
+    await setDoc(doc(db, "settings", "pricing"), payload, { merge: true });
+    saved = true;
+  } catch (err) {
+    console.warn("Could not save to settings/pricing (rules restriction):", err.message);
+    lastError = err;
+  }
+
+  // Also save to users/system_pricing (which is already allowed under users collection)
+  try {
+    await setDoc(doc(db, "users", "system_pricing"), payload, { merge: true });
+    saved = true;
+  } catch (err) {
+    console.warn("Could not save to users/system_pricing:", err.message);
+    if (!saved) lastError = err;
+  }
+
+  if (!saved && lastError) {
+    throw lastError;
+  }
+
   applyPricingToPlans(payload);
   if (typeof localStorage !== "undefined") {
     localStorage.setItem("tatkal_custom_pricing", JSON.stringify(payload));

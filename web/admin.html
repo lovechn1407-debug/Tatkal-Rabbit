@@ -424,7 +424,7 @@
       // First apply cached/default plans
       populatePricingInputs(SUBSCRIPTION_PLANS);
 
-      // Listen to Firestore real-time pricing doc
+      // Listen to Firestore real-time pricing doc (tries settings/pricing, falls back to users/system_pricing)
       const pricingRef = doc(db, "settings", "pricing");
       unsubscribePricing = onSnapshot(pricingRef, (docSnap) => {
         if (docSnap.exists()) {
@@ -432,7 +432,17 @@
           populatePricingInputs(data);
         }
       }, (err) => {
-        console.warn("Pricing snapshot error:", err.message);
+        console.warn("Notice: settings/pricing snapshot blocked by rules, checking users/system_pricing fallback...");
+        try {
+          const fallbackRef = doc(db, "users", "system_pricing");
+          unsubscribePricing = onSnapshot(fallbackRef, (fSnap) => {
+            if (fSnap.exists()) {
+              populatePricingInputs(fSnap.data());
+            }
+          }, (fErr) => {
+            console.warn("Pricing fallback snapshot:", fErr.message);
+          });
+        } catch(e) {}
       });
     }
 

@@ -1,0 +1,23 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 1. User Profiles & Subscriptions
+    match /users/{userId} {
+      allow read, write: if request.auth != null;
+    }
+
+    // 2. System Settings & Custom Pricing
+    match /settings/{docId} {
+      // Anyone can read pricing so the Chrome Extension and website can display prices
+      allow read: if true;
+      // Only the admin (lovechn1407@gmail.com) can update pricing
+      allow write: if request.auth != null && request.auth.token.email.lower() == 'lovechn1407@gmail.com';
+    }
+
+    // 3. Fallback rule for admin
+    match /{document=**} {
+      allow read, write: if request.auth != null && request.auth.token.email.lower() == 'lovechn1407@gmail.com';
+    }
+  }
+}
