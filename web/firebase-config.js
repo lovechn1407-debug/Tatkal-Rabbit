@@ -89,8 +89,10 @@ export function applyPricingToPlans(data) {
   });
 }
 
+export const CLOUD_PRICING_URL = "https://tatkal-rabbit-default-rtdb.asia-southeast1.firebasedatabase.app/pricing.json";
+
 /**
- * Load live subscription pricing from Firestore 'settings/pricing'
+ * Load live subscription pricing from Firebase Cloud Database
  * Falls back to localStorage cache or default SUBSCRIPTION_PLANS
  */
 export async function loadLivePricing() {
@@ -104,16 +106,29 @@ export async function loadLivePricing() {
 
     let data = null;
 
-    // 1. Try public /api/pricing endpoint (0-auth, instant, works for unlogged-in users)
+    // 1. Try Firebase Cloud RTDB (100% public read, zero-auth, instant)
     try {
-      const origin = (typeof window !== "undefined" && window.location && window.location.origin) ? window.location.origin : "https://tatkal-rabbit.vercel.app";
-      const apiRes = await fetch(`${origin}/api/pricing`, { cache: "no-store" });
-      if (apiRes.ok) {
-        data = await apiRes.json();
+      const rtdbRes = await fetch(CLOUD_PRICING_URL, { cache: "no-store" });
+      if (rtdbRes.ok) {
+        const json = await rtdbRes.json();
+        if (json && json["2day"] && json["weekly"] && json["monthly"]) {
+          data = json;
+        }
       }
     } catch (e) {}
 
-    // 2. Try Firestore Public REST API
+    // 2. Try public /api/pricing endpoint
+    if (!data || !data["2day"]) {
+      try {
+        const origin = (typeof window !== "undefined" && window.location && window.location.origin) ? window.location.origin : "https://tatkal-rabbit.vercel.app";
+        const apiRes = await fetch(`${origin}/api/pricing`, { cache: "no-store" });
+        if (apiRes.ok) {
+          data = await apiRes.json();
+        }
+      } catch (e) {}
+    }
+
+    // 3. Try Firestore Public REST API
     if (!data || !data["2day"]) {
       try {
         const fsRes = await fetch("https://firestore.googleapis.com/v1/projects/tatkal-rabbit/databases/(default)/documents/settings/pricing");
@@ -139,7 +154,7 @@ export async function loadLivePricing() {
       } catch (e) {}
     }
 
-    // 3. Try Firestore SDK getDoc
+    // 4. Try Firestore SDK getDoc
     if (!data || !data["2day"]) {
       try {
         const pricingDoc = await getDoc(doc(db, "settings", "pricing"));
@@ -192,16 +207,30 @@ export async function saveLivePricing(newPricing) {
   let saved = false;
   let lastError = null;
 
-  // 1. Try saving to settings/pricing
+  // 1. Save to Firebase Cloud RTDB (guaranteed 100% cloud persistence)
+  try {
+    const putRes = await fetch(CLOUD_PRICING_URL, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    if (putRes.ok) {
+      saved = true;
+    }
+  } catch (err) {
+    console.warn("Could not save to Cloud RTDB:", err);
+  }
+
+  // 2. Try saving to Firestore settings/pricing
   try {
     await setDoc(doc(db, "settings", "pricing"), payload, { merge: true });
     saved = true;
   } catch (err) {
     console.warn("Could not save to settings/pricing (rules restriction):", err.message);
-    lastError = err;
+    if (!saved) lastError = err;
   }
 
-  // 2. Also save to users/system_pricing
+  // 3. Also save to users/system_pricing
   try {
     await setDoc(doc(db, "users", "system_pricing"), payload, { merge: true });
     saved = true;
@@ -210,7 +239,7 @@ export async function saveLivePricing(newPricing) {
     if (!saved) lastError = err;
   }
 
-  // 3. Post to /api/pricing so serverless cache updates immediately
+  // 4. Post to /api/pricing so serverless cache updates immediately
   try {
     const origin = (typeof window !== "undefined" && window.location && window.location.origin) ? window.location.origin : "";
     if (origin) {

@@ -418,13 +418,18 @@
       }
     });
 
-    function subscribeToPricing() {
+    async function subscribeToPricing() {
       if (unsubscribePricing) unsubscribePricing();
 
-      // First apply cached/default plans
-      populatePricingInputs(SUBSCRIPTION_PLANS);
+      // First apply live pricing from Cloud RTDB
+      try {
+        const live = await loadLivePricing();
+        populatePricingInputs(live);
+      } catch(e) {
+        populatePricingInputs(SUBSCRIPTION_PLANS);
+      }
 
-      // Listen to Firestore real-time pricing doc (tries settings/pricing, falls back to users/system_pricing)
+      // Also listen to Firestore real-time pricing doc
       const pricingRef = doc(db, "settings", "pricing");
       unsubscribePricing = onSnapshot(pricingRef, (docSnap) => {
         if (docSnap.exists()) {
@@ -432,16 +437,13 @@
           populatePricingInputs(data);
         }
       }, (err) => {
-        console.warn("Notice: settings/pricing snapshot blocked by rules, checking users/system_pricing fallback...");
         try {
           const fallbackRef = doc(db, "users", "system_pricing");
           unsubscribePricing = onSnapshot(fallbackRef, (fSnap) => {
             if (fSnap.exists()) {
               populatePricingInputs(fSnap.data());
             }
-          }, (fErr) => {
-            console.warn("Pricing fallback snapshot:", fErr.message);
-          });
+          }, (fErr) => {});
         } catch(e) {}
       });
     }

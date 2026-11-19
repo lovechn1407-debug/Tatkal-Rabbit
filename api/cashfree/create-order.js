@@ -46,7 +46,18 @@ export default async function handler(req, res) {
 
     const plan = { ...DEFAULT_PLANS[planId] };
 
-    // Fetch live price from Firestore if available to guarantee current admin price
+    // Fetch live price from Firebase Cloud RTDB first
+    try {
+      const rtdbRes = await fetch("https://tatkal-rabbit-default-rtdb.asia-southeast1.firebasedatabase.app/pricing.json", { cache: "no-store" });
+      if (rtdbRes.ok) {
+        const rtdbData = await rtdbRes.json();
+        if (rtdbData && rtdbData[planId] && rtdbData[planId].discountedPrice !== undefined) {
+          plan.discountedPrice = Number(rtdbData[planId].discountedPrice);
+        }
+      }
+    } catch (e) {}
+
+    // Fallback to Firestore REST if available
     try {
       const fsRes = await fetch("https://firestore.googleapis.com/v1/projects/tatkal-rabbit/databases/(default)/documents/settings/pricing");
       if (fsRes.ok) {
@@ -59,9 +70,7 @@ export default async function handler(req, res) {
           }
         }
       }
-    } catch (e) {
-      // Use default price if Firestore fetch fails
-    }
+    } catch (e) {}
 
     const orderAmount = Number(plan.discountedPrice).toFixed(2);
     const orderId = `tr_${planId}_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;

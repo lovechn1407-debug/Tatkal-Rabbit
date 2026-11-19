@@ -39,6 +39,7 @@ let currentSubscription = null;
 // Initialize on Load
 document.addEventListener("DOMContentLoaded", async () => {
   try {
+    fetchCloudPricing(); // Fetch latest admin pricing immediately
     await initTheme();
     await initData();
     setupNavigation();
@@ -1800,7 +1801,7 @@ async function getWebPortalUrl() {
   return "https://tatkal-rabbit.vercel.app";
 }
 
-// Fetch live pricing from serverless API / Firestore REST for all users (including unauthenticated)
+// Fetch live pricing from Firebase Cloud Database for all users (including unauthenticated)
 async function fetchCloudPricing() {
   const applyAndSave = (pricing) => {
     if (pricing && pricing["2day"]) {
@@ -1811,7 +1812,19 @@ async function fetchCloudPricing() {
     }
   };
 
-  // 1. Try Vercel Serverless /api/pricing
+  // 1. Try Firebase Cloud RTDB directly (100% public, works without login, fastest)
+  try {
+    const rtdbRes = await fetch("https://tatkal-rabbit-default-rtdb.asia-southeast1.firebasedatabase.app/pricing.json?t=" + Date.now(), { cache: "no-store" });
+    if (rtdbRes.ok) {
+      const data = await rtdbRes.json();
+      if (data && data["2day"] && data["weekly"] && data["monthly"]) {
+        applyAndSave(data);
+        return;
+      }
+    }
+  } catch (e) {}
+
+  // 2. Try Vercel Serverless /api/pricing
   try {
     const portalBase = await getWebPortalUrl();
     const res = await fetch(`${portalBase}/api/pricing?t=${Date.now()}`, { cache: "no-store" });
@@ -1824,7 +1837,7 @@ async function fetchCloudPricing() {
     }
   } catch (e) {}
 
-  // 2. Try Firestore REST API directly
+  // 3. Try Firestore REST API directly
   try {
     const res = await fetch("https://firestore.googleapis.com/v1/projects/tatkal-rabbit/databases/(default)/documents/settings/pricing");
     if (res.ok) {
