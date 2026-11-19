@@ -1126,10 +1126,17 @@ function isAtTatkalWindowMinute(travelClass) {
 }
 
 // 12. Master Action Buttons
+let isActionPending = false;
+
 function setupMasterActionButtons() {
   const btnStart = document.getElementById("btnStartAutomation");
   if (btnStart) {
-    btnStart.addEventListener("click", async () => {
+    btnStart.addEventListener("click", async (e) => {
+      e?.preventDefault?.();
+      e?.stopPropagation?.();
+
+      if (isActionPending) return;
+
       // Subscription Verification Guard
       if (!isSubscriptionValid(currentSubscription)) {
         renderAuthAndSubscriptionUI();
@@ -1137,6 +1144,7 @@ function setupMasterActionButtons() {
         return;
       }
 
+      isActionPending = true;
       try {
         setUiRunningState(true, "Launching automation...");
 
@@ -1182,30 +1190,64 @@ function setupMasterActionButtons() {
       } catch (err) {
         setUiRunningState(false, "Error: " + err.message);
         alert("Error: " + err.message);
+      } finally {
+        isActionPending = false;
       }
     });
   }
 
   const btnResume = document.getElementById("btnResumeAutomation");
   if (btnResume) {
-    btnResume.addEventListener("click", async () => {
-      const res = await chrome.runtime.sendMessage({ type: "RESUME_AUTOMATION" });
-      if (res?.ok) {
-        setUiRunningState(true, "Automation resumed");
-      } else {
-        alert("Resume: " + (res?.error || "Could not resume"));
+    btnResume.addEventListener("click", async (e) => {
+      e?.preventDefault?.();
+      e?.stopPropagation?.();
+
+      if (isActionPending) return;
+      isActionPending = true;
+
+      try {
+        const res = await chrome.runtime.sendMessage({ type: "RESUME_AUTOMATION" });
+        if (res?.ok) {
+          setUiRunningState(true, "Automation resumed");
+        } else {
+          alert("Resume: " + (res?.error || "Could not resume"));
+        }
+      } finally {
+        isActionPending = false;
       }
     });
   }
 
   const btnStop = document.getElementById("btnStopAutomation");
   if (btnStop) {
-    btnStop.addEventListener("click", async () => {
-      await chrome.runtime.sendMessage({ type: "STOP_AUTOMATION" });
-      setUiRunningState(false, "Automation stopped");
-      updateVisualStepper(AutomationStates.IDLE, "Stopped", false);
-      const tracker = document.getElementById("automationTracker");
-      if (tracker) tracker.classList.remove("visible");
+    btnStop.addEventListener("click", async (e) => {
+      e?.preventDefault?.();
+      e?.stopPropagation?.();
+
+      if (isActionPending) return;
+      isActionPending = true;
+
+      try {
+        // Instant UI feedback on first click
+        setUiRunningState(false, "Automation stopped");
+        updateVisualStepper(AutomationStates.IDLE, "Stopped", false);
+        const tracker = document.getElementById("automationTracker");
+        if (tracker) tracker.classList.remove("visible");
+
+        // Broadcast STOP to all IRCTC tabs immediately (stops in-tab automation loops instantly)
+        if (typeof chrome !== "undefined" && chrome.tabs && chrome.tabs.query) {
+          chrome.tabs.query({ url: "*://*.irctc.co.in/*" }).then(tabs => {
+            tabs.forEach(t => {
+              if (t.id) chrome.tabs.sendMessage(t.id, { type: "STOP_AUTOMATION" }).catch(() => {});
+            });
+          }).catch(() => {});
+        }
+
+        // Also notify background service worker
+        await chrome.runtime.sendMessage({ type: "STOP_AUTOMATION" }).catch(() => {});
+      } finally {
+        isActionPending = false;
+      }
     });
   }
 
@@ -1218,7 +1260,7 @@ function setupMasterActionButtons() {
   }
 }
 
-// 13. Live IST Clock & Tatkal Countdown Ticker
+// 13. Live Clock & Tatkal Countdown Ticker (No IST word)
 function startTatkalCountdownTicker() {
   if (tatkalCountdownInterval) clearInterval(tatkalCountdownInterval);
 
@@ -1229,13 +1271,13 @@ function startTatkalCountdownTicker() {
     const curMin = istTime.getUTCMinutes();
     const curSec = istTime.getUTCSeconds();
 
-    // Update Header IST Clock Text
+    // Update Header Clock Text (No IST word)
     const istText = document.getElementById("istClockText");
     if (istText) {
       const hStr = String(curHour).padStart(2, "0");
       const mStr = String(curMin).padStart(2, "0");
       const sStr = String(curSec).padStart(2, "0");
-      istText.textContent = `${hStr}:${mStr}:${sStr} IST`;
+      istText.textContent = `${hStr}:${mStr}:${sStr}`;
     }
 
     let targetHour = 10;
@@ -1483,10 +1525,14 @@ function setupAuthAndSubscription() {
     }
   }
 
-  // Open & Close User Profile Modal
-  if (btnUserAccount && dialogUser) {
+  // Open & Close User Profile Modal (or Sign-in Modal if not logged in)
+  if (btnUserAccount) {
     btnUserAccount.addEventListener("click", () => {
-      dialogUser.style.display = "flex";
+      if (!currentAuthUser && authModal) {
+        authModal.style.display = "flex";
+      } else if (dialogUser) {
+        dialogUser.style.display = "flex";
+      }
     });
   }
 
@@ -1823,6 +1869,33 @@ function renderAuthAndSubscriptionUI() {
   const hasUser = Boolean(currentAuthUser && currentAuthUser.email);
   const hasActiveSub = isSubscriptionValid(currentSubscription);
 
+  // Update Header Days Badge at user profile logo position
+  const daysBadge = document.getElementById("btnUserAccount");
+  const daysText = document.getElementById("headerSubDaysText");
+  if (daysBadge && daysText) {
+    if (!hasUser) {
+      daysText.textContent = "LOGIN";
+      daysBadge.className = "tr-header-days-badge login";
+      daysBadge.title = "Not signed in - Click to Login";
+    } else if (hasActiveSub && currentSubscription) {
+      const exp = parseTimestamp(currentSubscription.validUntil);
+      if (exp) {
+        const diffMs = exp.getTime() - Date.now();
+        const daysLeft = Math.max(1, Math.ceil(diffMs / (24 * 60 * 60 * 1000)));
+        daysText.textContent = `${daysLeft}D`;
+        daysBadge.title = `Active Pass: ${daysLeft} days remaining`;
+      } else {
+        daysText.textContent = "PRO";
+        daysBadge.title = "Active Pass";
+      }
+      daysBadge.className = "tr-header-days-badge active";
+    } else {
+      daysText.textContent = "0D";
+      daysBadge.className = "tr-header-days-badge inactive";
+      daysBadge.title = "No active pass - Click to view plans";
+    }
+  }
+
   // Update Header Avatar
   if (headerAvatar) {
     if (hasUser && currentAuthUser.photoURL) {
@@ -1899,16 +1972,24 @@ function renderAuthAndSubscriptionUI() {
     if (subBanner) subBanner.style.display = "none";
     if (contentArea) contentArea.classList.remove("m3-locked-state");
     if (btnStartAutomation) {
-      btnStartAutomation.disabled = false;
-      btnStartAutomation.innerHTML = '<md-icon slot="icon">bolt</md-icon> Start IRCTC Automation';
+      const targetState = "active";
+      if (btnStartAutomation.dataset.subState !== targetState) {
+        btnStartAutomation.dataset.subState = targetState;
+        btnStartAutomation.disabled = false;
+        btnStartAutomation.innerHTML = '<md-icon slot="icon">bolt</md-icon> Start IRCTC Automation';
+      }
     }
   } else {
     // 2. Subscription required: SHOW the inline banner card, lock start button
     if (subBanner) subBanner.style.display = "block";
     if (contentArea) contentArea.classList.add("m3-locked-state");
     if (btnStartAutomation) {
-      btnStartAutomation.disabled = false; // Keep clickable to guide user
-      btnStartAutomation.innerHTML = '<md-icon slot="icon">lock</md-icon> Start Automation (Pass Required)';
+      const targetState = "locked";
+      if (btnStartAutomation.dataset.subState !== targetState) {
+        btnStartAutomation.dataset.subState = targetState;
+        btnStartAutomation.disabled = false; // Keep clickable to guide user
+        btnStartAutomation.innerHTML = '<md-icon slot="icon">lock</md-icon> Start Automation (Pass Required)';
+      }
     }
   }
 

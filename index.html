@@ -28,10 +28,9 @@
         </button>
       </div>
 
-      <!-- Live Pulse IST Clock Chip -->
+      <!-- Live Clock Chip (No green pulse, no IST word) -->
       <div class="m3-clock-chip" title="Live Clock Synced to IRCTC Servers">
-        <span class="m3-pulse-dot"></span>
-        <span id="istClockText">--:--:-- IST</span>
+        <span id="istClockText">--:--:--</span>
       </div>
 
       <!-- Tips, FAQ & Guidelines Button -->
@@ -44,15 +43,9 @@
         <md-icon id="iconTheme">light_mode</md-icon>
       </md-icon-button>
 
-      <!-- Active Pass Status Chip (shown when subscription is active) -->
-      <div id="headerPassActiveChip" class="m3-pass-active-chip" style="display:none;" title="Active Tatkal Rabbit Pass">
-        <span class="m3-pulse-dot" style="background:#00a843;"></span>
-        <span id="headerPassName">PRO PASS</span>
-      </div>
-
-      <!-- Google User Profile Avatar Button -->
-      <button type="button" id="btnUserAccount" class="m3-user-avatar-btn" title="Google Account & Subscription">
-        <img id="headerUserAvatar" src="assets/rabbit_32.png" alt="Profile" class="m3-header-avatar-img" />
+      <!-- Subscription Status Days Badge at the place of user profile logo -->
+      <button type="button" id="btnUserAccount" class="tr-header-days-badge" title="View Account & Subscription Details">
+        <span id="headerSubDaysText">FREE</span>
       </button>
     </div>
   </header>
@@ -88,10 +81,6 @@
     <div id="subscriptionPaywallOverlay" class="tr-sub-card-container" style="display: none;">
       <div class="tr-sub-header">
         <div class="tr-sub-title-group">
-          <div class="tr-badge-glow">
-            <span class="tr-pulse-dot"></span>
-            <span>PRO PASS REQUIRED</span>
-          </div>
           <h2 class="tr-sub-heading">Unlock 0-Second Tatkal Automation</h2>
           <p class="tr-sub-lead">
             Route & passenger settings are preserved below. Activate any pass for instant auto-booking:
@@ -324,7 +313,7 @@
       </div>
 
       <!-- Quota & Travel Class -->
-      <div class="m3-card">
+      <div class="m3-card m3-quota-class-card">
         <div class="m3-section-headline">
           <md-icon>verified</md-icon>
           <span>Booking Quota</span>
@@ -333,13 +322,13 @@
           <md-filter-chip class="pill-option selected" data-quota="TQ" label="Tatkal (TQ)" selected></md-filter-chip>
           <md-filter-chip class="pill-option" data-quota="PT" label="Premium Tatkal (PT)"></md-filter-chip>
           <md-filter-chip class="pill-option" data-quota="GN" label="General (GN)"></md-filter-chip>
-          <div class="m3-chip-row-break"></div>
           <md-filter-chip class="pill-option" data-quota="LD" label="Ladies (LD)"></md-filter-chip>
+          <div class="m3-chip-row-break"></div>
           <md-filter-chip class="pill-option" data-quota="SS" label="Senior Citizen (SS)"></md-filter-chip>
         </md-chip-set>
 
         <div class="m3-section-headline" style="margin-top: 14px;">
-          <md-icon>chair</md-icon>
+          <md-icon>hotel</md-icon>
           <span>Travel Class</span>
         </div>
         <md-chip-set id="classPillGrid">
@@ -908,8 +897,8 @@
           Sign in with your Google Account to manage your passes, sync automation preferences, and unlock instant IRCTC Tatkal auto-fill.
         </p>
 
-        <!-- Google Sign-In Button -->
-        <button type="button" id="btnModalGoogleLogin" class="tr-google-auth-btn">
+        <!-- Google Sign-In Button (Black with slight corner radius) -->
+        <button type="button" id="btnModalGoogleLogin" class="tr-google-auth-btn-black">
           <svg class="tr-google-icon" viewBox="0 0 24 24" width="20" height="20">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
             <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -918,25 +907,6 @@
           </svg>
           <span>Sign in with Google</span>
         </button>
-
-        <div class="tr-auth-divider">
-          <span>ALREADY HAVE AN ACTIVE PASS?</span>
-        </div>
-
-        <div style="display:flex; flex-direction:column; gap:8px; width:100%;">
-          <button type="button" id="btnModalUnlockClipboard" class="tr-secondary-auth-btn prominent">
-            <md-icon style="font-size:16px;">bolt</md-icon>
-            <span>Unlock with Clipboard Token</span>
-          </button>
-          <button type="button" id="btnModalPasteToken" class="tr-secondary-auth-btn">
-            <md-icon style="font-size:16px;">vpn_key</md-icon>
-            <span>Paste Web Sync Key</span>
-          </button>
-        </div>
-
-        <p class="tr-auth-footer-note">
-          🔒 Secure Google Authentication &bull; Powered by Tatkal Rabbit Cloud
-        </p>
       </div>
     </div>
   </div>
