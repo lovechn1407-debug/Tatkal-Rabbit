@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tatkal Rabbit – IRCTC Fast Tatkal & Auto-Fill</title>
+  <link rel="stylesheet" href="popup.css" />
+  <script type="module" src="assets/material-web.bundle.js"></script>
+  <script type="module" src="popup.js"></script>
+</head>
+<body>
+  <!-- Top App Bar: Tatkal Rabbit with Official IRCTC Branding -->
+  <header class="m3-top-bar">
+    <div class="m3-brand">
+      <img src="assets/tatkal-rabbit-brand.png" alt="Tatkal Rabbit" class="m3-header-brand-img" />
+    </div>
+    
+    <div class="m3-top-actions">
+      <!-- Site Version Segmented Switcher -->
+      <div class="m3-segmented-control">
+        <button type="button" id="btnSiteNget" class="m3-segment-btn active" title="Old IRCTC Website (/nget)">
+          <md-icon style="font-size:14px;">desktop_windows</md-icon>
+          <span>Old Site</span>
+        </button>
+        <button type="button" id="btnSiteEticket" class="m3-segment-btn" title="New IRCTC Website (/eticket)">
+          <md-icon style="font-size:14px;">web</md-icon>
+          <span>New Site</span>
+        </button>
+      </div>
+
+      <!-- Live Pulse IST Clock Chip -->
+      <div class="m3-clock-chip" title="Live Clock Synced to IRCTC Servers">
+        <span class="m3-pulse-dot"></span>
+        <span id="istClockText">--:--:-- IST</span>
+      </div>
+
+      <!-- Tips, FAQ & Guidelines Button -->
+      <md-icon-button id="btnOpenTips" title="Tips, FAQ, Caution & Guide">
+        <md-icon>tips_and_updates</md-icon>
+      </md-icon-button>
+
+      <!-- Theme Switcher -->
+      <md-icon-button id="btnThemeToggle" title="Switch Theme (Light / Dark)">
+        <md-icon id="iconTheme">light_mode</md-icon>
+      </md-icon-button>
+
+      <!-- Google User Profile Avatar Button -->
+      <button type="button" id="btnUserAccount" class="m3-user-avatar-btn" title="Google Account & Subscription">
+        <img id="headerUserAvatar" src="assets/rabbit_32.png" alt="Profile" class="m3-header-avatar-img" />
+      </button>
+    </div>
+  </header>
+
+  <!-- M3 Navigation Tabs -->
+  <md-tabs id="mainTabs" active-tab-index="0">
+    <md-primary-tab id="tabBtn-journey">
+      <md-icon slot="icon">train</md-icon>
+      Journey
+    </md-primary-tab>
+    <md-primary-tab id="tabBtn-passengers">
+      <md-icon slot="icon">group</md-icon>
+      Passengers
+    </md-primary-tab>
+    <md-primary-tab id="tabBtn-preferences">
+      <md-icon slot="icon">tune</md-icon>
+      Preferences
+    </md-primary-tab>
+    <md-primary-tab id="tabBtn-credentials">
+      <md-icon slot="icon">lock</md-icon>
+      Credentials & Pay
+    </md-primary-tab>
+    <md-primary-tab id="tabBtn-scheduler">
+      <md-icon slot="icon">alarm</md-icon>
+      Tatkal Clock
+    </md-primary-tab>
+  </md-tabs>
+
+  <!-- Scrollable Content Area (With Full Space Available) -->
+  <main class="m3-content-area">
+
+    <!-- PANE 1: JOURNEY -->
+    <section id="pane-journey" class="m3-pane active">
+      <!-- Route Hero Card -->
+      <div class="m3-route-hero">
+        <div class="m3-route-stations-row">
+          <div class="m3-route-station">
+            <span id="heroOriginCode" class="m3-route-station-code">NDLS</span>
+            <span id="heroOriginName" class="m3-route-station-name">New Delhi</span>
+          </div>
+
+          <div class="m3-route-track">
+            <div class="m3-track-line"></div>
+            <div class="m3-track-train-badge">
+              <md-icon>directions_railway</md-icon>
+            </div>
+          </div>
+
+          <div class="m3-route-station" style="text-align: right;">
+            <span id="heroDestCode" class="m3-route-station-code">MMCT</span>
+            <span id="heroDestName" class="m3-route-station-name">Mumbai Central</span>
+          </div>
+        </div>
+
+        <div class="m3-route-meta-pills">
+          <div class="m3-meta-tag">
+            <md-icon>calendar_month</md-icon>
+            <span id="heroDateTag">Tomorrow</span>
+          </div>
+          <div class="m3-meta-tag">
+            <md-icon>bolt</md-icon>
+            <span id="heroQuotaTag">Tatkal (TQ)</span>
+          </div>
+          <div class="m3-meta-tag">
+            <md-icon>airline_seat_recline_extra</md-icon>
+            <span id="heroClassTag">3A Class</span>
+          </div>
+          <div class="m3-meta-tag">
+            <md-icon>group</md-icon>
+            <span id="heroPsgnTag">1 Passenger</span>
+          </div>
+          <div class="m3-meta-tag">
+            <md-icon>web</md-icon>
+            <span id="heroSiteTag">Old Site (/nget)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Saved Preset Row -->
+      <div class="m3-card m3-row" style="margin-bottom: 12px; gap: 8px;">
+        <md-outlined-select id="selectJourneyTemplate" label="Saved Journey Presets" style="flex: 1;">
+          <md-select-option value="" selected><div slot="headline">-- Select Journey Plan --</div></md-select-option>
+        </md-outlined-select>
+        <md-icon-button id="btnSaveJourneyPlan" title="Save Current Journey Plan">
+          <md-icon>bookmark_add</md-icon>
+        </md-icon-button>
+        <md-icon-button id="btnDeleteJourneyPlan" title="Delete Selected Plan">
+          <md-icon>delete_outline</md-icon>
+        </md-icon-button>
+      </div>
+
+      <!-- Stations -->
+      <div class="m3-card">
+        <div class="m3-section-headline">
+          <md-icon>route</md-icon>
+          <span>Route & Stations</span>
+        </div>
+
+        <div class="m3-station-grid">
+          <div class="m3-autocomplete-wrapper">
+            <md-outlined-text-field id="inputOrigin" label="From Station" placeholder="e.g. NDLS - New Delhi">
+              <md-icon slot="leading-icon">flight_takeoff</md-icon>
+            </md-outlined-text-field>
+            <div id="dropdownOrigin" class="m3-dropdown"></div>
+          </div>
+
+          <md-icon-button id="btnSwapStations" title="Swap Stations" class="m3-swap-btn">
+            <md-icon>swap_horiz</md-icon>
+          </md-icon-button>
+
+          <div class="m3-autocomplete-wrapper">
+            <md-outlined-text-field id="inputDest" label="To Station" placeholder="e.g. MMCT - Mumbai Central">
+              <md-icon slot="leading-icon">flight_land</md-icon>
+            </md-outlined-text-field>
+            <div id="dropdownDest" class="m3-dropdown"></div>
+          </div>
+        </div>
+
+        <!-- Quick Hub Chips -->
+        <div style="margin-top: 10px;">
+          <div class="m3-label-text">Popular Hubs:</div>
+          <md-chip-set class="m3-quick-chips">
+            <md-assist-chip class="chip-quick-station" data-code="NDLS" label="New Delhi (NDLS)"></md-assist-chip>
+            <md-assist-chip class="chip-quick-station" data-code="MMCT" label="Mumbai (MMCT)"></md-assist-chip>
+            <md-assist-chip class="chip-quick-station" data-code="HWH" label="Howrah (HWH)"></md-assist-chip>
+            <md-assist-chip class="chip-quick-station" data-code="PNBE" label="Patna (PNBE)"></md-assist-chip>
+            <md-assist-chip class="chip-quick-station" data-code="SBC" label="Bengaluru (SBC)"></md-assist-chip>
+            <md-assist-chip class="chip-quick-station" data-code="MAS" label="Chennai (MAS)"></md-assist-chip>
+          </md-chip-set>
+        </div>
+      </div>
+
+      <!-- Date & Train -->
+      <div class="m3-card">
+        <div class="m3-section-headline">
+          <md-icon>event</md-icon>
+          <span>Journey Date & Train Number</span>
+        </div>
+
+        <div class="m3-grid-2">
+          <div>
+            <md-outlined-text-field id="inputJourneyDate" type="date" label="Date of Journey">
+              <md-icon slot="leading-icon">calendar_today</md-icon>
+            </md-outlined-text-field>
+            <md-chip-set style="margin-top: 8px;">
+              <md-assist-chip id="btnDateToday" label="Today"></md-assist-chip>
+              <md-assist-chip id="btnDateTomorrow" label="Tomorrow"></md-assist-chip>
+              <md-assist-chip id="btnDateTatkal" label="Tatkal (Tomorrow TQ)"></md-assist-chip>
+            </md-chip-set>
+          </div>
+
+          <div>
+            <md-outlined-text-field id="inputTrainNumber" label="Train Number (Optional)" placeholder="e.g. 12952" supporting-text="Leave empty to book first available train">
+              <md-icon slot="leading-icon">directions_transit</md-icon>
+            </md-outlined-text-field>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quota & Travel Class -->
+      <div class="m3-card">
+        <div class="m3-section-headline">
+          <md-icon>verified</md-icon>
+          <span>Booking Quota</span>
+        </div>
+        <md-chip-set id="quotaPillGrid">
+          <md-filter-chip class="pill-option selected" data-quota="TQ" label="Tatkal (TQ)" selected></md-filter-chip>
+          <md-filter-chip class="pill-option" data-quota="PT" label="Premium Tatkal (PT)"></md-filter-chip>
+          <md-filter-chip class="pill-option" data-quota="GN" label="General (GN)"></md-filter-chip>
+          <div class="m3-chip-row-break"></div>
+          <md-filter-chip class="pill-option" data-quota="LD" label="Ladies (LD)"></md-filter-chip>
+          <md-filter-chip class="pill-option" data-quota="SS" label="Senior Citizen (SS)"></md-filter-chip>
+        </md-chip-set>
+
+        <div class="m3-section-headline" style="margin-top: 14px;">
+          <md-icon>chair</md-icon>
+          <span>Travel Class</span>
+        </div>
+        <md-chip-set id="classPillGrid">
+          <md-filter-chip class="pill-option" data-class="SL" label="Sleeper (SL)"></md-filter-chip>
+          <md-filter-chip class="pill-option selected" data-class="3A" label="AC 3 Tier (3A)" selected></md-filter-chip>
+          <md-filter-chip class="pill-option" data-class="2A" label="AC 2 Tier (2A)"></md-filter-chip>
+          <md-filter-chip class="pill-option" data-class="1A" label="AC First Class (1A)"></md-filter-chip>
+          <div class="m3-chip-row-break"></div>
+          <md-filter-chip class="pill-option" data-class="3E" label="AC 3 Economy (3E)"></md-filter-chip>
+          <md-filter-chip class="pill-option" data-class="CC" label="Chair Car (CC)"></md-filter-chip>
+          <md-filter-chip class="pill-option" data-class="2S" label="Second Sitting (2S)"></md-filter-chip>
+        </md-chip-set>
+      </div>
+
+      <!-- Boarding Station -->
+      <div class="m3-card">
+        <div class="m3-switch-row">
+          <div class="m3-switch-label">
+            <strong>Change Boarding Station</strong>
+            <p>Board train from an intermediate stoppage</p>
+          </div>
+          <md-switch id="checkBoarding" icons></md-switch>
+        </div>
+        <div id="boxBoardingStation" style="display: none; margin-top: 10px;">
+          <div class="m3-autocomplete-wrapper">
+            <md-outlined-text-field id="inputBoarding" label="Boarding Station Code" placeholder="e.g. BRC - Vadodara">
+              <md-icon slot="leading-icon">transfer_within_a_station</md-icon>
+            </md-outlined-text-field>
+            <div id="dropdownBoarding" class="m3-dropdown"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANE 2: PASSENGERS -->
+    <section id="pane-passengers" class="m3-pane">
+      <div class="m3-card m3-row" style="justify-content: space-between; align-items: center;">
+        <span id="psgnCounterLabel" class="m3-section-headline" style="margin: 0;">
+          <md-icon>group</md-icon>
+          <span>Passengers (1/6)</span>
+        </span>
+        <div class="m3-row" style="gap: 8px;">
+          <md-text-button id="btnSavePsgnPreset">
+            <md-icon slot="icon">save</md-icon>Save Preset
+          </md-text-button>
+          <md-text-button id="btnLoadPsgnPreset">
+            <md-icon slot="icon">restore</md-icon>Load Preset
+          </md-text-button>
+        </div>
+      </div>
+
+      <!-- Passenger Cards Container -->
+      <div id="passengerCardsList"></div>
+
+      <!-- Add Passenger / Infant Actions -->
+      <div class="m3-row" style="margin-top: 12px; gap: 12px;">
+        <md-filled-tonal-button id="btnAddPassenger" style="flex: 1;">
+          <md-icon slot="icon">person_add</md-icon>Add Passenger
+        </md-filled-tonal-button>
+        <md-outlined-button id="btnAddInfant">
+          <md-icon slot="icon">child_care</md-icon>Add Infant
+        </md-outlined-button>
+      </div>
+
+      <div id="infantCardsList" style="margin-top: 12px;"></div>
+    </section>
+
+    <!-- PANE 3: PREFERENCES -->
+    <section id="pane-preferences" class="m3-pane">
+      <!-- Contact Info -->
+      <div class="m3-card">
+        <div class="m3-section-headline">
+          <md-icon>contact_phone</md-icon>
+          <span>Contact Information</span>
+        </div>
+        <div class="m3-grid-2">
+          <md-outlined-text-field id="inputMobileNumber" type="tel" label="Passenger Mobile Number" prefix-text="+91 " maxlength="10">
+            <md-icon slot="leading-icon">phone</md-icon>
+          </md-outlined-text-field>
+          <md-outlined-text-field id="inputPrefCoach" label="Preferred Coach ID (Optional)" placeholder="e.g. B1, S3">
+            <md-icon slot="leading-icon">directions_railway</md-icon>
+          </md-outlined-text-field>
+        </div>
+      </div>
+
+      <!-- Booking Rules -->
+      <div class="m3-card">
+        <div class="m3-section-headline">
+          <md-icon>tune</md-icon>
+          <span>Booking & Allocation Rules</span>
+        </div>
+        
+        <div class="m3-switch-row">
+          <div class="m3-switch-label">
+            <strong>Consider Auto-Upgradation</strong>
+            <p>Free upgrade to next higher class if vacancy occurs during chart preparation</p>
+          </div>
+          <md-switch id="checkAutoUpgrade" icons></md-switch>
+        </div>
+
+        <md-divider></md-divider>
+
+        <div class="m3-switch-row">
+          <div class="m3-switch-label">
+            <strong>Book Only If Confirm Berths Allotted</strong>
+            <p>Prevents booking if tickets are put into Waitlist or RAC</p>
+          </div>
+          <md-switch id="checkConfirmOnly" icons></md-switch>
+        </div>
+
+        <md-divider></md-divider>
+
+        <div class="m3-switch-row">
+          <div class="m3-switch-label">
+            <strong>Do Not Want Food (Optional)</strong>
+            <p>Opt-out of catering charges on Rajdhani/Shatabdi/Vande Bharat trains</p>
+          </div>
+          <md-switch id="checkNoFood" icons></md-switch>
+        </div>
+
+        <md-divider></md-divider>
+
+        <div class="m3-switch-row">
+          <div class="m3-switch-label">
+            <strong>High-Priority Audio Chime</strong>
+            <p>Play loud alert chime when CAPTCHA or OTP requires your attention</p>
+          </div>
+          <md-switch id="checkNotifyOtp" selected icons></md-switch>
+        </div>
+      </div>
+
+      <!-- GST Details -->
+      <div class="m3-card">
+        <div class="m3-section-headline">
+          <md-icon>receipt_long</md-icon>
+          <span>GST Details for Business (Optional)</span>
+        </div>
+        <div class="m3-grid-2">
+          <md-outlined-text-field id="inputGstin" label="GSTIN" placeholder="e.g. 07AAAAA0000A1Z5"></md-outlined-text-field>
+          <md-outlined-text-field id="inputGstName" label="Registered Company Name"></md-outlined-text-field>
+          <md-outlined-text-field id="inputGstFlat" label="Flat / Door / Block No."></md-outlined-text-field>
+          <md-outlined-text-field id="inputGstStreet" label="Street / Road"></md-outlined-text-field>
+          <md-outlined-text-field id="inputGstArea" label="Area / Locality"></md-outlined-text-field>
+          <md-outlined-text-field id="inputGstPin" label="PIN Code"></md-outlined-text-field>
+          <md-outlined-text-field id="inputGstCity" label="City"></md-outlined-text-field>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANE 4: CREDENTIALS & BRANDED PAYMENT GATEWAYS -->
+    <section id="pane-credentials" class="m3-pane">
+      <!-- IRCTC Login Credentials -->
+      <div class="m3-card">
+        <div class="m3-section-headline">
+          <md-icon>lock</md-icon>
+          <span>IRCTC Login Credentials</span>
+        </div>
+        <p class="m3-supporting-text">Credentials are encrypted and saved only on your local machine. Never shared with any server.</p>
+
+        <div class="m3-grid-2" style="margin-top: 10px;">
+          <md-outlined-text-field id="inputUsername" label="IRCTC User ID">
+            <md-icon slot="leading-icon">account_circle</md-icon>
+          </md-outlined-text-field>
+
+          <div class="m3-row" style="align-items: center; gap: 4px;">
+            <md-outlined-text-field id="inputPassword" type="password" label="IRCTC Password" style="flex: 1;">
+              <md-icon slot="leading-icon">key</md-icon>
+            </md-outlined-text-field>
+            <md-icon-button id="btnTogglePassword" title="Show/Hide Password">
+              <md-icon id="iconTogglePassword">visibility</md-icon>
+            </md-icon-button>
+          </div>
+        </div>
+
+        <div class="m3-switch-row" style="margin-top: 12px;">
+          <div class="m3-switch-label">
+            <strong>Autofill Login Form</strong>
+            <p>Automatically populates user & password fields on IRCTC login modal</p>
+          </div>
+          <md-switch id="checkAutoFillLogin" selected icons></md-switch>
+        </div>
+
+        <div class="m3-row" style="gap: 8px; margin-top: 12px;">
+          <md-filled-button id="btnSaveCredentials">
+            <md-icon slot="icon">save</md-icon>Save Credentials
+          </md-filled-button>
+          <md-outlined-button id="btnClearCredentials">
+            <md-icon slot="icon">delete_outline</md-icon>Clear
+          </md-outlined-button>
+        </div>
+      </div>
+
+      <!-- Payment Settings with Authentic Brand Logos -->
+      <div class="m3-card">
+        <div class="m3-section-headline">
+          <md-icon>payment</md-icon>
+          <span>Payment Method & Instant Gateway</span>
+        </div>
+        <div class="m3-row" style="gap: 10px; margin: 8px 0;">
+          <md-filter-chip id="chipPayUpi" label="BHIM / UPI / QR Code (Fastest)" selected></md-filter-chip>
+          <md-filter-chip id="chipPayWallet" label="IRCTC iMudra / Wallet"></md-filter-chip>
+        </div>
+
+        <!-- Branded UPI Payment Provider Selection Grid -->
+        <div id="boxUpiGateway" style="margin-top: 12px;">
+          <div class="m3-label-text">Select Fast UPI Provider:</div>
+          <div class="m3-gateway-grid" id="upiGatewayGrid">
+            <!-- Paytm -->
+            <div class="m3-gateway-card selected" data-upi="PAYTM" id="gw-paytm">
+              <img src="assets/paytm-logo.png" class="m3-gw-logo" alt="Paytm" />
+              <span class="m3-gw-name">Paytm UPI</span>
+              <span class="m3-gw-badge">Fastest QR</span>
+            </div>
+
+            <!-- PhonePe -->
+            <div class="m3-gateway-card" data-upi="PHONEPE" id="gw-phonepe">
+              <img src="assets/phonepe-logo.webp" class="m3-gw-logo" alt="PhonePe" />
+              <span class="m3-gw-name">PhonePe</span>
+              <span class="m3-gw-badge">UPI / QR</span>
+            </div>
+
+            <!-- BHIM UPI -->
+            <div class="m3-gateway-card" data-upi="BHIM" id="gw-bhim">
+              <img src="assets/bhim-logo.webp" class="m3-gw-logo" alt="BHIM UPI" />
+              <span class="m3-gw-name">BHIM UPI</span>
+              <span class="m3-gw-badge">NPCI Gov</span>
+            </div>
+
+            <!-- Google Pay -->
+            <div class="m3-gateway-card" data-upi="GPAY" id="gw-gpay">
+              <img src="assets/gpay-logo.webp" class="m3-gw-logo" alt="Google Pay" />
+              <span class="m3-gw-name">Google Pay</span>
+              <span class="m3-gw-badge">Fast UPI</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANE 5: TATKAL CLOCK & SCHEDULER -->
+    <section id="pane-scheduler" class="m3-pane">
+      <div class="m3-card" style="text-align: center;">
+        <span id="tatkalBannerTitle" class="m3-headline">⚡ Tatkal Opening Countdown</span>
+        <div id="tatkalCountdownTimer" class="m3-countdown-display">00:00:00</div>
+        <div class="m3-supporting-text" style="margin-bottom: 14px;">Synced to Indian Standard Time (IST)</div>
+
+        <div class="m3-row" style="justify-content: center; gap: 12px;">
+          <md-filled-tonal-button id="btnSetTatkalSchedule">
+            <md-icon slot="icon">alarm_add</md-icon>Schedule Tatkal Auto-Start (30s Before Window)
+          </md-filled-tonal-button>
+        </div>
+      </div>
+
+      <!-- Tatkal Info -->
+      <div class="m3-card">
+        <div class="m3-section-headline">
+          <md-icon>info</md-icon>
+          <span>Tatkal Window Timing</span>
+        </div>
+        <div class="m3-grid-2">
+          <div>
+            <div class="m3-label-text">Current Class:</div>
+            <strong id="schedClassType">3A (AC Class)</strong>
+          </div>
+          <div>
+            <div class="m3-label-text">Window Opening:</div>
+            <strong id="schedOpenTime">10:00:00 AM IST</strong>
+          </div>
+          <div>
+            <div class="m3-label-text">Target Website:</div>
+            <strong id="schedSiteLabel">Old Site (/nget)</strong>
+          </div>
+          <div>
+            <div class="m3-label-text">Next Opening:</div>
+            <strong id="schedAlarmTime">Calculating...</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- Active Schedules -->
+      <div class="m3-card">
+        <div class="m3-section-headline">
+          <md-icon>notifications_active</md-icon>
+          <span>Active Alarms & Timers</span>
+        </div>
+        <div id="activeSchedulesList" class="m3-supporting-text">No active alarms scheduled.</div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Sticky Bottom Action Dock with Automation Visuals Placed BELOW the Buttons -->
+  <footer class="m3-bottom-dock">
+    <!-- Master Action Bar: Stop/Start Buttons & Status in the EXACT SAME ROW -->
+    <div class="m3-dock-main-row">
+      <div class="m3-dock-buttons">
+        <md-filled-button id="btnStartAutomation" class="m3-btn-start">
+          <md-icon slot="icon">bolt</md-icon>Start
+        </md-filled-button>
+
+        <md-filled-tonal-button id="btnResumeAutomation" style="display: none;" class="m3-btn-resume">
+          <md-icon slot="icon">play_arrow</md-icon>Resume
+        </md-filled-tonal-button>
+
+        <md-outlined-button id="btnStopAutomation" style="display: none;" class="m3-btn-stop">
+          <md-icon slot="icon">stop</md-icon>Stop
+        </md-outlined-button>
+      </div>
+
+      <div class="m3-dock-status-center">
+        <span id="headerStatusDot" class="m3-status-dot active"></span>
+        <span id="headerStatusText" class="m3-status-badge">Ready</span>
+        <span class="m3-status-divider">•</span>
+        <span id="footerStatusText" class="m3-status-msg">Ready to automate</span>
+      </div>
+
+      <div class="m3-dock-right">
+        <div id="footerStepIndicator" class="m3-step-indicator">Step 0/6</div>
+        <md-icon-button id="btnDashOpenIrctc" title="Open IRCTC in New Tab">
+          <md-icon>open_in_new</md-icon>
+        </md-icon-button>
+      </div>
+    </div>
+
+    <!-- LIVE VISUAL AUTOMATION STEPPER TRACKER (Placed BELOW Start/Stop Buttons, shown on start!) -->
+    <div class="m3-automation-tracker" id="automationTracker">
+      <md-linear-progress id="trackerProgress" style="display: none; width: 100%; margin-bottom: 6px;"></md-linear-progress>
+
+      <div class="m3-stepper">
+        <!-- Step 1: Login -->
+        <div class="m3-step" id="flowStep-login">
+          <div class="m3-step-icon-wrap">
+            <md-icon class="m3-step-icon">account_circle</md-icon>
+            <md-icon class="m3-step-check">check</md-icon>
+          </div>
+          <span class="m3-step-label">Login</span>
+        </div>
+        <div class="m3-step-connector" id="connector-1"></div>
+
+        <!-- Step 2: Search -->
+        <div class="m3-step" id="flowStep-search">
+          <div class="m3-step-icon-wrap">
+            <md-icon class="m3-step-icon">search</md-icon>
+            <md-icon class="m3-step-check">check</md-icon>
+          </div>
+          <span class="m3-step-label">Search</span>
+        </div>
+        <div class="m3-step-connector" id="connector-2"></div>
+
+        <!-- Step 3: Train Selection & Availability -->
+        <div class="m3-step" id="flowStep-train">
+          <div class="m3-step-icon-wrap">
+            <md-icon class="m3-step-icon">train</md-icon>
+            <md-icon class="m3-step-check">check</md-icon>
+          </div>
+          <span class="m3-step-label">Avail</span>
+        </div>
+        <div class="m3-step-connector" id="connector-3"></div>
+
+        <!-- Step 4: Passenger Entry -->
+        <div class="m3-step" id="flowStep-psgn">
+          <div class="m3-step-icon-wrap">
+            <md-icon class="m3-step-icon">group</md-icon>
+            <md-icon class="m3-step-check">check</md-icon>
+          </div>
+          <span class="m3-step-label">Pass</span>
+        </div>
+        <div class="m3-step-connector" id="connector-4"></div>
+
+        <!-- Step 5: Review & CAPTCHA -->
+        <div class="m3-step" id="flowStep-review">
+          <div class="m3-step-icon-wrap">
+            <md-icon class="m3-step-icon">verified_user</md-icon>
+            <md-icon class="m3-step-check">check</md-icon>
+          </div>
+          <span class="m3-step-label">Review</span>
+        </div>
+        <div class="m3-step-connector" id="connector-5"></div>
+
+        <!-- Step 6: Payment Gateway -->
+        <div class="m3-step" id="flowStep-pay">
+          <div class="m3-step-icon-wrap">
+            <md-icon class="m3-step-icon">payments</md-icon>
+            <md-icon class="m3-step-check">check</md-icon>
+          </div>
+          <span class="m3-step-label">Pay</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- TIPS, FAQ, CAUTION & PRIVACY MODAL DIALOG (Material Design 3) -->
+  <md-dialog id="dialogTips" style="min-width: 520px; max-width: 580px;">
+    <div slot="headline" class="m3-row" style="gap: 8px; align-items: center;">
+      <md-icon style="color: var(--md-sys-color-primary); font-size: 24px;">tips_and_updates</md-icon>
+      <span style="font-weight: 700; font-size: 16px;">Tatkal Rabbit – Guide, Tips & FAQ</span>
+    </div>
+
+    <div slot="content" class="m3-tips-content">
+      <!-- 1. How It Works -->
+      <div class="m3-tips-section">
+        <div class="m3-tips-section-title">
+          <md-icon>play_circle</md-icon>
+          <span>How It Works (Automated Workflow)</span>
+        </div>
+        <ol class="m3-tips-list">
+          <li><b>Pre-fill Details:</b> Save your Stations, Travel Class, Quota, and Passenger details before Tatkal opening time.</li>
+          <li><b>Tatkal Clock Sync:</b> Click "Start IRCTC Automation" or use the scheduled timer 30 seconds before opening (10 AM for AC, 11 AM for Non-AC).</li>
+          <li><b>Auto-Search & Instant Avail:</b> Tatkal Rabbit launches IRCTC, searches trains, checks availability the exact second the window opens, and clicks "Book Now".</li>
+          <li><b>Autofill Form & Fast Pay:</b> Passengers and preferences are filled in under 1 second. You enter the CAPTCHA, and your selected UPI gateway opens for instant payment.</li>
+        </ol>
+      </div>
+
+      <!-- 2. Tatkal Pro Tips -->
+      <div class="m3-tips-section">
+        <div class="m3-tips-section-title">
+          <md-icon>bolt</md-icon>
+          <span>Tatkal Pro Tips (Speed Secrets)</span>
+        </div>
+        <ul class="m3-tips-list">
+          <li><b>Login 2–3 Mins Early:</b> Login around 09:57 AM (for AC) or 10:57 AM (for Non-AC) to prevent session timeouts.</li>
+          <li><b>Use Paytm / PhonePe QR:</b> UPI QR Code checkout is the fastest checkout method on IRCTC, completely avoiding bank OTP delays.</li>
+          <li><b>Leave Train Number Empty:</b> If you want whatever train is available fastest on the route, leave the train number blank.</li>
+          <li><b>Keep Passenger Names Under 16 Chars:</b> IRCTC trims long names; pre-fill short names as per govt ID to avoid errors.</li>
+        </ul>
+      </div>
+
+      <!-- 3. Important Cautions -->
+      <div class="m3-tips-section">
+        <div class="m3-tips-section-title" style="color: #ba1a1a;">
+          <md-icon style="color: #ba1a1a;">warning_amber</md-icon>
+          <span>Important Cautions & IRCTC Rules</span>
+        </div>
+        <ul class="m3-tips-list">
+          <li><b>Tatkal Max Limit:</b> IRCTC strictly limits Tatkal bookings to maximum <b>4 passengers</b> per PNR.</li>
+          <li><b>Manual CAPTCHA Requirement:</b> Per IRCTC security regulations, CAPTCHAs require your manual glance & entry. Tatkal Rabbit chimes and pauses for you to type it instantly.</li>
+          <li><b>Do Not Refresh During Payment:</b> Once on the UPI / QR payment screen, do not reload the browser tab.</li>
+        </ul>
+      </div>
+
+      <!-- 4. FAQ -->
+      <div class="m3-tips-section">
+        <div class="m3-tips-section-title">
+          <md-icon>quiz</md-icon>
+          <span>Frequently Asked Questions (FAQ)</span>
+        </div>
+        <ul class="m3-tips-list">
+          <li><b>Q: What are the subscription plans?</b><br>A: Tatkal Rabbit offers 3 high-speed passes: 2-Day Express (&#8377;49), Weekly Explorer (&#8377;119), and Monthly Pro (&#8377;299). Active passes instantly unlock all autofill and automation options on your Chrome extension.</li>
+          <li><b>Q: Is my IRCTC Password safe?</b><br>A: Yes. Credentials are encrypted locally using AES-GCM and stored only inside your Chrome browser's local sandbox. No sensitive credentials ever leave your device.</li>
+          <li><b>Q: What is the difference between Old Site and New Site?</b><br>A: Old Site (/nget) is lightweight and often withstands 10:00 AM traffic spikes better. New Site (/eticket) features IRCTC's newer interface. Both work seamlessly.</li>
+        </ul>
+      </div>
+
+      <!-- 5. Privacy Policy -->
+      <div class="m3-tips-section">
+        <div class="m3-tips-section-title">
+          <md-icon>privacy_tip</md-icon>
+          <span>Privacy & Security Policy</span>
+        </div>
+        <p style="font-size: 11px; line-height: 1.4; margin: 0; color: var(--md-sys-color-on-surface-variant);">
+          Tatkal Rabbit operates 100% locally on your computer. It does not track, collect, store, or transmit your personal details, journey information, payment data, or IRCTC credentials to any remote server or third party. Everything resides securely in your browser's private extension storage.
+        </p>
+      </div>
+    </div>
+
+    <div slot="actions">
+      <md-filled-button id="btnCloseTips">Got It</md-filled-button>
+    </div>
+  </md-dialog>
+
+  <!-- User Profile & Subscription Account Dialog -->
+  <md-dialog id="dialogUserAccount" style="max-width: 420px; width: 92%;">
+    <div slot="headline" style="display:flex; align-items:center; gap:8px;">
+      <md-icon style="color:var(--md-sys-color-primary)">account_circle</md-icon>
+      <span>Tatkal Rabbit Account</span>
+    </div>
+
+    <div slot="content" class="m3-account-dialog-body">
+      <div class="m3-account-profile-card">
+        <img id="dialogUserAvatar" src="assets/rabbit_32.png" alt="User" class="m3-dialog-avatar" />
+        <div style="flex-grow:1;">
+          <div id="dialogUserName" style="font-weight:700; font-size:15px;">Signed In User</div>
+          <div id="dialogUserEmail" style="font-size:12px; color:var(--md-sys-color-on-surface-variant);">user@gmail.com</div>
+          <span id="dialogSubStatusBadge" class="m3-status-chip-sub inactive">No Active Pass</span>
+        </div>
+      </div>
+
+      <div id="dialogActivePlanBox" class="m3-dialog-plan-box" style="display:none;">
+        <div style="font-size:11px; text-transform:uppercase; font-weight:700; color:var(--md-sys-color-primary);">Subscription Details</div>
+        <div id="dialogActivePlanTitle" style="font-size:16px; font-weight:700;">Monthly Pro Pass</div>
+        <div id="dialogActivePlanExpiry" style="font-size:12px; color:var(--md-sys-color-on-surface-variant);">Valid until: --</div>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:8px; margin-top:16px;">
+        <md-filled-button id="btnOpenClientPortal">
+          <md-icon slot="icon">open_in_new</md-icon>
+          Manage / Buy Subscription
+        </md-filled-button>
+        <md-outlined-button id="btnDialogSyncSub">
+          <md-icon slot="icon">sync</md-icon>
+          Sync Subscription Status
+        </md-outlined-button>
+        <md-text-button id="btnDialogLogout" style="color:var(--md-sys-color-error);">
+          <md-icon slot="icon">logout</md-icon>
+          Sign Out
+        </md-text-button>
+      </div>
+    </div>
+
+    <div slot="actions">
+      <md-text-button id="btnCloseUserAccount">Close</md-text-button>
+    </div>
+  </md-dialog>
+
+  <!-- Subscription Paywall & Auth Protection Overlay -->
+  <div id="subscriptionPaywallOverlay" class="m3-paywall-overlay" style="display: none;">
+    <div class="m3-paywall-modal">
+      <!-- Unauthenticated Mode -->
+      <div id="paywallAuthPrompt" style="display: none; text-align: center;">
+        <div class="m3-paywall-badge">
+          <md-icon style="font-size: 16px;">lock</md-icon>
+          <span>Google Sign-In Required</span>
+        </div>
+        <h3 class="m3-paywall-title">Sign In to Tatkal Rabbit</h3>
+        <p class="m3-paywall-sub">
+          Please sign in with your Google account to verify your subscription and unlock high-speed Tatkal automation.
+        </p>
+        <button type="button" id="btnPaywallGoogleLogin" class="m3-paywall-google-btn">
+          <svg style="width:18px; height:18px; margin-right:8px;" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+          </svg>
+          <span>Sign In with Google</span>
+        </button>
+      </div>
+
+      <!-- Authenticated but No Active Subscription Mode -->
+      <div id="paywallSubPrompt" style="display: none;">
+        <div style="text-align: center; margin-bottom: 12px;">
+          <div class="m3-paywall-badge">
+            <md-icon style="font-size: 16px;">lock</md-icon>
+            <span>Subscription Required</span>
+          </div>
+          <h3 class="m3-paywall-title">Unlock Tatkal Rabbit Automation</h3>
+          <p class="m3-paywall-sub">
+            All commands are locked. Choose a pass below to activate your account and start booking at atomic speed.
+          </p>
+        </div>
+
+        <div class="m3-paywall-plans-grid">
+          <!-- 2-Day Pass -->
+          <div class="m3-paywall-plan-card">
+            <span class="m3-paywall-card-badge">Quick Trip</span>
+            <div class="m3-paywall-plan-name">2-Day Pass</div>
+            <div class="m3-paywall-price-row">
+              <span class="m3-paywall-cut-price">&#8377;149</span>
+              <span class="m3-paywall-price">&#8377;49</span>
+            </div>
+            <div class="m3-paywall-plan-info">48-Hr Full Access</div>
+            <button type="button" class="m3-paywall-buy-btn" data-plan="2day">
+              <md-icon style="font-size: 15px;">shopping_cart</md-icon>
+              <span>Buy (&#8377;49)</span>
+            </button>
+          </div>
+
+          <!-- Weekly Pass -->
+          <div class="m3-paywall-plan-card">
+            <span class="m3-paywall-card-badge">Best Value</span>
+            <div class="m3-paywall-plan-name">Weekly Pass</div>
+            <div class="m3-paywall-price-row">
+              <span class="m3-paywall-cut-price">&#8377;399</span>
+              <span class="m3-paywall-price">&#8377;119</span>
+            </div>
+            <div class="m3-paywall-plan-info">7 Days Unlimited</div>
+            <button type="button" class="m3-paywall-buy-btn primary" data-plan="weekly">
+              <md-icon style="font-size: 15px;">bolt</md-icon>
+              <span>Buy (&#8377;119)</span>
+            </button>
+          </div>
+
+          <!-- Monthly Pass -->
+          <div class="m3-paywall-plan-card featured">
+            <span class="m3-paywall-card-badge popular">Popular</span>
+            <div class="m3-paywall-plan-name">Monthly Pro</div>
+            <div class="m3-paywall-price-row">
+              <span class="m3-paywall-cut-price">&#8377;999</span>
+              <span class="m3-paywall-price">&#8377;299</span>
+            </div>
+            <div class="m3-paywall-plan-info">30 Days VIP Pass</div>
+            <button type="button" class="m3-paywall-buy-btn accent" data-plan="monthly">
+              <md-icon style="font-size: 15px;">stars</md-icon>
+              <span>Buy (&#8377;299)</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="m3-paywall-footer">
+          <button type="button" id="btnSyncSubscriptionStatus" class="m3-paywall-text-btn">
+            <md-icon style="font-size: 16px;">refresh</md-icon>
+            <span>Already Purchased? Sync Status</span>
+          </button>
+          <button type="button" id="btnOpenClientPage" class="m3-paywall-text-btn">
+            <md-icon style="font-size: 16px;">open_in_new</md-icon>
+            <span>Open Client Webpage</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

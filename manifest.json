@@ -1,0 +1,55 @@
+{
+  "manifest_version": 3,
+  "name": "Tatkal Rabbit – IRCTC Fast Tatkal & Auto-Fill",
+  "version": "4.0.0",
+  "description": "High-speed IRCTC booking automation. Auto-fill passengers, sync Tatkal opening clock, auto-select payment & instant alerts with Tatkal Rabbit passes.",
+  "permissions": [
+    "storage",
+    "tabs",
+    "notifications",
+    "activeTab",
+    "alarms"
+  ],
+  "host_permissions": [
+    "https://www.irctc.co.in/*"
+  ],
+  "action": {
+    "default_popup": "index.html",
+    "default_title": "Tatkal Rabbit"
+  },
+  "background": {
+    "service_worker": "service-worker-loader.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "js": [
+        "assets/index.ts-loader-35eC9YrI.js"
+      ],
+      "matches": [
+        "https://www.irctc.co.in/*"
+      ],
+      "run_at": "document_end"
+    }
+  ],
+  "icons": {
+    "16": "public/irctc_16.png",
+    "32": "public/irctc_32.png",
+    "48": "public/irctc_48.png",
+    "128": "public/irctc_128.png"
+  },
+  "web_accessible_resources": [
+    {
+      "matches": [
+        "https://www.irctc.co.in/*"
+      ],
+      "resources": [
+        "assets/logger-Cl8-E4U8.js",
+        "assets/extension-links-B5zadNJ_.js",
+        "assets/index.ts-bAmJYNBM.js",
+        "station_list.json"
+      ],
+      "use_dynamic_url": false
+    }
+  ]
+}

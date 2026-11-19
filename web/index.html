@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tatkal Rabbit – IRCTC High-Speed Tatkal Auto-Fill & Booking Engine</title>
+  <meta name="description" content="Tatkal Rabbit is the fastest IRCTC Tatkal automation extension. Auto-fill passengers, sync IRCTC Tatkal clock down to milliseconds, instant UPI payments, and confirmed train tickets." />
+  <link rel="icon" type="image/png" href="assets/rabbit_32.png" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Site Navigation -->
+  <header class="site-nav">
+    <div class="container nav-container">
+      <a href="index.html" class="nav-brand">
+        <img src="assets/tatkal-rabbit-brand.png" alt="Tatkal Rabbit" class="nav-brand-img" />
+      </a>
+
+      <nav class="nav-links">
+        <a href="#features" class="nav-link">Features</a>
+        <a href="#pricing" class="nav-link">Pricing Plans</a>
+        <a href="#installation" class="nav-link">Installation Guide</a>
+        <a href="#faq" class="nav-link">FAQ</a>
+      </nav>
+
+      <div class="nav-actions">
+        <!-- Theme Toggle -->
+        <button id="themeToggleBtn" class="btn-icon" title="Toggle Light/Dark Theme">
+          <span class="material-symbols-outlined" id="themeIcon">dark_mode</span>
+        </button>
+
+        <a href="client.html" class="btn btn-outline btn-sm">
+          <span class="material-symbols-outlined">account_circle</span>
+          <span>Client Panel</span>
+        </a>
+
+        <a href="admin.html" class="btn btn-tonal btn-sm">
+          <span class="material-symbols-outlined">admin_panel_settings</span>
+          <span>Admin</span>
+        </a>
+
+        <a href="#pricing" class="btn btn-primary btn-sm">
+          <span class="material-symbols-outlined">bolt</span>
+          <span>Get Pass</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-glow"></div>
+    <div class="container hero-content">
+      <div class="hero-chip">
+        <span class="pulse-dot"></span>
+        <span id="heroIstClock">IST: Syncing...</span>
+        <span>•</span>
+        <span>AC Window 10:00 AM | Non-AC 11:00 AM</span>
+      </div>
+
+      <h1 class="hero-title">
+        Book Confirmed Tatkal Tickets at <br>
+        <span class="gradient-text">Lightning Speed with Tatkal Rabbit</span>
+      </h1>
+
+      <p class="hero-subtitle">
+        The ultimate IRCTC booking automation Chrome Extension. Millisecond-accurate Tatkal countdown, 1-second autofill for all passengers, dual Old/New site support, and instant UPI checkout.
+      </p>
+
+      <div class="hero-ctas">
+        <a href="#installation" class="btn btn-primary btn-lg">
+          <span class="material-symbols-outlined">download</span>
+          <span>Install Extension</span>
+        </a>
+        <a href="#pricing" class="btn btn-secondary btn-lg">
+          <span class="material-symbols-outlined">workspace_premium</span>
+          <span>View Subscription Plans</span>
+        </a>
+        <a href="client.html" class="btn btn-outline btn-lg">
+          <span class="material-symbols-outlined">login</span>
+          <span>Open Client Portal</span>
+        </a>
+      </div>
+
+      <!-- Hero Mockup Card -->
+      <div class="hero-mockup-wrapper">
+        <div class="hero-mockup-card">
+          <div class="mockup-header">
+            <div class="mockup-dots">
+              <span class="mockup-dot red"></span>
+              <span class="mockup-dot yellow"></span>
+              <span class="mockup-dot green"></span>
+            </div>
+            <div class="mockup-url">chrome-extension://tatkal-rabbit/popup</div>
+            <div style="font-size: 11px; font-weight: 600; color: var(--md-sys-color-primary);">v4.0.0 PRO ACTIVE</div>
+          </div>
+          <div class="mockup-body">
+            <div>
+              <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+                <span class="material-symbols-outlined" style="color:var(--md-sys-color-primary)">train</span>
+                <span style="font-weight:700; font-size:15px;">Route: NDLS &rarr; BSB (Varanasi)</span>
+              </div>
+              <p style="font-size:13px; color:var(--md-sys-color-on-surface-variant); margin-bottom:10px;">
+                <b>Quota:</b> Tatkal (TQ) &bull; <b>Class:</b> 3rd AC (3A) &bull; <b>Passengers:</b> 2 Pre-saved
+              </p>
+              <div style="background:var(--md-sys-color-surface-container-high); padding:10px 14px; border-radius:8px; font-size:12px; display:flex; justify-content:space-between;">
+                <span>Opening Clock Sync</span>
+                <span style="color:#00a843; font-weight:700;">Ready (0.02s latency)</span>
+              </div>
+            </div>
+            <div>
+              <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+                <span class="material-symbols-outlined" style="color:var(--md-sys-color-success)">speed</span>
+                <span style="font-weight:700; font-size:15px;">Automated Fast-Lane Pay</span>
+              </div>
+              <p style="font-size:13px; color:var(--md-sys-color-on-surface-variant); margin-bottom:10px;">
+                Direct UPI QR (Paytm / Google Pay / PhonePe) selection avoids bank gateway OTP delays.
+              </p>
+              <div style="background:var(--md-sys-color-primary-container); color:var(--md-sys-color-on-primary-container); padding:10px 14px; border-radius:8px; font-size:12px; font-weight:600;">
+                Avg. Ticket Confirmation Time: 12 to 18 Seconds!
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section id="features" class="features-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Why Tatkal Rabbit</span>
+        <h2 class="section-title">Engineered for Tatkal Success</h2>
+        <p class="section-desc">When Tatkal seats evaporate in 60 seconds, every microsecond matters. Tatkal Rabbit eliminates human lag.</p>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">
+            <span class="material-symbols-outlined">schedule</span>
+          </div>
+          <h3 class="feature-title">Atomic IRCTC Clock Sync</h3>
+          <p class="feature-desc">Synchronizes automatically with Indian Railways NTP time servers. Schedules booking auto-trigger precisely 30 seconds before Tatkal opens.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">
+            <span class="material-symbols-outlined">bolt</span>
+          </div>
+          <h3 class="feature-title">Sub-Second Autofill</h3>
+          <p class="feature-desc">Injects passenger details, age, berth preference, meal choices, and contact info in under 400ms without touching the keyboard.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">
+            <span class="material-symbols-outlined">swap_horiz</span>
+          </div>
+          <h3 class="feature-title">Dual Site Switcher</h3>
+          <p class="feature-desc">Switch seamlessly between Old IRCTC (/nget) and New IRCTC (/eticket) websites to bypass 10:00 AM server congestion effortlessly.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">
+            <span class="material-symbols-outlined">qr_code_scanner</span>
+          </div>
+          <h3 class="feature-title">Instant UPI QR Auto-Select</h3>
+          <p class="feature-desc">Auto-selects Paytm or Google Pay UPI QR checkout on the payment gateway, bypassing sluggish SMS OTP wait times.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">
+            <span class="material-symbols-outlined">security</span>
+          </div>
+          <h3 class="feature-title">AES-GCM Encryption</h3>
+          <p class="feature-desc">Your credentials and passenger data remain 100% inside your local Chrome browser sandbox, protected with military-grade encryption.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">
+            <span class="material-symbols-outlined">sync</span>
+          </div>
+          <h3 class="feature-title">Real-Time Cloud Sync</h3>
+          <p class="feature-desc">Manage subscriptions, view pass status, and sync seamlessly between the Web Client Dashboard and your Chrome Extension.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing Section (3-Tier Subscription) -->
+  <section id="pricing" class="pricing-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Flexible Subscriptions</span>
+        <h2 class="section-title">Select Your Tatkal Rabbit Pass</h2>
+        <p class="section-desc">Choose a plan that fits your travel schedule. Instant automated activation for your Chrome Extension.</p>
+      </div>
+
+      <div class="pricing-grid">
+        <!-- Plan 1: 2-Day -->
+        <div class="pricing-card">
+          <span class="pricing-badge secondary">Quick Trip</span>
+          <div class="pricing-header">
+            <h3 class="pricing-plan-name">2-Day Express Pass</h3>
+            <p class="pricing-plan-desc">Perfect for an urgent trip or single weekend Tatkal booking.</p>
+            <div class="pricing-price-box">
+              <span class="pricing-cut-price">&#8377;149</span>
+              <span class="pricing-price"><span class="pricing-currency">&#8377;</span>49</span>
+              <span class="pricing-period">/ 48 Hours</span>
+            </div>
+          </div>
+          <ul class="pricing-features">
+            <li class="pricing-feature-item">
+              <span class="material-symbols-outlined">check_circle</span>
+              <span>48-Hours Full Automation Access</span>
+            </li>
+            <li class="pricing-feature-item">
+              <span class="material-symbols-outlined">check_circle</span>
+              <span>Both AC (10 AM) & Non-AC (11 AM)</span>
+            </li>
+            <li class="pricing-feature-item">
+              <span class="material-symbols-outlined">check_circle</span>
+              <span>Old & New IRCTC Site Support</span>
+            </li>
+            <li class="pricing-feature-item">
+              <span class="material-symbols-outlined">check_circle</span>
+              <span>Up to 4 Passengers Autofill</span>
+            </li>
+            <li class="pricing-feature-item">
+              <span class="material-symbols-outlined">check_circle</span>
+              <span>Instant UPI Payment Auto-select</span>
+            </li>
+          </ul>
+          <a href="client.html?plan=2day" class="btn btn-outline" style="width:100%;">
+            <span class="material-symbols-outlined">shopping_cart</span>
+            <span>Buy 2-Day Pass</span>
+          </a>
+        </div>
+
+        <!-- Plan 2: Weekly -->
+        <div class="pricing-card">
+          <span class="pricing-badge secondary">Best Value</span>
+          <div class="pricing-header">
+            <h3 class="pricing-plan-name">Weekly Explorer Pass</h3>
+            <p class="pricing-plan-desc">Ideal for multi-leg journeys and frequent weekly commuters.</p>
+            <div class="pricing-price-box">
+              <span class="pricing-cut-price">&#8377;399</span>
+              <span class="pricing-price"><span class="pricing-currency">&#8377;</span>119</span>
+              <span class="pricing-period">/ 7 Days</span>
+            </div>
+          </div>
+          <ul class="pricing-features">
+            <li class="pricing-feature-item">
+              <span class="material-symbols-outlined">check_circle</span>
+              <span>7 Full Days Unlimited Bookings</span>
+            </li>
+            <li class="pricing-feature-item">
+              <span class="material-symbols-outlined">check_circle</span>
+              <span>Priority High-Speed Server Sync</span>
+            </li>
+            <li class="pricing-feature-item">
+              <span class="material-symbols-outlined">check_circle</span>
+              <span>Old & New IRCTC Site Support</span>
+            </li>
+            <li class="pricing-feature-item">
+              <span class="material-symbols-outlined">check_circle</span>
+              <span>Up to 4 Passengers Autofill</span>
+            </li>
+            <li class="pricing-feature-item">
+              <span class="material-symbols-outlined">check_circle</span>
+              <span>Auto-captcha sound alert chime</span>
+            </li>
+          </ul>
+          <a href="client.html?plan=weekly" class="btn btn-secondary" style="width:100%;">
+            <span class="material-symbols-outlined">bolt</span>
+            <span>Buy Weekly Pass</span>
+          </a>
+        </div>
+
+        <!-- Plan 3: Monthly (Featured) -->
+        <div class="pricing-card featured">
+          <span class="pricing-badge">Most Popular</span>
+          <div class="pricing-header">
+            <h3 class="pricing-plan-name">Monthly Pro Pass</h3>
+            <p class="pricing-plan-desc">For regular travelers and agents requiring ultimate speed and reliability.</p>
+            <div class="pricing-price-box">
+              <span class="pricing-cut-price">&#8377;999</span>
+              <span class="pricing-price"><span class="pricing-currency">&#8377;</span>299</span>
+              <span class="pricing-period">/ 30 Days</span>
+            </div>
+          </div>
+          <ul class="pricing-features">
+            <li class="pricing-feature-item">
+              <span class="material-symbols-outlined">check_circle</span>
+              <span>30 Days Unlimited Tatkal Bookings</span>
+            </li>
+            <li class="pricing-feature-item">
+              <span class="material-symbols-outlined">check_circle</span>
+              <span>VIP Priority Support & Updates</span>
+            </li>
+            <li class="pricing-feature-item">
+              <span class="material-symbols-outlined">check_circle</span>
+              <span>Master Passenger List Sync</span>
+            </li>
+            <li class="pricing-feature-item">
+              <span class="material-symbols-outlined">check_circle</span>
+              <span>Old & New IRCTC Auto-Failover</span>
+            </li>
+            <li class="pricing-feature-item">
+              <span class="material-symbols-outlined">check_circle</span>
+              <span>Zero Renewal Interruption</span>
+            </li>
+          </ul>
+          <a href="client.html?plan=monthly" class="btn btn-primary" style="width:100%;">
+            <span class="material-symbols-outlined">stars</span>
+            <span>Buy Monthly Pro Pass</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Installation Guide Section -->
+  <section id="installation" class="install-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Easy Setup</span>
+        <h2 class="section-title">Install Tatkal Rabbit in 4 Simple Steps</h2>
+        <p class="section-desc">Works seamlessly with Google Chrome, Microsoft Edge, Brave, and all Chromium browsers.</p>
+      </div>
+
+      <div style="text-align:center; margin-bottom: 20px;">
+        <a href="https://github.com/lovechn1407-debug/Tatkal-Rabbit/archive/refs/heads/main.zip" class="btn btn-primary btn-lg" download>
+          <span class="material-symbols-outlined">download</span>
+          <span>Download Tatkal Rabbit Extension (.ZIP)</span>
+        </a>
+      </div>
+
+      <div class="install-steps-grid">
+        <div class="install-step-card">
+          <div class="install-step-num">1</div>
+          <h3 class="install-step-title">Download & Unzip</h3>
+          <p class="install-step-text">Click the download button above and extract the downloaded ZIP folder to a convenient folder on your computer.</p>
+        </div>
+
+        <div class="install-step-card">
+          <div class="install-step-num">2</div>
+          <h3 class="install-step-title">Open Chrome Extensions</h3>
+          <p class="install-step-text">In your Chrome address bar, navigate to <code>chrome://extensions/</code> and press Enter.</p>
+        </div>
+
+        <div class="install-step-card">
+          <div class="install-step-num">3</div>
+          <h3 class="install-step-title">Enable Developer Mode</h3>
+          <p class="install-step-text">Look for the <b>"Developer mode"</b> toggle switch in the top-right corner of the Extensions page and toggle it ON.</p>
+        </div>
+
+        <div class="install-step-card">
+          <div class="install-step-num">4</div>
+          <h3 class="install-step-title">Click "Load Unpacked"</h3>
+          <p class="install-step-text">Click <b>"Load unpacked"</b> in the top-left menu, choose the extracted folder, and Tatkal Rabbit is immediately installed!</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section id="faq" class="features-section" style="background-color: var(--md-sys-color-surface);">
+    <div class="container container-narrow">
+      <div class="section-header">
+        <span class="section-tag">Got Questions?</span>
+        <h2 class="section-title">Frequently Asked Questions</h2>
+      </div>
+
+      <div class="feature-card" style="margin-bottom: 16px;">
+        <h3 class="feature-title">How do subscriptions work with Tatkal Rabbit?</h3>
+        <p class="feature-desc">When you sign in with Google in the extension or web client, you can choose a 2-Day (&#8377;49), Weekly (&#8377;119), or Monthly (&#8377;299) pass. Once activated, the Chrome extension unlocks all automation features instantly.</p>
+      </div>
+
+      <div class="feature-card" style="margin-bottom: 16px;">
+        <h3 class="feature-title">Is my IRCTC account password secure?</h3>
+        <p class="feature-desc">Absolutely. Credentials never leave your computer. Tatkal Rabbit stores passwords locally using client-side AES-GCM encryption within Chrome's isolated storage sandbox.</p>
+      </div>
+
+      <div class="feature-card" style="margin-bottom: 16px;">
+        <h3 class="feature-title">Why does Tatkal Rabbit use UPI QR checkout?</h3>
+        <p class="feature-desc">Credit card and Netbanking gateways on IRCTC frequently suffer from OTP SMS delays during peak 10:00 AM rush. UPI QR code opens instantly on screen, allowing you to scan and approve in seconds.</p>
+      </div>
+
+      <div class="feature-card">
+        <h3 class="feature-title">How do I switch between the Old Site and New Site?</h3>
+        <p class="feature-desc">In the extension header bar, click "Old Site" (/nget) or "New Site" (/eticket). The extension will automatically adjust all selectors and navigations accordingly.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Site Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <img src="assets/tatkal-rabbit-brand.png" alt="Tatkal Rabbit" style="height:44px; margin-bottom:16px;" />
+          <p style="font-size:13.5px; color:var(--md-sys-color-on-surface-variant); max-width:320px;">
+            The fastest, most reliable IRCTC Tatkal ticket auto-fill and automation suite. Confirmed tickets made effortless.
+          </p>
+        </div>
+
+        <div>
+          <h4 class="footer-col-title">Navigation</h4>
+          <ul class="footer-links">
+            <li class="footer-link-item"><a href="#features">Features</a></li>
+            <li class="footer-link-item"><a href="#pricing">Pricing Plans</a></li>
+            <li class="footer-link-item"><a href="#installation">Installation Guide</a></li>
+            <li class="footer-link-item"><a href="#faq">FAQ</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="footer-col-title">Portals</h4>
+          <ul class="footer-links">
+            <li class="footer-link-item"><a href="client.html">Client Dashboard</a></li>
+            <li class="footer-link-item"><a href="admin.html">Admin Panel</a></li>
+            <li class="footer-link-item"><a href="https://github.com/lovechn1407-debug/Tatkal-Rabbit" target="_blank">GitHub Repository</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="footer-col-title">Legal & Security</h4>
+          <ul class="footer-links">
+            <li class="footer-link-item"><a href="#faq">Privacy Policy</a></li>
+            <li class="footer-link-item"><a href="#faq">Terms of Service</a></li>
+            <li class="footer-link-item"><a href="#faq">IRCTC Compliance</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>&copy; 2026 Tatkal Rabbit. All rights reserved.</div>
+        <div style="font-size:12px;">Admin: lovechn1407@gmail.com &bull; Designed with Material Design 3</div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Theme toggle
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
+    const themeIcon = document.getElementById('themeIcon');
+    const htmlElem = document.documentElement;
+
+    const savedTheme = localStorage.getItem('tatkal_theme') || 'light';
+    htmlElem.setAttribute('data-theme', savedTheme);
+    themeIcon.textContent = savedTheme === 'dark' ? 'light_mode' : 'dark_mode';
+
+    themeToggleBtn.addEventListener('click', () => {
+      const current = htmlElem.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      htmlElem.setAttribute('data-theme', next);
+      localStorage.setItem('tatkal_theme', next);
+      themeIcon.textContent = next === 'dark' ? 'light_mode' : 'dark_mode';
+    });
+
+    // Live IST Clock
+    function updateHeroClock() {
+      const now = new Date();
+      const istString = now.toLocaleTimeString('en-US', { timeZone: 'Asia/Kolkata', hour12: false });
+      const heroClock = document.getElementById('heroIstClock');
+      if (heroClock) {
+        heroClock.textContent = `IST: ${istString}`;
+      }
+    }
+    setInterval(updateHeroClock, 1000);
+    updateHeroClock();
+  </script>
+</body>
+</html>

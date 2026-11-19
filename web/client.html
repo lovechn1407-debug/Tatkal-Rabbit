@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Client Portal & Subscriptions – Tatkal Rabbit</title>
+  <link rel="icon" type="image/png" href="assets/rabbit_32.png" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Site Navigation -->
+  <header class="site-nav">
+    <div class="container nav-container">
+      <a href="index.html" class="nav-brand">
+        <img src="assets/tatkal-rabbit-brand.png" alt="Tatkal Rabbit" class="nav-brand-img" />
+      </a>
+
+      <nav class="nav-links">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="client.html" class="nav-link active">Client Portal</a>
+        <a href="admin.html" class="nav-link">Admin</a>
+      </nav>
+
+      <div class="nav-actions">
+        <!-- Theme Toggle -->
+        <button id="themeToggleBtn" class="btn-icon" title="Toggle Light/Dark Theme">
+          <span class="material-symbols-outlined" id="themeIcon">dark_mode</span>
+        </button>
+
+        <div id="navUserArea" style="display:none; align-items:center; gap:10px;">
+          <img id="navAvatar" src="" class="user-avatar-sm" alt="User" />
+          <button id="btnNavLogout" class="btn btn-outline btn-sm">Logout</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" style="padding-top: 36px; padding-bottom: 60px;">
+    <!-- Unauthenticated State Card -->
+    <div id="authRequiredCard" class="dashboard-card" style="text-align:center; max-width:640px; margin:40px auto; padding:48px 32px;">
+      <div class="feature-icon-wrapper" style="margin: 0 auto 20px; width:64px; height:64px;">
+        <span class="material-symbols-outlined" style="font-size:36px;">lock</span>
+      </div>
+      <h2 style="font-size:26px; font-weight:700; margin-bottom:12px;">Sign In to Client Portal</h2>
+      <p style="font-size:14px; color:var(--md-sys-color-on-surface-variant); margin-bottom:30px; line-height:1.6;">
+        Authenticate with your Google account to manage your Tatkal Rabbit subscriptions, view active passes, and automatically unlock your Chrome Extension.
+      </p>
+      <button id="btnGoogleLogin" class="btn btn-primary btn-lg" style="margin:0 auto;">
+        <svg style="width:20px; height:20px; margin-right:8px;" viewBox="0 0 24 24">
+          <path fill="#ffffff" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#ffffff" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#ffffff" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+          <path fill="#ffffff" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+        </svg>
+        <span>Sign in with Google</span>
+      </button>
+    </div>
+
+    <!-- Authenticated Client Dashboard -->
+    <div id="clientDashboardArea" style="display:none;">
+      <!-- Profile Header Card -->
+      <div class="dashboard-card">
+        <div class="account-profile-header">
+          <div class="profile-info">
+            <img id="userAvatar" src="" alt="Profile" class="profile-avatar-lg" />
+            <div>
+              <div style="display:flex; align-items:center; gap:10px;">
+                <h1 id="userDisplayName" class="profile-name">User</h1>
+                <span id="userSubBadge" class="sub-status-badge inactive">No Active Pass</span>
+              </div>
+              <p id="userEmail" class="profile-email">user@gmail.com</p>
+              <div style="font-size:11.5px; color:var(--md-sys-color-outline); margin-top:4px;">
+                User UID: <span id="userUidText" style="font-family:monospace; user-select:all;">--</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:10px; align-items:center;">
+            <button id="btnSyncExtension" class="btn btn-tonal btn-sm">
+              <span class="material-symbols-outlined">sync</span>
+              <span>Sync with Extension</span>
+            </button>
+            <button id="btnLogout" class="btn btn-outline btn-sm">
+              <span class="material-symbols-outlined">logout</span>
+              <span>Logout</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Active Subscription Banner & Countdown -->
+        <div id="activeSubDetails" style="display:none; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--md-sys-color-outline-variant);">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+            <div>
+              <div style="font-size:12px; font-weight:700; text-transform:uppercase; color:var(--md-sys-color-primary);">Current Active Subscription</div>
+              <div id="activePlanName" style="font-size:22px; font-weight:700; margin-top:2px;">Monthly Pro Pass</div>
+              <div style="font-size:13px; color:var(--md-sys-color-on-surface-variant);">
+                Valid until: <b id="activeExpiryDate" style="color:var(--md-sys-color-on-surface);">--</b>
+              </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px; background:var(--md-sys-color-success-container); color:var(--md-sys-color-on-success); padding:8px 16px; border-radius:var(--radius-full); font-size:12.5px; font-weight:600;">
+              <span class="material-symbols-outlined" style="font-size:18px;">check_circle</span>
+              <span>Chrome Extension Unlocked</span>
+            </div>
+          </div>
+
+          <!-- Countdown -->
+          <div class="sub-countdown-box">
+            <div class="countdown-unit">
+              <div id="countDays" class="countdown-num">00</div>
+              <div class="countdown-label">Days</div>
+            </div>
+            <div style="font-size:28px; font-weight:300; color:var(--md-sys-color-outline);">:</div>
+            <div class="countdown-unit">
+              <div id="countHours" class="countdown-num">00</div>
+              <div class="countdown-label">Hours</div>
+            </div>
+            <div style="font-size:28px; font-weight:300; color:var(--md-sys-color-outline);">:</div>
+            <div class="countdown-unit">
+              <div id="countMinutes" class="countdown-num">00</div>
+              <div class="countdown-label">Minutes</div>
+            </div>
+            <div style="font-size:28px; font-weight:300; color:var(--md-sys-color-outline);">:</div>
+            <div class="countdown-unit">
+              <div id="countSeconds" class="countdown-num">00</div>
+              <div class="countdown-label">Seconds</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Inactive Subscription Notice -->
+        <div id="inactiveSubNotice" style="margin-top:24px; padding:18px; border-radius:var(--radius-md); background:var(--md-sys-color-surface-container-high); border:1px dashed var(--md-sys-color-outline);">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <span class="material-symbols-outlined" style="color:var(--md-sys-color-error); font-size:28px;">warning</span>
+            <div>
+              <div style="font-weight:700; font-size:15px;">No Active Subscription Found</div>
+              <div style="font-size:13px; color:var(--md-sys-color-on-surface-variant);">
+                Your Chrome Extension automation features are currently locked. Choose a plan below to activate your account.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Choose / Upgrade Subscription Plans Section -->
+      <div style="margin-top: 40px;">
+        <div class="section-header" style="text-align:left; margin-bottom:28px;">
+          <span class="section-tag">Available Passes</span>
+          <h2 class="section-title" style="font-size:26px;">Activate or Extend Your Tatkal Rabbit Pass</h2>
+          <p class="section-desc">Purchasing any pass instantly updates your cloud profile and unlocks your Chrome Extension.</p>
+        </div>
+
+        <div class="pricing-grid">
+          <!-- 2-Day -->
+          <div class="pricing-card">
+            <span class="pricing-badge secondary">Quick Trip</span>
+            <div class="pricing-header">
+              <h3 class="pricing-plan-name">2-Day Express Pass</h3>
+              <p class="pricing-plan-desc">48-Hour access for an urgent weekend Tatkal journey.</p>
+              <div class="pricing-price-box">
+                <span class="pricing-cut-price">&#8377;149</span>
+                <span class="pricing-price"><span class="pricing-currency">&#8377;</span>49</span>
+                <span class="pricing-period">/ 2 Days</span>
+              </div>
+            </div>
+            <ul class="pricing-features">
+              <li class="pricing-feature-item">
+                <span class="material-symbols-outlined">check_circle</span>
+                <span>48 Hours Full Automation Access</span>
+              </li>
+              <li class="pricing-feature-item">
+                <span class="material-symbols-outlined">check_circle</span>
+                <span>AC (10 AM) & Non-AC (11 AM)</span>
+              </li>
+              <li class="pricing-feature-item">
+                <span class="material-symbols-outlined">check_circle</span>
+                <span>Instant UPI Payment Auto-select</span>
+              </li>
+            </ul>
+            <button class="btn btn-outline btnBuyPlan" data-plan="2day" style="width:100%;">
+              <span class="material-symbols-outlined">shopping_cart</span>
+              <span>Buy 2-Day (&#8377;49)</span>
+            </button>
+          </div>
+
+          <!-- Weekly -->
+          <div class="pricing-card">
+            <span class="pricing-badge secondary">Best Value</span>
+            <div class="pricing-header">
+              <h3 class="pricing-plan-name">Weekly Explorer Pass</h3>
+              <p class="pricing-plan-desc">7 Days unlimited automated bookings for frequent travelers.</p>
+              <div class="pricing-price-box">
+                <span class="pricing-cut-price">&#8377;399</span>
+                <span class="pricing-price"><span class="pricing-currency">&#8377;</span>119</span>
+                <span class="pricing-period">/ 7 Days</span>
+              </div>
+            </div>
+            <ul class="pricing-features">
+              <li class="pricing-feature-item">
+                <span class="material-symbols-outlined">check_circle</span>
+                <span>7 Days Unlimited Bookings</span>
+              </li>
+              <li class="pricing-feature-item">
+                <span class="material-symbols-outlined">check_circle</span>
+                <span>Priority NTP Tatkal Clock Sync</span>
+              </li>
+              <li class="pricing-feature-item">
+                <span class="material-symbols-outlined">check_circle</span>
+                <span>Old & New IRCTC Site Support</span>
+              </li>
+            </ul>
+            <button class="btn btn-secondary btnBuyPlan" data-plan="weekly" style="width:100%;">
+              <span class="material-symbols-outlined">bolt</span>
+              <span>Buy Weekly (&#8377;119)</span>
+            </button>
+          </div>
+
+          <!-- Monthly -->
+          <div class="pricing-card featured">
+            <span class="pricing-badge">Most Popular</span>
+            <div class="pricing-header">
+              <h3 class="pricing-plan-name">Monthly Pro Pass</h3>
+              <p class="pricing-plan-desc">30 Days VIP Tatkal automation with priority fast lanes.</p>
+              <div class="pricing-price-box">
+                <span class="pricing-cut-price">&#8377;999</span>
+                <span class="pricing-price"><span class="pricing-currency">&#8377;</span>299</span>
+                <span class="pricing-period">/ 30 Days</span>
+              </div>
+            </div>
+            <ul class="pricing-features">
+              <li class="pricing-feature-item">
+                <span class="material-symbols-outlined">check_circle</span>
+                <span>30 Days Unlimited Tatkal Automation</span>
+              </li>
+              <li class="pricing-feature-item">
+                <span class="material-symbols-outlined">check_circle</span>
+                <span>VIP Priority Support & Updates</span>
+              </li>
+              <li class="pricing-feature-item">
+                <span class="material-symbols-outlined">check_circle</span>
+                <span>Auto Failover Old & New Site</span>
+              </li>
+            </ul>
+            <button class="btn btn-primary btnBuyPlan" data-plan="monthly" style="width:100%;">
+              <span class="material-symbols-outlined">stars</span>
+              <span>Buy Monthly Pro (&#8377;299)</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Extension Connection Status Guide -->
+      <div class="dashboard-card" style="margin-top:36px;">
+        <h3 style="font-size:18px; font-weight:700; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+          <span class="material-symbols-outlined" style="color:var(--md-sys-color-primary)">extension</span>
+          <span>Chrome Extension Auto-Unlock</span>
+        </h3>
+        <p style="font-size:13.5px; color:var(--md-sys-color-on-surface-variant); line-height:1.6; margin-bottom:16px;">
+          When you activate your pass above, Tatkal Rabbit's Firestore cloud database updates in real time. Simply open your Tatkal Rabbit extension popup on your browser, and it will immediately detect your active subscription and unlock all booking features automatically.
+        </p>
+        <div style="background:var(--md-sys-color-surface-container-high); padding:14px; border-radius:var(--radius-md); font-size:13px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+          <span>Need help or subscription not showing in extension?</span>
+          <button id="btnCopyAuthSession" class="btn btn-tonal btn-sm">
+            <span class="material-symbols-outlined">content_copy</span>
+            <span>Copy Session Sync Data</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Checkout & Payment Modal -->
+  <div id="checkoutModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">Complete Subscription Checkout</h3>
+        <button id="btnCloseModal" class="modal-close-btn">&times;</button>
+      </div>
+
+      <div style="background:var(--md-sys-color-surface-container-high); padding:16px; border-radius:var(--radius-md); margin-bottom:18px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div id="modalPlanName" style="font-weight:700; font-size:16px;">Monthly Pro Pass</div>
+            <div id="modalPlanDuration" style="font-size:12px; color:var(--md-sys-color-on-surface-variant);">30 Days Validity</div>
+          </div>
+          <div style="text-align:right;">
+            <div id="modalCutPrice" style="text-decoration:line-through; font-size:13px; color:var(--md-sys-color-outline);">&#8377;999</div>
+            <div id="modalFinalPrice" style="font-size:24px; font-weight:800; color:var(--md-sys-color-primary);">&#8377;299</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="font-size:13.5px; font-weight:600; margin-bottom:8px;">Select Payment Gateway</div>
+      <div class="payment-methods-grid">
+        <div class="payment-method-item selected" data-method="paytm">
+          <img src="assets/paytm-upi.png" alt="Paytm UPI" class="payment-logo" />
+          <span style="font-size:13px; font-weight:600;">Paytm UPI</span>
+        </div>
+        <div class="payment-method-item" data-method="gpay">
+          <img src="assets/gpay.png" alt="Google Pay" class="payment-logo" />
+          <span style="font-size:13px; font-weight:600;">Google Pay</span>
+        </div>
+        <div class="payment-method-item" data-method="phonepe">
+          <img src="assets/phonepe-logo.webp" alt="PhonePe" class="payment-logo" />
+          <span style="font-size:13px; font-weight:600;">PhonePe</span>
+        </div>
+        <div class="payment-method-item" data-method="bhim">
+          <img src="assets/bhim-logo.webp" alt="BHIM UPI" class="payment-logo" />
+          <span style="font-size:13px; font-weight:600;">BHIM UPI</span>
+        </div>
+      </div>
+
+      <div style="background:linear-gradient(135deg, rgba(0, 91, 193, 0.08), rgba(79, 216, 235, 0.08)); padding:14px; border-radius:var(--radius-md); font-size:12.5px; margin-bottom:20px; border:1px solid var(--md-sys-color-primary-container);">
+        <div style="display:flex; align-items:center; gap:8px; font-weight:600; color:var(--md-sys-color-primary); margin-bottom:4px;">
+          <span class="material-symbols-outlined" style="font-size:16px;">verified_user</span>
+          <span>Instant Cloud Activation</span>
+        </div>
+        <span>Click below to complete simulated payment and instantly bind this active pass to your Google account.</span>
+      </div>
+
+      <div style="display:flex; gap:12px;">
+        <button id="btnCancelCheckout" class="btn btn-tonal" style="flex:1;">Cancel</button>
+        <button id="btnConfirmPayment" class="btn btn-primary" style="flex:2;">
+          <span class="material-symbols-outlined">payments</span>
+          <span>Pay &amp; Activate Pass</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Module Script with Firebase Integration -->
+  <script type="module">
+    import { 
+      auth, 
+      db, 
+      loginWithGoogle, 
+      logoutUser, 
+      syncUserRecord, 
+      isSubscriptionActive,
+      SUBSCRIPTION_PLANS 
+    } from "./firebase-config.js";
+
+    import { 
+      onAuthStateChanged 
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { 
+      doc, 
+      onSnapshot, 
+      updateDoc, 
+      arrayUnion, 
+      serverTimestamp,
+      Timestamp 
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    // UI Elements
+    const authRequiredCard = document.getElementById("authRequiredCard");
+    const clientDashboardArea = document.getElementById("clientDashboardArea");
+    const btnGoogleLogin = document.getElementById("btnGoogleLogin");
+    const btnLogout = document.getElementById("btnLogout");
+    const btnNavLogout = document.getElementById("btnNavLogout");
+    const navUserArea = document.getElementById("navUserArea");
+    const navAvatar = document.getElementById("navAvatar");
+
+    const userAvatar = document.getElementById("userAvatar");
+    const userDisplayName = document.getElementById("userDisplayName");
+    const userEmail = document.getElementById("userEmail");
+    const userUidText = document.getElementById("userUidText");
+    const userSubBadge = document.getElementById("userSubBadge");
+
+    const activeSubDetails = document.getElementById("activeSubDetails");
+    const inactiveSubNotice = document.getElementById("inactiveSubNotice");
+    const activePlanName = document.getElementById("activePlanName");
+    const activeExpiryDate = document.getElementById("activeExpiryDate");
+
+    const countDays = document.getElementById("countDays");
+    const countHours = document.getElementById("countHours");
+    const countMinutes = document.getElementById("countMinutes");
+    const countSeconds = document.getElementById("countSeconds");
+
+    const checkoutModal = document.getElementById("checkoutModal");
+    const btnCloseModal = document.getElementById("btnCloseModal");
+    const btnCancelCheckout = document.getElementById("btnCancelCheckout");
+    const btnConfirmPayment = document.getElementById("btnConfirmPayment");
+    const modalPlanName = document.getElementById("modalPlanName");
+    const modalPlanDuration = document.getElementById("modalPlanDuration");
+    const modalCutPrice = document.getElementById("modalCutPrice");
+    const modalFinalPrice = document.getElementById("modalFinalPrice");
+
+    let currentUser = null;
+    let currentUserData = null;
+    let selectedPlanId = "monthly";
+    let selectedPaymentMethod = "paytm";
+    let countdownInterval = null;
+
+    // Show Toast
+    function showToast(message, type = "success") {
+      const container = document.getElementById("toastContainer");
+      const toast = document.createElement("div");
+      toast.className = `toast ${type}`;
+      toast.innerHTML = `<span class="material-symbols-outlined">${type === "success" ? "check_circle" : "error"}</span><span>${message}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.remove();
+      }, 4000);
+    }
+
+    // Google Sign-In
+    btnGoogleLogin.addEventListener("click", async () => {
+      try {
+        btnGoogleLogin.disabled = true;
+        btnGoogleLogin.innerHTML = `<span>Signing in...</span>`;
+        await loginWithGoogle();
+        showToast("Signed in successfully with Google!");
+      } catch (err) {
+        console.error(err);
+        showToast("Failed to sign in with Google: " + err.message, "error");
+      } finally {
+        btnGoogleLogin.disabled = false;
+        btnGoogleLogin.innerHTML = `<span>Sign in with Google</span>`;
+      }
+    });
+
+    // Logout
+    const doLogout = async () => {
+      await logoutUser();
+      localStorage.removeItem("tatkal_user_session");
+      if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
+        chrome.storage.local.remove(["tatkal_auth_user", "tatkal_subscription"]);
+      }
+      showToast("Logged out successfully");
+    };
+    btnLogout?.addEventListener("click", doLogout);
+    btnNavLogout?.addEventListener("click", doLogout);
+
+    // Auth State Listener
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        currentUser = user;
+        authRequiredCard.style.display = "none";
+        clientDashboardArea.style.display = "block";
+        navUserArea.style.display = "flex";
+
+        navAvatar.src = user.photoURL || "assets/rabbit_32.png";
+        userAvatar.src = user.photoURL || "assets/rabbit_32.png";
+        userDisplayName.textContent = user.displayName || user.email.split("@")[0];
+        userEmail.textContent = user.email;
+        userUidText.textContent = user.uid;
+
+        // Sync Firestore Record & Listen for real-time changes
+        await syncUserRecord(user);
+
+        // Save local session for extension bridge
+        localStorage.setItem("tatkal_user_session", JSON.stringify({
+          uid: user.uid,
+          email: user.email,
+          displayName: user.displayName,
+          photoURL: user.photoURL
+        }));
+
+        if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
+          chrome.storage.local.set({
+            tatkal_auth_user: {
+              uid: user.uid,
+              email: user.email,
+              displayName: user.displayName || user.email.split("@")[0],
+              photoURL: user.photoURL || ""
+            }
+          });
+        }
+
+        // Subscribe to real-time user document updates
+        onSnapshot(doc(db, "users", user.uid), (snap) => {
+          if (snap.exists()) {
+            currentUserData = snap.data();
+            updateSubscriptionUI(currentUserData.subscription);
+            if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
+              chrome.storage.local.set({
+                tatkal_auth_user: {
+                  uid: user.uid,
+                  email: user.email,
+                  displayName: user.displayName || user.email.split("@")[0],
+                  photoURL: user.photoURL || ""
+                },
+                tatkal_subscription: currentUserData.subscription
+              });
+            }
+          }
+        });
+
+        // Check if query param specifies a plan
+        const urlParams = new URLSearchParams(window.location.search);
+        const reqPlan = urlParams.get("plan");
+        if (reqPlan && SUBSCRIPTION_PLANS[reqPlan]) {
+          openCheckout(reqPlan);
+        }
+      } else {
+        currentUser = null;
+        currentUserData = null;
+        authRequiredCard.style.display = "block";
+        clientDashboardArea.style.display = "none";
+        navUserArea.style.display = "none";
+        if (countdownInterval) clearInterval(countdownInterval);
+      }
+    });
+
+    // Update Subscription UI
+    function updateSubscriptionUI(sub) {
+      if (countdownInterval) clearInterval(countdownInterval);
+
+      const active = isSubscriptionActive(sub);
+      if (active) {
+        userSubBadge.className = "sub-status-badge active";
+        userSubBadge.textContent = "Active Pass";
+        activeSubDetails.style.display = "block";
+        inactiveSubNotice.style.display = "none";
+
+        const planConfig = SUBSCRIPTION_PLANS[sub.plan] || { name: sub.plan.toUpperCase() + " Pass" };
+        activePlanName.textContent = planConfig.name;
+
+        const expiryDate = sub.validUntil.toDate ? sub.validUntil.toDate() : new Date(sub.validUntil);
+        activeExpiryDate.textContent = expiryDate.toLocaleString("en-IN", { timeZone: "Asia/Kolkata", dateStyle: "medium", timeStyle: "short" }) + " IST";
+
+        // Start live ticker
+        function runCountdown() {
+          const now = Date.now();
+          const diff = expiryDate.getTime() - now;
+          if (diff <= 0) {
+            clearInterval(countdownInterval);
+            userSubBadge.className = "sub-status-badge expired";
+            userSubBadge.textContent = "Expired";
+            activeSubDetails.style.display = "none";
+            inactiveSubNotice.style.display = "block";
+            return;
+          }
+
+          const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+          const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+          const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+          const s = Math.floor((diff % (1000 * 60)) / 1000);
+
+          countDays.textContent = String(d).padStart(2, "0");
+          countHours.textContent = String(h).padStart(2, "0");
+          countMinutes.textContent = String(m).padStart(2, "0");
+          countSeconds.textContent = String(s).padStart(2, "0");
+        }
+        runCountdown();
+        countdownInterval = setInterval(runCountdown, 1000);
+      } else {
+        const isSusp = sub && sub.isSuspended;
+        userSubBadge.className = `sub-status-badge ${isSusp ? "suspended" : "inactive"}`;
+        userSubBadge.textContent = isSusp ? "Suspended" : (sub && sub.status === "expired" ? "Expired" : "No Active Pass");
+        activeSubDetails.style.display = "none";
+        inactiveSubNotice.style.display = "block";
+      }
+    }
+
+    // Checkout Modal Handlers
+    function openCheckout(planId) {
+      if (!currentUser) {
+        showToast("Please sign in with Google first", "error");
+        return;
+      }
+      const plan = SUBSCRIPTION_PLANS[planId];
+      if (!plan) return;
+
+      selectedPlanId = planId;
+      modalPlanName.textContent = plan.name;
+      modalPlanDuration.textContent = `${plan.durationDays} Days Full Tatkal Access`;
+      modalCutPrice.innerHTML = `&#8377;${plan.originalPrice}`;
+      modalFinalPrice.innerHTML = `&#8377;${plan.discountedPrice}`;
+      checkoutModal.classList.add("open");
+    }
+
+    document.querySelectorAll(".btnBuyPlan").forEach(btn => {
+      btn.addEventListener("click", () => {
+        openCheckout(btn.getAttribute("data-plan"));
+      });
+    });
+
+    btnCloseModal.addEventListener("click", () => checkoutModal.classList.remove("open"));
+    btnCancelCheckout.addEventListener("click", () => checkoutModal.classList.remove("open"));
+
+    // Payment method selector
+    document.querySelectorAll(".payment-method-item").forEach(item => {
+      item.addEventListener("click", () => {
+        document.querySelectorAll(".payment-method-item").forEach(el => el.classList.remove("selected"));
+        item.classList.add("selected");
+        selectedPaymentMethod = item.getAttribute("data-method");
+      });
+    });
+
+    // Confirm Payment & Activate Subscription
+    btnConfirmPayment.addEventListener("click", async () => {
+      if (!currentUser) return;
+      const plan = SUBSCRIPTION_PLANS[selectedPlanId];
+      if (!plan) return;
+
+      try {
+        btnConfirmPayment.disabled = true;
+        btnConfirmPayment.innerHTML = `<span>Activating...</span>`;
+
+        // Calculate new expiry date
+        const now = new Date();
+        let baseDate = now;
+        
+        // If current subscription is still active, extend from current validUntil!
+        if (currentUserData && currentUserData.subscription && isSubscriptionActive(currentUserData.subscription)) {
+          const currentExpiry = currentUserData.subscription.validUntil.toDate ? currentUserData.subscription.validUntil.toDate() : new Date(currentUserData.subscription.validUntil);
+          if (currentExpiry > now) {
+            baseDate = currentExpiry;
+          }
+        }
+
+        const newExpiryDate = new Date(baseDate.getTime() + (plan.durationDays * 24 * 60 * 60 * 1000));
+        const userRef = doc(db, "users", currentUser.uid);
+
+        const transactionRecord = {
+          transactionId: "TRX" + Date.now(),
+          planId: plan.id,
+          planName: plan.name,
+          durationDays: plan.durationDays,
+          amountPaid: plan.discountedPrice,
+          paymentMethod: selectedPaymentMethod,
+          paidAt: new Date().toISOString(),
+          status: "SUCCESS"
+        };
+
+        await updateDoc(userRef, {
+          "subscription.status": "active",
+          "subscription.plan": plan.id,
+          "subscription.validUntil": Timestamp.fromDate(newExpiryDate),
+          "subscription.activatedAt": serverTimestamp(),
+          "subscription.isSuspended": false,
+          "bookingHistory": arrayUnion(transactionRecord)
+        });
+
+        checkoutModal.classList.remove("open");
+        showToast(`🎉 Success! ${plan.name} is now active on your account!`);
+
+        // Save session locally for instant extension recognition
+        localStorage.setItem("tatkal_active_sub", JSON.stringify({
+          plan: plan.id,
+          validUntil: newExpiryDate.toISOString(),
+          status: "active"
+        }));
+
+      } catch (err) {
+        console.error("Payment error:", err);
+        showToast("Payment failed: " + err.message, "error");
+      } finally {
+        btnConfirmPayment.disabled = false;
+        btnConfirmPayment.innerHTML = `<span class="material-symbols-outlined">payments</span><span>Pay &amp; Activate Pass</span>`;
+      }
+    });
+
+    // Copy Session Sync Data
+    document.getElementById("btnCopyAuthSession").addEventListener("click", () => {
+      if (!currentUser) return;
+      const data = {
+        uid: currentUser.uid,
+        email: currentUser.email,
+        sub: currentUserData?.subscription || null
+      };
+      navigator.clipboard.writeText(JSON.stringify(data));
+      showToast("Session sync data copied to clipboard!");
+    });
+
+    // Theme toggle
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
+    const themeIcon = document.getElementById('themeIcon');
+    const htmlElem = document.documentElement;
+
+    const savedTheme = localStorage.getItem('tatkal_theme') || 'light';
+    htmlElem.setAttribute('data-theme', savedTheme);
+    themeIcon.textContent = savedTheme === 'dark' ? 'light_mode' : 'dark_mode';
+
+    themeToggleBtn.addEventListener('click', () => {
+      const current = htmlElem.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      htmlElem.setAttribute('data-theme', next);
+      localStorage.setItem('tatkal_theme', next);
+      themeIcon.textContent = next === 'dark' ? 'light_mode' : 'dark_mode';
+    });
+  </script>
+</body>
+</html>

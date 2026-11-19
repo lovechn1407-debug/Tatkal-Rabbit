@@ -1,0 +1,16 @@
+# Dependency and build artifacts
+node_modules/
+dist/
+.vercel/
+
+# Extension packages and keys
+*.crx
+*.pem
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# Logs & temp
+*.log
+scratch_*.ps1

@@ -1,0 +1,26 @@
+{
+  "version": 2,
+  "public": true,
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/", "destination": "/web/index.html" },
+    { "source": "/client", "destination": "/web/client.html" },
+    { "source": "/client.html", "destination": "/web/client.html" },
+    { "source": "/admin", "destination": "/web/admin.html" },
+    { "source": "/admin.html", "destination": "/web/admin.html" },
+    { "source": "/style.css", "destination": "/web/style.css" },
+    { "source": "/firebase-config.js", "destination": "/web/firebase-config.js" },
+    { "source": "/assets/(.*)", "destination": "/web/assets/$1" },
+    { "source": "/web/(.*)", "destination": "/web/$1" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET,POST,OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type" }
+      ]
+    }
+  ]
+}

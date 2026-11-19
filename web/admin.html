@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard – Tatkal Rabbit (Restricted)</title>
+  <link rel="icon" type="image/png" href="assets/rabbit_32.png" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Site Navigation -->
+  <header class="site-nav">
+    <div class="container nav-container">
+      <a href="index.html" class="nav-brand">
+        <img src="assets/tatkal-rabbit-brand.png" alt="Tatkal Rabbit" class="nav-brand-img" />
+      </a>
+
+      <nav class="nav-links">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="client.html" class="nav-link">Client Portal</a>
+        <a href="admin.html" class="nav-link active">Admin Panel</a>
+      </nav>
+
+      <div class="nav-actions">
+        <!-- Theme Toggle -->
+        <button id="themeToggleBtn" class="btn-icon" title="Toggle Light/Dark Theme">
+          <span class="material-symbols-outlined" id="themeIcon">dark_mode</span>
+        </button>
+
+        <div id="adminNavUser" style="display:none; align-items:center; gap:10px;">
+          <span class="pricing-badge" style="position:static; transform:none; font-size:10px; padding:3px 10px;">ADMIN VERIFIED</span>
+          <img id="adminNavAvatar" src="" class="user-avatar-sm" alt="Admin" />
+          <button id="btnAdminLogout" class="btn btn-outline btn-sm">Logout</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container container-wide" style="padding-top: 36px; padding-bottom: 60px;">
+    <!-- 1. Admin Sign-In Card (Shown when logged out) -->
+    <div id="adminAuthGateCard" class="dashboard-card" style="text-align:center; max-width:600px; margin:40px auto; padding:48px 32px;">
+      <div class="feature-icon-wrapper" style="margin: 0 auto 20px; width:64px; height:64px; background:var(--md-sys-color-error-container); color:var(--md-sys-color-on-error-container);">
+        <span class="material-symbols-outlined" style="font-size:36px;">admin_panel_settings</span>
+      </div>
+      <h2 style="font-size:24px; font-weight:700; margin-bottom:10px;">Admin Access Control</h2>
+      <p style="font-size:13.5px; color:var(--md-sys-color-on-surface-variant); margin-bottom:20px; line-height:1.6;">
+        This portal is strictly restricted to administrator <b>lovechn1407@gmail.com</b>. Any other Google account will be denied immediately.
+      </p>
+
+      <div id="adminAuthErrorBanner" style="display:none; background:var(--md-sys-color-error-container); color:var(--md-sys-color-on-error-container); padding:12px 18px; border-radius:var(--radius-md); font-size:13px; margin-bottom:20px; text-align:left;">
+        <span class="material-symbols-outlined" style="vertical-align:middle; margin-right:6px;">gpp_bad</span>
+        <span id="adminAuthErrorText">Access Denied.</span>
+      </div>
+
+      <button id="btnAdminGoogleLogin" class="btn btn-primary btn-lg" style="margin:0 auto;">
+        <svg style="width:20px; height:20px; margin-right:8px;" viewBox="0 0 24 24">
+          <path fill="#ffffff" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#ffffff" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#ffffff" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+          <path fill="#ffffff" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+        </svg>
+        <span>Sign In as Admin (lovechn1407@gmail.com)</span>
+      </button>
+    </div>
+
+    <!-- 2. Admin Content Dashboard (Shown only to lovechn1407@gmail.com) -->
+    <div id="adminDashboardView" style="display:none;">
+      <!-- Top Overview Bar -->
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; margin-bottom:28px;">
+        <div>
+          <h1 style="font-size:26px; font-weight:800; color:var(--md-sys-color-on-surface);">Tatkal Rabbit Control Center</h1>
+          <p style="font-size:13.5px; color:var(--md-sys-color-on-surface-variant);">
+            Admin: <b>lovechn1407@gmail.com</b> &bull; Real-time Firestore Cloud Stream Active
+          </p>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <button id="btnRefreshData" class="btn btn-tonal btn-sm">
+            <span class="material-symbols-outlined">refresh</span>
+            <span>Reload Users</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- KPI Statistics Grid -->
+      <div class="admin-stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon primary">
+            <span class="material-symbols-outlined">group</span>
+          </div>
+          <div>
+            <div id="statTotalUsers" class="stat-val">0</div>
+            <div class="stat-label">Total Registered Users</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon success">
+            <span class="material-symbols-outlined">verified</span>
+          </div>
+          <div>
+            <div id="statActiveSubs" class="stat-val">0</div>
+            <div class="stat-label">Active Subscriptions</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon error">
+            <span class="material-symbols-outlined">event_busy</span>
+          </div>
+          <div>
+            <div id="statExpiredSubs" class="stat-val">0</div>
+            <div class="stat-label">Expired / Inactive</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon tertiary">
+            <span class="material-symbols-outlined">currency_rupee</span>
+          </div>
+          <div>
+            <div id="statTotalRevenue" class="stat-val">&#8377;0</div>
+            <div class="stat-label">Total Revenue Generated</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Users Management Table Card -->
+      <div class="table-card">
+        <div class="table-toolbar">
+          <div class="search-input-box">
+            <span class="material-symbols-outlined" style="font-size:18px; color:var(--md-sys-color-outline);">search</span>
+            <input type="text" id="userSearchInput" placeholder="Search by name, email, or UID..." />
+          </div>
+
+          <div class="filter-chips">
+            <button class="chip-filter active" data-filter="all">All Users</button>
+            <button class="chip-filter" data-filter="active">Active Pass</button>
+            <button class="chip-filter" data-filter="expired">Expired</button>
+            <button class="chip-filter" data-filter="suspended">Suspended</button>
+          </div>
+        </div>
+
+        <div class="admin-table-wrapper">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>User Details</th>
+                <th>UID</th>
+                <th>Status</th>
+                <th>Plan &amp; Expiry Date</th>
+                <th>Subscription Actions</th>
+              </tr>
+            </thead>
+            <tbody id="usersTableBody">
+              <tr>
+                <td colspan="5" style="text-align:center; padding:40px; color:var(--md-sys-color-outline);">
+                  Loading real-time user database...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Custom Days Modal -->
+  <div id="customDaysModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">Grant Custom Subscription</h3>
+        <button id="btnCloseCustomModal" class="modal-close-btn">&times;</button>
+      </div>
+
+      <p style="font-size:13.5px; color:var(--md-sys-color-on-surface-variant); margin-bottom:16px;">
+        Add custom validity days for user: <b id="customModalUserEmail">--</b>
+      </p>
+
+      <div style="margin-bottom:16px;">
+        <label style="display:block; font-size:12.5px; font-weight:600; margin-bottom:6px;">Number of Days to Grant</label>
+        <input type="number" id="inputCustomDays" min="1" max="730" value="7" style="width:100%; padding:10px 14px; border-radius:var(--radius-md); border:1.5px solid var(--md-sys-color-outline-variant); font-size:15px; font-family:var(--font-family); background:var(--md-sys-color-surface-container-high); color:var(--md-sys-color-on-surface);" />
+      </div>
+
+      <div style="display:flex; gap:10px; margin-bottom:20px;">
+        <button type="button" class="btn btn-tonal btn-sm btnQuickPreset" data-days="2">+2 Days</button>
+        <button type="button" class="btn btn-tonal btn-sm btnQuickPreset" data-days="7">+7 Days</button>
+        <button type="button" class="btn btn-tonal btn-sm btnQuickPreset" data-days="30">+30 Days</button>
+        <button type="button" class="btn btn-tonal btn-sm btnQuickPreset" data-days="90">+90 Days</button>
+        <button type="button" class="btn btn-tonal btn-sm btnQuickPreset" data-days="365">+365 Days</button>
+      </div>
+
+      <div style="display:flex; gap:12px;">
+        <button id="btnCancelCustomDays" class="btn btn-tonal" style="flex:1;">Cancel</button>
+        <button id="btnSaveCustomDays" class="btn btn-primary" style="flex:2;">
+          <span class="material-symbols-outlined">save</span>
+          <span>Apply Subscription</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- User History Modal -->
+  <div id="userHistoryModal" class="modal-overlay">
+    <div class="modal-card" style="max-width:680px;">
+      <div class="modal-header">
+        <h3 class="modal-title">User Subscription &amp; Booking History</h3>
+        <button id="btnCloseHistoryModal" class="modal-close-btn">&times;</button>
+      </div>
+      <div id="historyModalContent" style="font-size:13px; max-height:400px; overflow-y:auto;">
+        <!-- Filled dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Module Script with Firebase Integration -->
+  <script type="module">
+    import { 
+      auth, 
+      db, 
+      loginWithGoogle, 
+      logoutUser, 
+      ADMIN_EMAIL,
+      isSubscriptionActive,
+      SUBSCRIPTION_PLANS 
+    } from "./firebase-config.js";
+
+    import { 
+      onAuthStateChanged,
+      signOut 
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { 
+      collection, 
+      doc, 
+      onSnapshot, 
+      updateDoc, 
+      arrayUnion, 
+      serverTimestamp,
+      Timestamp 
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    // UI Elements
+    const adminAuthGateCard = document.getElementById("adminAuthGateCard");
+    const adminAuthErrorBanner = document.getElementById("adminAuthErrorBanner");
+    const adminAuthErrorText = document.getElementById("adminAuthErrorText");
+    const btnAdminGoogleLogin = document.getElementById("btnAdminGoogleLogin");
+    const adminDashboardView = document.getElementById("adminDashboardView");
+    const adminNavUser = document.getElementById("adminNavUser");
+    const adminNavAvatar = document.getElementById("adminNavAvatar");
+    const btnAdminLogout = document.getElementById("btnAdminLogout");
+
+    const statTotalUsers = document.getElementById("statTotalUsers");
+    const statActiveSubs = document.getElementById("statActiveSubs");
+    const statExpiredSubs = document.getElementById("statExpiredSubs");
+    const statTotalRevenue = document.getElementById("statTotalRevenue");
+
+    const userSearchInput = document.getElementById("userSearchInput");
+    const usersTableBody = document.getElementById("usersTableBody");
+    const btnRefreshData = document.getElementById("btnRefreshData");
+
+    const customDaysModal = document.getElementById("customDaysModal");
+    const customModalUserEmail = document.getElementById("customModalUserEmail");
+    const inputCustomDays = document.getElementById("inputCustomDays");
+    const btnCloseCustomModal = document.getElementById("btnCloseCustomModal");
+    const btnCancelCustomDays = document.getElementById("btnCancelCustomDays");
+    const btnSaveCustomDays = document.getElementById("btnSaveCustomDays");
+
+    const userHistoryModal = document.getElementById("userHistoryModal");
+    const btnCloseHistoryModal = document.getElementById("btnCloseHistoryModal");
+    const historyModalContent = document.getElementById("historyModalContent");
+
+    let allUsersList = [];
+    let activeFilter = "all";
+    let targetCustomUid = null;
+    let unsubscribeUsers = null;
+
+    // Toast
+    function showToast(message, type = "success") {
+      const container = document.getElementById("toastContainer");
+      const toast = document.createElement("div");
+      toast.className = `toast ${type}`;
+      toast.innerHTML = `<span class="material-symbols-outlined">${type === "success" ? "check_circle" : "error"}</span><span>${message}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 4000);
+    }
+
+    // Google Sign-In with Strict Email Gate
+    btnAdminGoogleLogin.addEventListener("click", async () => {
+      adminAuthErrorBanner.style.display = "none";
+      try {
+        btnAdminGoogleLogin.disabled = true;
+        btnAdminGoogleLogin.innerHTML = `<span>Checking admin credentials...</span>`;
+        const user = await loginWithGoogle();
+
+        if (user.email.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
+          // Immediately reject and sign out
+          await signOut(auth);
+          adminAuthErrorText.textContent = `Access Denied: Logged in as ${user.email}. Only ${ADMIN_EMAIL} is authorized.`;
+          adminAuthErrorBanner.style.display = "block";
+          showToast(`Access Denied for ${user.email}`, "error");
+        }
+      } catch (err) {
+        console.error(err);
+        adminAuthErrorText.textContent = err.message;
+        adminAuthErrorBanner.style.display = "block";
+      } finally {
+        btnAdminGoogleLogin.disabled = false;
+        btnAdminGoogleLogin.innerHTML = `<span>Sign In as Admin (${ADMIN_EMAIL})</span>`;
+      }
+    });
+
+    btnAdminLogout.addEventListener("click", async () => {
+      await logoutUser();
+      showToast("Admin logged out");
+    });
+
+    // Auth Observer
+    onAuthStateChanged(auth, async (user) => {
+      if (user && user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
+        // Authorized Admin
+        adminAuthGateCard.style.display = "none";
+        adminDashboardView.style.display = "block";
+        adminNavUser.style.display = "flex";
+        adminNavAvatar.src = user.photoURL || "assets/rabbit_32.png";
+        subscribeToUsers();
+      } else {
+        // Not authorized or logged out
+        adminAuthGateCard.style.display = "block";
+        adminDashboardView.style.display = "none";
+        adminNavUser.style.display = "none";
+        if (unsubscribeUsers) {
+          unsubscribeUsers();
+          unsubscribeUsers = null;
+        }
+      }
+    });
+
+    // Subscribe to Realtime Firestore Users Collection
+    function subscribeToUsers() {
+      if (unsubscribeUsers) unsubscribeUsers();
+
+      const usersCol = collection(db, "users");
+      unsubscribeUsers = onSnapshot(usersCol, (snapshot) => {
+        allUsersList = [];
+        snapshot.forEach(docSnap => {
+          allUsersList.push({ id: docSnap.id, ...docSnap.data() });
+        });
+        renderStats();
+        renderTable();
+      }, (error) => {
+        console.error("Firestore listen error:", error);
+        showToast("Error loading users: " + error.message, "error");
+      });
+    }
+
+    btnRefreshData.addEventListener("click", () => {
+      subscribeToUsers();
+      showToast("Data refreshed!");
+    });
+
+    // Compute Stats
+    function renderStats() {
+      const total = allUsersList.length;
+      let active = 0;
+      let expired = 0;
+      let revenue = 0;
+
+      allUsersList.forEach(u => {
+        if (isSubscriptionActive(u.subscription)) {
+          active++;
+        } else {
+          expired++;
+        }
+        if (Array.isArray(u.bookingHistory)) {
+          u.bookingHistory.forEach(tx => {
+            if (tx.amountPaid) revenue += Number(tx.amountPaid);
+          });
+        }
+      });
+
+      statTotalUsers.textContent = total;
+      statActiveSubs.textContent = active;
+      statExpiredSubs.textContent = expired;
+      statTotalRevenue.innerHTML = `&#8377;${revenue.toLocaleString("en-IN")}`;
+    }
+
+    // Render Users Table
+    function renderTable() {
+      const q = userSearchInput.value.toLowerCase().trim();
+      
+      const filtered = allUsersList.filter(user => {
+        // Search filter
+        const matchSearch = (user.email && user.email.toLowerCase().includes(q)) ||
+                            (user.displayName && user.displayName.toLowerCase().includes(q)) ||
+                            (user.uid && user.uid.toLowerCase().includes(q));
+
+        if (!matchSearch) return false;
+
+        // Status filter
+        const isActive = isSubscriptionActive(user.subscription);
+        const isSusp = user.subscription?.isSuspended;
+
+        if (activeFilter === "active") return isActive;
+        if (activeFilter === "expired") return !isActive && !isSusp;
+        if (activeFilter === "suspended") return isSusp;
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        usersTableBody.innerHTML = `
+          <tr>
+            <td colspan="5" style="text-align:center; padding:30px; color:var(--md-sys-color-outline);">
+              No users matching query.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      usersTableBody.innerHTML = filtered.map(user => {
+        const sub = user.subscription || {};
+        const isActive = isSubscriptionActive(sub);
+        const isSusp = sub.isSuspended;
+
+        let badgeHtml = "";
+        let expiryFormatted = "No Active Pass";
+
+        if (isSusp) {
+          badgeHtml = `<span class="sub-status-badge suspended">Suspended</span>`;
+        } else if (isActive) {
+          badgeHtml = `<span class="sub-status-badge active">Active</span>`;
+        } else if (sub.status === "expired") {
+          badgeHtml = `<span class="sub-status-badge expired">Expired</span>`;
+        } else {
+          badgeHtml = `<span class="sub-status-badge inactive">Inactive</span>`;
+        }
+
+        if (sub.validUntil) {
+          const exp = sub.validUntil.toDate ? sub.validUntil.toDate() : new Date(sub.validUntil);
+          const diffDays = Math.ceil((exp.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+          const daysText = diffDays > 0 ? `(${diffDays} days left)` : "(Ended)";
+          expiryFormatted = `<b>${sub.plan ? sub.plan.toUpperCase() : 'PASS'}</b> &bull; ${exp.toLocaleDateString("en-IN")} ${daysText}`;
+        }
+
+        return `
+          <tr data-uid="${user.uid}">
+            <td>
+              <div class="user-cell">
+                <img src="${user.photoURL || 'assets/rabbit_32.png'}" class="user-avatar-sm" alt="User" />
+                <div>
+                  <div style="font-weight:700;">${user.displayName || 'No Name'}</div>
+                  <div style="font-size:12px; color:var(--md-sys-color-on-surface-variant);">${user.email}</div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <span style="font-family:monospace; font-size:11.5px; user-select:all;" title="${user.uid}">
+                ${user.uid.substring(0, 8)}...
+              </span>
+            </td>
+            <td>${badgeHtml}</td>
+            <td><div style="font-size:12.5px;">${expiryFormatted}</div></td>
+            <td>
+              <div class="action-btn-group">
+                <button class="btn btn-tonal btn-sm btnQuickAdd" data-uid="${user.uid}" data-days="2" title="Add 2 Days">+2D</button>
+                <button class="btn btn-tonal btn-sm btnQuickAdd" data-uid="${user.uid}" data-days="7" title="Add 7 Days">+7D</button>
+                <button class="btn btn-tonal btn-sm btnQuickAdd" data-uid="${user.uid}" data-days="30" title="Add 30 Days">+30D</button>
+                <button class="btn btn-primary btn-sm btnOpenCustom" data-uid="${user.uid}" data-email="${user.email}" title="Custom Days">Custom</button>
+                <button class="btn btn-outline btn-sm btnToggleSuspend" data-uid="${user.uid}" data-suspended="${isSusp ? 'true' : 'false'}" title="${isSusp ? 'Unsuspend' : 'Suspend'}">
+                  ${isSusp ? 'Unsuspend' : 'Suspend'}
+                </button>
+                <button class="btn btn-tonal btn-sm btnViewHistory" data-uid="${user.uid}" title="View History">
+                  <span class="material-symbols-outlined" style="font-size:16px;">history</span>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join("");
+
+      attachTableEventListeners();
+    }
+
+    // Attach Event Listeners to Buttons in Table
+    function attachTableEventListeners() {
+      // Quick Add
+      document.querySelectorAll(".btnQuickAdd").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const uid = btn.getAttribute("data-uid");
+          const days = Number(btn.getAttribute("data-days"));
+          await grantSubscriptionDays(uid, days, `Admin Quick +${days} Days`);
+        });
+      });
+
+      // Open Custom Modal
+      document.querySelectorAll(".btnOpenCustom").forEach(btn => {
+        btn.addEventListener("click", () => {
+          targetCustomUid = btn.getAttribute("data-uid");
+          customModalUserEmail.textContent = btn.getAttribute("data-email");
+          customDaysModal.classList.add("open");
+        });
+      });
+
+      // Suspend / Unsuspend
+      document.querySelectorAll(".btnToggleSuspend").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const uid = btn.getAttribute("data-uid");
+          const isSusp = btn.getAttribute("data-suspended") === "true";
+          const newSusp = !isSusp;
+          try {
+            const userRef = doc(db, "users", uid);
+            await updateDoc(userRef, {
+              "subscription.isSuspended": newSusp,
+              "subscription.status": newSusp ? "suspended" : "active"
+            });
+            showToast(`User ${newSusp ? 'suspended' : 'unsuspended'} successfully`);
+          } catch (err) {
+            showToast("Failed to update status: " + err.message, "error");
+          }
+        });
+      });
+
+      // View History
+      document.querySelectorAll(".btnViewHistory").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const uid = btn.getAttribute("data-uid");
+          const user = allUsersList.find(u => u.uid === uid);
+          if (!user) return;
+
+          const history = user.bookingHistory || [];
+          if (history.length === 0) {
+            historyModalContent.innerHTML = `<div style="padding:20px; text-align:center; color:var(--md-sys-color-outline);">No transaction or booking history recorded yet.</div>`;
+          } else {
+            historyModalContent.innerHTML = `
+              <div style="font-weight:700; margin-bottom:12px;">Transactions for ${user.displayName} (${user.email})</div>
+              <table style="width:100%; border-collapse:collapse; font-size:12px;">
+                <thead>
+                  <tr style="background:var(--md-sys-color-surface-container-high); text-align:left;">
+                    <th style="padding:8px;">Date</th>
+                    <th style="padding:8px;">Plan / Event</th>
+                    <th style="padding:8px;">Amount</th>
+                    <th style="padding:8px;">Method</th>
+                    <th style="padding:8px;">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${history.map(item => `
+                    <tr style="border-bottom:1px solid var(--md-sys-color-outline-variant);">
+                      <td style="padding:8px;">${item.paidAt ? new Date(item.paidAt).toLocaleString("en-IN") : '--'}</td>
+                      <td style="padding:8px;"><b>${item.planName || item.planId || 'Manual Grant'}</b></td>
+                      <td style="padding:8px;">&#8377;${item.amountPaid || 0}</td>
+                      <td style="padding:8px;">${item.paymentMethod || 'Admin'}</td>
+                      <td style="padding:8px; color:var(--md-sys-color-success); font-weight:700;">${item.status || 'OK'}</td>
+                    </tr>
+                  `).join("")}
+                </tbody>
+              </table>
+            `;
+          }
+          userHistoryModal.classList.add("open");
+        });
+      });
+    }
+
+    // Grant Days to a User
+    async function grantSubscriptionDays(uid, days, reason = "Admin Manual Extension") {
+      const user = allUsersList.find(u => u.uid === uid);
+      if (!user) return;
+
+      try {
+        const now = new Date();
+        let baseDate = now;
+
+        if (user.subscription && isSubscriptionActive(user.subscription)) {
+          const curExp = user.subscription.validUntil.toDate ? user.subscription.validUntil.toDate() : new Date(user.subscription.validUntil);
+          if (curExp > now) baseDate = curExp;
+        }
+
+        const newExpiry = new Date(baseDate.getTime() + (days * 24 * 60 * 60 * 1000));
+        const userRef = doc(db, "users", uid);
+
+        const historyRecord = {
+          transactionId: "ADMIN_" + Date.now(),
+          planId: "custom_" + days + "d",
+          planName: `Admin Grant (+${days} Days)`,
+          durationDays: days,
+          amountPaid: 0,
+          paymentMethod: "Admin Console",
+          paidAt: new Date().toISOString(),
+          status: "SUCCESS",
+          note: reason
+        };
+
+        await updateDoc(userRef, {
+          "subscription.status": "active",
+          "subscription.plan": `custom_${days}d`,
+          "subscription.validUntil": Timestamp.fromDate(newExpiry),
+          "subscription.activatedAt": serverTimestamp(),
+          "subscription.isSuspended": false,
+          "bookingHistory": arrayUnion(historyRecord)
+        });
+
+        showToast(`Successfully granted +${days} days to ${user.email}!`);
+      } catch (err) {
+        console.error("Grant error:", err);
+        showToast("Error granting subscription: " + err.message, "error");
+      }
+    }
+
+    // Custom Days Modal Handlers
+    btnCloseCustomModal.addEventListener("click", () => customDaysModal.classList.remove("open"));
+    btnCancelCustomDays.addEventListener("click", () => customDaysModal.classList.remove("open"));
+    btnCloseHistoryModal.addEventListener("click", () => userHistoryModal.classList.remove("open"));
+
+    document.querySelectorAll(".btnQuickPreset").forEach(presetBtn => {
+      presetBtn.addEventListener("click", () => {
+        inputCustomDays.value = presetBtn.getAttribute("data-days");
+      });
+    });
+
+    btnSaveCustomDays.addEventListener("click", async () => {
+      const days = parseInt(inputCustomDays.value, 10);
+      if (isNaN(days) || days <= 0) {
+        showToast("Please enter a valid number of days", "error");
+        return;
+      }
+
+      if (!targetCustomUid) return;
+
+      btnSaveCustomDays.disabled = true;
+      await grantSubscriptionDays(targetCustomUid, days, `Admin Custom ${days} Days`);
+      btnSaveCustomDays.disabled = false;
+      customDaysModal.classList.remove("open");
+    });
+
+    // Search and Filter Listeners
+    userSearchInput.addEventListener("input", renderTable);
+
+    document.querySelectorAll(".chip-filter").forEach(chip => {
+      chip.addEventListener("click", () => {
+        document.querySelectorAll(".chip-filter").forEach(c => c.classList.remove("active"));
+        chip.classList.add("active");
+        activeFilter = chip.getAttribute("data-filter");
+        renderTable();
+      });
+    });
+
+    // Theme toggle
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
+    const themeIcon = document.getElementById('themeIcon');
+    const htmlElem = document.documentElement;
+
+    const savedTheme = localStorage.getItem('tatkal_theme') || 'light';
+    htmlElem.setAttribute('data-theme', savedTheme);
+    themeIcon.textContent = savedTheme === 'dark' ? 'light_mode' : 'dark_mode';
+
+    themeToggleBtn.addEventListener('click', () => {
+      const current = htmlElem.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      htmlElem.setAttribute('data-theme', next);
+      localStorage.setItem('tatkal_theme', next);
+      themeIcon.textContent = next === 'dark' ? 'light_mode' : 'dark_mode';
+    });
+  </script>
+</body>
+</html>
