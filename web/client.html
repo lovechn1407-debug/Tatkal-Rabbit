@@ -525,7 +525,6 @@
         });
 
         // Check if query param specifies a plan
-        const urlParams = new URLSearchParams(window.location.search);
         const reqPlan = urlParams.get("plan");
         if (reqPlan && SUBSCRIPTION_PLANS[reqPlan]) {
           openCheckout(reqPlan);
