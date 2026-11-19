@@ -6,6 +6,8 @@
   <title>Client Portal & Subscriptions – Tatkal Rabbit</title>
   <link rel="icon" type="image/png" href="assets/rabbit_32.png" />
   <link rel="stylesheet" href="style.css" />
+  <!-- Cashfree Official Checkout SDK v3 -->
+  <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
 </head>
 <body>
 
@@ -273,10 +275,11 @@
   <div id="checkoutModal" class="modal-overlay">
     <div class="modal-card">
       <div class="modal-header">
-        <h3 class="modal-title">Complete Subscription Checkout</h3>
+        <h3 class="modal-title">Subscription Checkout</h3>
         <button id="btnCloseModal" class="modal-close-btn">&times;</button>
       </div>
 
+      <!-- Plan Pricing Summary Box -->
       <div style="background:var(--md-sys-color-surface-container-high); padding:16px; border-radius:var(--radius-md); margin-bottom:18px;">
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <div>
@@ -290,39 +293,52 @@
         </div>
       </div>
 
-      <div style="font-size:13.5px; font-weight:600; margin-bottom:8px;">Select Payment Gateway</div>
-      <div class="payment-methods-grid">
-        <div class="payment-method-item selected" data-method="paytm">
-          <img src="assets/paytm-upi.png" alt="Paytm UPI" class="payment-logo" />
-          <span style="font-size:13px; font-weight:600;">Paytm UPI</span>
+      <!-- Mobile Number Input for Cashfree Receipt & Verification -->
+      <div style="margin-bottom:16px;">
+        <label for="checkoutUserPhone" style="display:block; font-size:12.5px; font-weight:600; margin-bottom:6px; color:var(--md-sys-color-on-surface);">
+          Mobile Number (for Cashfree Receipt &amp; UPI Confirmation)
+        </label>
+        <div style="position:relative; display:flex; align-items:center;">
+          <span style="position:absolute; left:12px; font-size:13px; font-weight:600; color:var(--md-sys-color-on-surface-variant); pointer-events:none;">+91</span>
+          <input type="tel" id="checkoutUserPhone" placeholder="Enter 10-digit mobile number" maxlength="10" 
+            style="width:100%; padding:10px 12px 10px 48px; border-radius:var(--radius-sm); border:1px solid var(--md-sys-color-outline-variant); font-size:14px; background:var(--md-sys-color-surface-container); color:var(--md-sys-color-on-surface); outline:none;" />
         </div>
-        <div class="payment-method-item" data-method="gpay">
-          <img src="assets/gpay.png" alt="Google Pay" class="payment-logo" />
-          <span style="font-size:13px; font-weight:600;">Google Pay</span>
-        </div>
-        <div class="payment-method-item" data-method="phonepe">
-          <img src="assets/phonepe-logo.webp" alt="PhonePe" class="payment-logo" />
-          <span style="font-size:13px; font-weight:600;">PhonePe</span>
-        </div>
-        <div class="payment-method-item" data-method="bhim">
-          <img src="assets/bhim-logo.webp" alt="BHIM UPI" class="payment-logo" />
-          <span style="font-size:13px; font-weight:600;">BHIM UPI</span>
-        </div>
+        <div id="checkoutPhoneError" style="display:none; color:var(--md-sys-color-error); font-size:11.5px; margin-top:4px;">Please enter a valid 10-digit mobile number</div>
       </div>
 
-      <div style="background:linear-gradient(135deg, rgba(0, 91, 193, 0.08), rgba(79, 216, 235, 0.08)); padding:14px; border-radius:var(--radius-md); font-size:12.5px; margin-bottom:20px; border:1px solid var(--md-sys-color-primary-container);">
-        <div style="display:flex; align-items:center; gap:8px; font-weight:600; color:var(--md-sys-color-primary); margin-bottom:4px;">
-          <span class="material-symbols-outlined" style="font-size:16px;">verified_user</span>
-          <span>Instant Cloud Activation</span>
+      <!-- Cashfree Official Gateway Badge & Supported Methods -->
+      <div style="background:var(--md-sys-color-surface-container-high); padding:14px; border-radius:var(--radius-md); margin-bottom:20px; border:1px solid var(--md-sys-color-outline-variant);">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span class="material-symbols-outlined" style="font-size:18px; color:var(--md-sys-color-primary);">verified_user</span>
+            <span style="font-size:13px; font-weight:700;">Cashfree Secure Gateway</span>
+          </div>
+          <span style="font-size:11px; background:rgba(0, 200, 83, 0.12); color:#00a344; font-weight:700; padding:3px 8px; border-radius:100px;">Official Production PG</span>
         </div>
-        <span>Click below to complete simulated payment and instantly bind this active pass to your Google account.</span>
+        <div style="font-size:12px; color:var(--md-sys-color-on-surface-variant); line-height:1.5; margin-bottom:10px;">
+          Direct UPI QR, Google Pay, PhonePe, Paytm, Cards &amp; NetBanking supported via Cashfree:
+        </div>
+        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+          <span style="display:inline-flex; align-items:center; gap:4px; font-size:11.5px; font-weight:600; background:var(--md-sys-color-surface); padding:4px 8px; border-radius:6px; border:1px solid var(--md-sys-color-outline-variant);">
+            <span class="material-symbols-outlined" style="font-size:15px; color:#673ab7;">qr_code_scanner</span> UPI / QR
+          </span>
+          <span style="display:inline-flex; align-items:center; gap:4px; font-size:11.5px; font-weight:600; background:var(--md-sys-color-surface); padding:4px 8px; border-radius:6px; border:1px solid var(--md-sys-color-outline-variant);">
+            <span class="material-symbols-outlined" style="font-size:15px; color:#1a73e8;">phone_android</span> GPay / PhonePe / Paytm
+          </span>
+          <span style="display:inline-flex; align-items:center; gap:4px; font-size:11.5px; font-weight:600; background:var(--md-sys-color-surface); padding:4px 8px; border-radius:6px; border:1px solid var(--md-sys-color-outline-variant);">
+            <span class="material-symbols-outlined" style="font-size:15px; color:#ff9800;">credit_card</span> Cards
+          </span>
+          <span style="display:inline-flex; align-items:center; gap:4px; font-size:11.5px; font-weight:600; background:var(--md-sys-color-surface); padding:4px 8px; border-radius:6px; border:1px solid var(--md-sys-color-outline-variant);">
+            <span class="material-symbols-outlined" style="font-size:15px; color:#009688;">account_balance</span> NetBanking
+          </span>
+        </div>
       </div>
 
       <div style="display:flex; gap:12px;">
         <button id="btnCancelCheckout" class="btn btn-tonal" style="flex:1;">Cancel</button>
         <button id="btnConfirmPayment" class="btn btn-primary" style="flex:2;">
-          <span class="material-symbols-outlined">payments</span>
-          <span>Pay &amp; Activate Pass</span>
+          <span class="material-symbols-outlined">lock</span>
+          <span id="btnConfirmPaymentText">Proceed to Pay &#8377;299</span>
         </button>
       </div>
     </div>
@@ -386,15 +402,18 @@
     const btnCloseModal = document.getElementById("btnCloseModal");
     const btnCancelCheckout = document.getElementById("btnCancelCheckout");
     const btnConfirmPayment = document.getElementById("btnConfirmPayment");
+    const btnConfirmPaymentText = document.getElementById("btnConfirmPaymentText");
+    const checkoutUserPhone = document.getElementById("checkoutUserPhone");
+    const checkoutPhoneError = document.getElementById("checkoutPhoneError");
     const modalPlanName = document.getElementById("modalPlanName");
     const modalPlanDuration = document.getElementById("modalPlanDuration");
     const modalCutPrice = document.getElementById("modalCutPrice");
     const modalFinalPrice = document.getElementById("modalFinalPrice");
 
+    const urlParams = new URLSearchParams(window.location.search);
     let currentUser = null;
     let currentUserData = null;
     let selectedPlanId = "monthly";
-    let selectedPaymentMethod = "paytm";
     let countdownInterval = null;
 
     // Show Toast
@@ -474,33 +493,9 @@
         }
 
         // Retrieve extension ID from query params or storage
-        const urlParams = new URLSearchParams(window.location.search);
-        let extId = urlParams.get("extId") || localStorage.getItem("tatkal_ext_id");
+        const extId = urlParams.get("extId") || localStorage.getItem("tatkal_ext_id");
         if (urlParams.get("extId")) {
           localStorage.setItem("tatkal_ext_id", urlParams.get("extId"));
-        }
-
-        function notifyExtension(userObj, subObj) {
-          const targetExtId = extId || localStorage.getItem("tatkal_ext_id");
-          if (!targetExtId) return;
-          if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.sendMessage) {
-            try {
-              chrome.runtime.sendMessage(targetExtId, {
-                type: "TATKAL_AUTH_SYNC",
-                user: userObj,
-                subscription: subObj,
-                pricing: SUBSCRIPTION_PLANS
-              }, (resp) => {
-                if (chrome.runtime.lastError) {
-                  console.log("Extension connection notice:", chrome.runtime.lastError.message);
-                } else if (resp && resp.ok) {
-                  showToast("⚡ Chrome Extension unlocked successfully!", "success");
-                }
-              });
-            } catch (e) {
-              console.warn("Could not dispatch message to extension:", e);
-            }
-          }
         }
 
         // Subscribe to real-time user document updates
@@ -529,10 +524,16 @@
           console.warn("Firestore real-time subscription notice:", err.message);
         });
 
-        // Check if query param specifies a plan
-        const reqPlan = urlParams.get("plan");
-        if (reqPlan && SUBSCRIPTION_PLANS[reqPlan]) {
-          openCheckout(reqPlan);
+        // Check if user returned from Cashfree checkout with order_id
+        const pendingOrderId = urlParams.get("order_id");
+        if (pendingOrderId) {
+          verifyAndActivateOrder(pendingOrderId);
+        } else {
+          // Check if query param specifies a plan
+          const reqPlan = urlParams.get("plan");
+          if (reqPlan && SUBSCRIPTION_PLANS[reqPlan]) {
+            openCheckout(reqPlan);
+          }
         }
       } else {
         currentUser = null;
@@ -541,8 +542,37 @@
         clientDashboardArea.style.display = "none";
         navUserArea.style.display = "none";
         if (countdownInterval) clearInterval(countdownInterval);
+
+        const pendingOrderId = urlParams.get("order_id");
+        if (pendingOrderId) {
+          showToast("Please sign in with Google to link your Cashfree payment!", "info");
+        }
       }
     });
+
+    // Notify Chrome Extension of Auth / Subscription State
+    function notifyExtension(userObj, subObj) {
+      const targetExtId = urlParams.get("extId") || localStorage.getItem("tatkal_ext_id");
+      if (!targetExtId) return;
+      if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.sendMessage) {
+        try {
+          chrome.runtime.sendMessage(targetExtId, {
+            type: "TATKAL_AUTH_SYNC",
+            user: userObj,
+            subscription: subObj,
+            pricing: SUBSCRIPTION_PLANS
+          }, (resp) => {
+            if (chrome.runtime.lastError) {
+              console.log("Extension connection notice:", chrome.runtime.lastError.message);
+            } else if (resp && resp.ok) {
+              showToast("⚡ Chrome Extension unlocked successfully!", "success");
+            }
+          });
+        } catch (e) {
+          console.warn("Could not dispatch message to extension:", e);
+        }
+      }
+    }
 
     // Update Subscription UI
     function updateSubscriptionUI(sub) {
@@ -610,6 +640,15 @@
       modalPlanDuration.textContent = `${plan.durationDays} Days Full Tatkal Access`;
       modalCutPrice.innerHTML = `&#8377;${plan.originalPrice}`;
       modalFinalPrice.innerHTML = `&#8377;${plan.discountedPrice}`;
+      if (btnConfirmPaymentText) {
+        btnConfirmPaymentText.innerHTML = `Proceed to Pay &#8377;${plan.discountedPrice}`;
+      }
+      if (checkoutUserPhone) {
+        checkoutUserPhone.value = localStorage.getItem("tatkal_user_phone") || "";
+      }
+      if (checkoutPhoneError) {
+        checkoutPhoneError.style.display = "none";
+      }
       checkoutModal.classList.add("open");
     }
 
@@ -646,54 +685,72 @@
     btnCloseModal.addEventListener("click", () => checkoutModal.classList.remove("open"));
     btnCancelCheckout.addEventListener("click", () => checkoutModal.classList.remove("open"));
 
-    // Payment method selector
-    document.querySelectorAll(".payment-method-item").forEach(item => {
-      item.addEventListener("click", () => {
-        document.querySelectorAll(".payment-method-item").forEach(el => el.classList.remove("selected"));
-        item.classList.add("selected");
-        selectedPaymentMethod = item.getAttribute("data-method");
-      });
-    });
+    let isVerifyingPayment = false;
 
-    // Confirm Payment & Activate Subscription
-    btnConfirmPayment.addEventListener("click", async () => {
-      if (!currentUser) return;
-      const plan = SUBSCRIPTION_PLANS[selectedPlanId];
-      if (!plan) return;
+    // Verify Cashfree Order and Activate Subscription in Firestore
+    async function verifyAndActivateOrder(orderId) {
+      if (!orderId || isVerifyingPayment) return;
+      isVerifyingPayment = true;
+
+      showToast("Verifying payment with Cashfree...", "info");
 
       try {
-        btnConfirmPayment.disabled = true;
-        btnConfirmPayment.innerHTML = `<span>Activating...</span>`;
+        const origin = window.location.origin;
+        const res = await fetch(`${origin}/api/cashfree/verify-order?order_id=${encodeURIComponent(orderId)}`, {
+          cache: "no-store"
+        });
+        const data = await res.json();
 
-        // Calculate new expiry date
+        if (!res.ok || !data.ok) {
+          throw new Error(data.error || "Could not verify order with Cashfree");
+        }
+
+        if (!data.paid) {
+          showToast(`Order status: ${data.order_status || "Incomplete"}. Payment was not completed.`, "error");
+          return;
+        }
+
+        if (!currentUser) {
+          showToast("Payment verified! Please sign in with Google to link your pass.", "info");
+          return;
+        }
+
+        // Determine plan info
+        const planId = data.planId || selectedPlanId || "2day";
+        const plan = SUBSCRIPTION_PLANS[planId] || { name: planId.toUpperCase() + " Pass", durationDays: data.durationDays || 2 };
+
         const now = new Date();
         let baseDate = now;
-        
-        // If current subscription is still active, extend from current validUntil!
+
+        // Extend if existing pass is currently active
         if (currentUserData && currentUserData.subscription && isSubscriptionActive(currentUserData.subscription)) {
-          const currentExpiry = currentUserData.subscription.validUntil.toDate ? currentUserData.subscription.validUntil.toDate() : new Date(currentUserData.subscription.validUntil);
+          const currentExpiry = currentUserData.subscription.validUntil?.toDate 
+            ? currentUserData.subscription.validUntil.toDate() 
+            : new Date(currentUserData.subscription.validUntil);
           if (currentExpiry > now) {
             baseDate = currentExpiry;
           }
         }
 
-        const newExpiryDate = new Date(baseDate.getTime() + (plan.durationDays * 24 * 60 * 60 * 1000));
+        const durationDays = Number(data.durationDays || plan.durationDays || 2);
+        const newExpiryDate = new Date(baseDate.getTime() + (durationDays * 24 * 60 * 60 * 1000));
         const userRef = doc(db, "users", currentUser.uid);
 
         const transactionRecord = {
-          transactionId: "TRX" + Date.now(),
-          planId: plan.id,
+          orderId: data.order_id,
+          cfOrderId: data.cf_order_id || "",
+          planId: planId,
           planName: plan.name,
-          durationDays: plan.durationDays,
-          amountPaid: plan.discountedPrice,
-          paymentMethod: selectedPaymentMethod,
-          paidAt: new Date().toISOString(),
+          durationDays: durationDays,
+          amountPaid: Number(data.order_amount || plan.discountedPrice),
+          paymentMethod: "CASHFREE_PROD",
+          paidAt: data.paidAt || new Date().toISOString(),
           status: "SUCCESS"
         };
 
         const activeSubObj = {
           status: "active",
-          plan: plan.id,
+          plan: planId,
           validUntil: newExpiryDate.toISOString(),
           activatedAt: new Date().toISOString(),
           isSuspended: false
@@ -701,7 +758,7 @@
 
         await updateDoc(userRef, {
           "subscription.status": "active",
-          "subscription.plan": plan.id,
+          "subscription.plan": planId,
           "subscription.validUntil": Timestamp.fromDate(newExpiryDate),
           "subscription.activatedAt": serverTimestamp(),
           "subscription.isSuspended": false,
@@ -723,7 +780,7 @@
         };
         notifyExtension(userPayload, activeSubObj);
 
-        // Auto-generate sync token and copy to clipboard for seamless 1-click extension unlock
+        // Auto-generate sync token and copy to clipboard for seamless extension unlock
         const tokenData = {
           uid: currentUser.uid,
           email: currentUser.email,
@@ -738,18 +795,98 @@
           await navigator.clipboard.writeText(syncToken);
         } catch(e) {}
 
-        // Save session locally
         localStorage.setItem("tatkal_active_sub", JSON.stringify(activeSubObj));
 
-        checkoutModal.classList.remove("open");
-        showToast(`🎉 Success! ${plan.name} is now active! Sync token copied to clipboard!`);
+        showToast(`🎉 Payment Verified! ${plan.name} is now active! Sync token copied to clipboard!`);
+
+        // Clean order_id from browser address bar
+        if (window.history && window.history.replaceState) {
+          const cleanUrl = window.location.origin + window.location.pathname + (window.location.search.replace(/[?&]order_id=[^&]+/, ""));
+          window.history.replaceState({}, document.title, cleanUrl);
+        }
 
       } catch (err) {
-        console.error("Payment error:", err);
-        showToast("Payment failed: " + err.message, "error");
+        console.error("Order verification error:", err);
+        showToast("Verification failed: " + err.message, "error");
+      } finally {
+        isVerifyingPayment = false;
+      }
+    }
+
+    // Cashfree Checkout Trigger
+    btnConfirmPayment.addEventListener("click", async () => {
+      if (!currentUser) {
+        showToast("Please sign in with Google first", "error");
+        return;
+      }
+      const plan = SUBSCRIPTION_PLANS[selectedPlanId];
+      if (!plan) return;
+
+      const phoneVal = (checkoutUserPhone?.value || "").replace(/\D/g, "");
+      if (phoneVal.length !== 10) {
+        if (checkoutPhoneError) checkoutPhoneError.style.display = "block";
+        checkoutUserPhone?.focus();
+        return;
+      }
+      if (checkoutPhoneError) checkoutPhoneError.style.display = "none";
+      localStorage.setItem("tatkal_user_phone", phoneVal);
+
+      try {
+        btnConfirmPayment.disabled = true;
+        btnConfirmPayment.innerHTML = `<span class="material-symbols-outlined spin">progress_activity</span> <span>Connecting to Cashfree...</span>`;
+
+        // 1. Call serverless API to create Cashfree order
+        const origin = window.location.origin;
+        const createRes = await fetch(`${origin}/api/cashfree/create-order`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            planId: selectedPlanId,
+            uid: currentUser.uid,
+            email: currentUser.email,
+            name: currentUser.displayName || currentUser.email.split("@")[0],
+            phone: phoneVal,
+            returnUrl: `${origin}/client?order_id={order_id}`
+          })
+        });
+
+        const createData = await createRes.json();
+        if (!createRes.ok || !createData.payment_session_id) {
+          throw new Error(createData.error || "Failed to create Cashfree checkout order");
+        }
+
+        checkoutModal.classList.remove("open");
+
+        // 2. Check Cashfree SDK
+        if (typeof Cashfree === "undefined") {
+          throw new Error("Cashfree SDK failed to load. Please check your internet connection.");
+        }
+
+        const cashfree = Cashfree({
+          mode: "production"
+        });
+
+        showToast("Opening Cashfree Checkout...", "info");
+
+        // 3. Launch Cashfree Dropin Modal
+        const checkoutResult = await cashfree.checkout({
+          paymentSessionId: createData.payment_session_id,
+          redirectTarget: "_modal"
+        });
+
+        if (checkoutResult && checkoutResult.error) {
+          console.warn("Cashfree checkout error / cancelled:", checkoutResult.error);
+          showToast(checkoutResult.error.message || "Payment cancelled or incomplete", "error");
+        } else if (checkoutResult && checkoutResult.paymentDetails) {
+          await verifyAndActivateOrder(createData.order_id);
+        }
+
+      } catch (err) {
+        console.error("Cashfree flow error:", err);
+        showToast("Payment error: " + err.message, "error");
       } finally {
         btnConfirmPayment.disabled = false;
-        btnConfirmPayment.innerHTML = `<span class="material-symbols-outlined">payments</span><span>Pay &amp; Activate Pass</span>`;
+        btnConfirmPayment.innerHTML = `<span class="material-symbols-outlined">lock</span> <span id="btnConfirmPaymentText">Proceed to Pay &#8377;${plan.discountedPrice}</span>`;
       }
     });
 
