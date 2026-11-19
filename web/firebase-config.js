@@ -71,6 +71,85 @@ export const SUBSCRIPTION_PLANS = {
 };
 
 /**
+ * Apply custom pricing object to SUBSCRIPTION_PLANS
+ */
+export function applyPricingToPlans(data) {
+  if (!data) return;
+  ["2day", "weekly", "monthly"].forEach(key => {
+    if (data[key] && SUBSCRIPTION_PLANS[key]) {
+      if (data[key].discountedPrice !== undefined) {
+        SUBSCRIPTION_PLANS[key].discountedPrice = Number(data[key].discountedPrice);
+      } else if (data[key].price !== undefined) {
+        SUBSCRIPTION_PLANS[key].discountedPrice = Number(data[key].price);
+      }
+      if (data[key].originalPrice !== undefined) {
+        SUBSCRIPTION_PLANS[key].originalPrice = Number(data[key].originalPrice);
+      }
+    }
+  });
+}
+
+/**
+ * Load live subscription pricing from Firestore 'settings/pricing'
+ * Falls back to localStorage cache or default SUBSCRIPTION_PLANS
+ */
+export async function loadLivePricing() {
+  try {
+    if (typeof localStorage !== "undefined") {
+      const cached = localStorage.getItem("tatkal_custom_pricing");
+      if (cached) {
+        try { applyPricingToPlans(JSON.parse(cached)); } catch(e) {}
+      }
+    }
+
+    const pricingDoc = await getDoc(doc(db, "settings", "pricing"));
+    if (pricingDoc.exists()) {
+      const data = pricingDoc.data();
+      applyPricingToPlans(data);
+      if (typeof localStorage !== "undefined") {
+        localStorage.setItem("tatkal_custom_pricing", JSON.stringify(data));
+      }
+    }
+  } catch (err) {
+    console.warn("Could not load live pricing from cloud, using cached/default plans:", err.message);
+  }
+  return SUBSCRIPTION_PLANS;
+}
+
+/**
+ * Save pricing configured by admin (lovechn1407@gmail.com)
+ */
+export async function saveLivePricing(newPricing) {
+  if (!auth.currentUser || auth.currentUser.email.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
+    throw new Error("Unauthorized: Only " + ADMIN_EMAIL + " can update plan pricing.");
+  }
+
+  const payload = {
+    "2day": {
+      discountedPrice: Number(newPricing["2day"].discountedPrice),
+      originalPrice: Number(newPricing["2day"].originalPrice)
+    },
+    "weekly": {
+      discountedPrice: Number(newPricing["weekly"].discountedPrice),
+      originalPrice: Number(newPricing["weekly"].originalPrice)
+    },
+    "monthly": {
+      discountedPrice: Number(newPricing["monthly"].discountedPrice),
+      originalPrice: Number(newPricing["monthly"].originalPrice)
+    },
+    updatedAt: new Date().toISOString(),
+    updatedBy: auth.currentUser.email
+  };
+
+  await setDoc(doc(db, "settings", "pricing"), payload, { merge: true });
+  applyPricingToPlans(payload);
+  if (typeof localStorage !== "undefined") {
+    localStorage.setItem("tatkal_custom_pricing", JSON.stringify(payload));
+  }
+  return SUBSCRIPTION_PLANS;
+}
+
+/**
  * Sign in with Google Popup
  */
 export async function loginWithGoogle() {

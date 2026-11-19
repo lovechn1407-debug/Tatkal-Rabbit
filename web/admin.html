@@ -125,6 +125,102 @@
         </div>
       </div>
 
+      <!-- Subscription Pricing & Discount Manager -->
+      <div class="table-card" style="margin-bottom: 24px; padding: 22px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 18px;">
+          <div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary); font-size: 24px;">price_change</span>
+              <h2 style="font-size: 18px; font-weight: 700; margin: 0;">Subscription Pricing & Discount Manager</h2>
+            </div>
+            <p style="font-size: 13px; color: var(--md-sys-color-on-surface-variant); margin: 4px 0 0 0;">
+              Control active selling prices and slashed cut prices (MRP) for the Chrome Extension popup and Web checkout portal in real time.
+            </p>
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <button type="button" id="btnResetPricing" class="btn btn-outline btn-sm">
+              <span class="material-symbols-outlined">restart_alt</span>
+              <span>Reset Defaults</span>
+            </button>
+            <button type="button" id="btnSavePricing" class="btn btn-primary btn-sm">
+              <span class="material-symbols-outlined">save</span>
+              <span>Save Pricing Changes</span>
+            </button>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+          <!-- 2-Day Pass Config -->
+          <div style="background: var(--md-sys-color-surface-container-high); border-radius: 12px; padding: 16px; border: 1px solid var(--md-sys-color-outline-variant);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <div style="display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 15px;">
+                <span class="material-symbols-outlined" style="color: #0284c7; font-size: 20px;">bolt</span>
+                <span>2-Day Express Pass</span>
+              </div>
+              <span id="previewDiscount_2day" class="sub-status-badge active">67% OFF</span>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 8px;">
+              <div>
+                <label style="font-size: 11px; font-weight: 600; color: var(--md-sys-color-on-surface-variant); display: block; margin-bottom: 4px;">Selling Price (₹)</label>
+                <input type="number" id="inputPrice_2day" class="form-input" min="1" value="49" style="width: 100%; font-weight: 700; font-size: 16px;" />
+              </div>
+              <div>
+                <label style="font-size: 11px; font-weight: 600; color: var(--md-sys-color-on-surface-variant); display: block; margin-bottom: 4px;">Cut Price MRP (₹)</label>
+                <input type="number" id="inputCut_2day" class="form-input" min="1" value="149" style="width: 100%; color: var(--md-sys-color-outline);" />
+              </div>
+            </div>
+            <div style="font-size: 11px; color: var(--md-sys-color-on-surface-variant);">Fixed Duration: 2 Days (48 Hours Access)</div>
+          </div>
+
+          <!-- Weekly Pass Config -->
+          <div style="background: var(--md-sys-color-surface-container-high); border-radius: 12px; padding: 16px; border: 1px solid var(--md-sys-color-primary); position: relative;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <div style="display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 15px;">
+                <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary); font-size: 20px;">local_fire_department</span>
+                <span>Weekly Explorer Pass</span>
+              </div>
+              <span id="previewDiscount_weekly" class="sub-status-badge active">70% OFF</span>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 8px;">
+              <div>
+                <label style="font-size: 11px; font-weight: 600; color: var(--md-sys-color-on-surface-variant); display: block; margin-bottom: 4px;">Selling Price (₹)</label>
+                <input type="number" id="inputPrice_weekly" class="form-input" min="1" value="119" style="width: 100%; font-weight: 700; font-size: 16px; color: var(--md-sys-color-primary);" />
+              </div>
+              <div>
+                <label style="font-size: 11px; font-weight: 600; color: var(--md-sys-color-on-surface-variant); display: block; margin-bottom: 4px;">Cut Price MRP (₹)</label>
+                <input type="number" id="inputCut_weekly" class="form-input" min="1" value="399" style="width: 100%; color: var(--md-sys-color-outline);" />
+              </div>
+            </div>
+            <div style="font-size: 11px; color: var(--md-sys-color-on-surface-variant);">Fixed Duration: 7 Days (1 Week Unlimited)</div>
+          </div>
+
+          <!-- Monthly Pass Config -->
+          <div style="background: var(--md-sys-color-surface-container-high); border-radius: 12px; padding: 16px; border: 1px solid var(--md-sys-color-outline-variant);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <div style="display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 15px;">
+                <span class="material-symbols-outlined" style="color: #eab308; font-size: 20px;">workspace_premium</span>
+                <span>Monthly Pro Pass</span>
+              </div>
+              <span id="previewDiscount_monthly" class="sub-status-badge active">70% OFF</span>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 8px;">
+              <div>
+                <label style="font-size: 11px; font-weight: 600; color: var(--md-sys-color-on-surface-variant); display: block; margin-bottom: 4px;">Selling Price (₹)</label>
+                <input type="number" id="inputPrice_monthly" class="form-input" min="1" value="299" style="width: 100%; font-weight: 700; font-size: 16px;" />
+              </div>
+              <div>
+                <label style="font-size: 11px; font-weight: 600; color: var(--md-sys-color-on-surface-variant); display: block; margin-bottom: 4px;">Cut Price MRP (₹)</label>
+                <input type="number" id="inputCut_monthly" class="form-input" min="1" value="999" style="width: 100%; color: var(--md-sys-color-outline);" />
+              </div>
+            </div>
+            <div style="font-size: 11px; color: var(--md-sys-color-on-surface-variant);">Fixed Duration: 30 Days (VIP Unlimited)</div>
+          </div>
+        </div>
+      </div>
+
       <!-- Users Management Table Card -->
       <div class="table-card">
         <div class="table-toolbar">
@@ -226,6 +322,8 @@
       ADMIN_EMAIL,
       isSubscriptionActive,
       parseTimestamp,
+      loadLivePricing,
+      saveLivePricing,
       SUBSCRIPTION_PLANS 
     } from "./firebase-config.js";
 
@@ -277,6 +375,143 @@
     let activeFilter = "all";
     let targetCustomUid = null;
     let unsubscribeUsers = null;
+    let unsubscribePricing = null;
+
+    // Pricing UI Elements
+    const inputPrice_2day = document.getElementById("inputPrice_2day");
+    const inputCut_2day = document.getElementById("inputCut_2day");
+    const previewDiscount_2day = document.getElementById("previewDiscount_2day");
+
+    const inputPrice_weekly = document.getElementById("inputPrice_weekly");
+    const inputCut_weekly = document.getElementById("inputCut_weekly");
+    const previewDiscount_weekly = document.getElementById("previewDiscount_weekly");
+
+    const inputPrice_monthly = document.getElementById("inputPrice_monthly");
+    const inputCut_monthly = document.getElementById("inputCut_monthly");
+    const previewDiscount_monthly = document.getElementById("previewDiscount_monthly");
+
+    const btnSavePricing = document.getElementById("btnSavePricing");
+    const btnResetPricing = document.getElementById("btnResetPricing");
+
+    function updateDiscountBadge(priceInput, cutInput, badgeEl) {
+      if (!priceInput || !cutInput || !badgeEl) return;
+      const price = parseFloat(priceInput.value) || 0;
+      const cut = parseFloat(cutInput.value) || 0;
+      if (cut > price && cut > 0) {
+        const pct = Math.round((1 - price / cut) * 100);
+        badgeEl.textContent = `${pct}% OFF`;
+        badgeEl.className = "sub-status-badge active";
+      } else {
+        badgeEl.textContent = "NO DISCOUNT";
+        badgeEl.className = "sub-status-badge inactive";
+      }
+    }
+
+    [
+      [inputPrice_2day, inputCut_2day, previewDiscount_2day],
+      [inputPrice_weekly, inputCut_weekly, previewDiscount_weekly],
+      [inputPrice_monthly, inputCut_monthly, previewDiscount_monthly]
+    ].forEach(([p, c, b]) => {
+      if (p && c && b) {
+        p.addEventListener("input", () => updateDiscountBadge(p, c, b));
+        c.addEventListener("input", () => updateDiscountBadge(p, c, b));
+      }
+    });
+
+    function subscribeToPricing() {
+      if (unsubscribePricing) unsubscribePricing();
+
+      // First apply cached/default plans
+      populatePricingInputs(SUBSCRIPTION_PLANS);
+
+      // Listen to Firestore real-time pricing doc
+      const pricingRef = doc(db, "settings", "pricing");
+      unsubscribePricing = onSnapshot(pricingRef, (docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          populatePricingInputs(data);
+        }
+      }, (err) => {
+        console.warn("Pricing snapshot error:", err.message);
+      });
+    }
+
+    function populatePricingInputs(data) {
+      if (!data) return;
+      if (data["2day"]) {
+        const p = data["2day"].discountedPrice !== undefined ? data["2day"].discountedPrice : (data["2day"].price || 49);
+        const c = data["2day"].originalPrice || 149;
+        if (inputPrice_2day) inputPrice_2day.value = p;
+        if (inputCut_2day) inputCut_2day.value = c;
+        updateDiscountBadge(inputPrice_2day, inputCut_2day, previewDiscount_2day);
+      }
+      if (data["weekly"]) {
+        const p = data["weekly"].discountedPrice !== undefined ? data["weekly"].discountedPrice : (data["weekly"].price || 119);
+        const c = data["weekly"].originalPrice || 399;
+        if (inputPrice_weekly) inputPrice_weekly.value = p;
+        if (inputCut_weekly) inputCut_weekly.value = c;
+        updateDiscountBadge(inputPrice_weekly, inputCut_weekly, previewDiscount_weekly);
+      }
+      if (data["monthly"]) {
+        const p = data["monthly"].discountedPrice !== undefined ? data["monthly"].discountedPrice : (data["monthly"].price || 299);
+        const c = data["monthly"].originalPrice || 999;
+        if (inputPrice_monthly) inputPrice_monthly.value = p;
+        if (inputCut_monthly) inputCut_monthly.value = c;
+        updateDiscountBadge(inputPrice_monthly, inputCut_monthly, previewDiscount_monthly);
+      }
+    }
+
+    if (btnSavePricing) {
+      btnSavePricing.addEventListener("click", async () => {
+        try {
+          btnSavePricing.disabled = true;
+          btnSavePricing.innerHTML = `<span class="material-symbols-outlined" style="animation:spin 1s linear infinite;">sync</span><span>Saving...</span>`;
+          
+          const newPricing = {
+            "2day": {
+              discountedPrice: parseFloat(inputPrice_2day.value) || 49,
+              originalPrice: parseFloat(inputCut_2day.value) || 149
+            },
+            "weekly": {
+              discountedPrice: parseFloat(inputPrice_weekly.value) || 119,
+              originalPrice: parseFloat(inputCut_weekly.value) || 399
+            },
+            "monthly": {
+              discountedPrice: parseFloat(inputPrice_monthly.value) || 299,
+              originalPrice: parseFloat(inputCut_monthly.value) || 999
+            }
+          };
+
+          await saveLivePricing(newPricing);
+          showToast("🎉 Subscription pricing updated successfully in Firestore!");
+        } catch (err) {
+          console.error("Save pricing error:", err);
+          showToast("Error updating pricing: " + err.message, "error");
+        } finally {
+          btnSavePricing.disabled = false;
+          btnSavePricing.innerHTML = `<span class="material-symbols-outlined">save</span><span>Save Pricing Changes</span>`;
+        }
+      });
+    }
+
+    if (btnResetPricing) {
+      btnResetPricing.addEventListener("click", async () => {
+        if (!confirm("Reset all 3 plans to default pricing (₹49/149, ₹119/399, ₹299/999)?")) return;
+        inputPrice_2day.value = 49;
+        inputCut_2day.value = 149;
+        updateDiscountBadge(inputPrice_2day, inputCut_2day, previewDiscount_2day);
+
+        inputPrice_weekly.value = 119;
+        inputCut_weekly.value = 399;
+        updateDiscountBadge(inputPrice_weekly, inputCut_weekly, previewDiscount_weekly);
+
+        inputPrice_monthly.value = 299;
+        inputCut_monthly.value = 999;
+        updateDiscountBadge(inputPrice_monthly, inputCut_monthly, previewDiscount_monthly);
+
+        btnSavePricing.click();
+      });
+    }
 
     // Toast
     function showToast(message, type = "success") {
@@ -327,6 +562,7 @@
         adminNavUser.style.display = "flex";
         adminNavAvatar.src = user.photoURL || "assets/rabbit_32.png";
         subscribeToUsers();
+        subscribeToPricing();
       } else {
         // Not authorized or logged out
         adminAuthGateCard.style.display = "block";
@@ -335,6 +571,10 @@
         if (unsubscribeUsers) {
           unsubscribeUsers();
           unsubscribeUsers = null;
+        }
+        if (unsubscribePricing) {
+          unsubscribePricing();
+          unsubscribePricing = null;
         }
       }
     });

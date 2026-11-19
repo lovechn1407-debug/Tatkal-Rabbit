@@ -472,5 +472,27 @@
     setInterval(updateHeroClock, 1000);
     updateHeroClock();
   </script>
+
+  <!-- Live Dynamic Pricing Module -->
+  <script type="module">
+    import { loadLivePricing, SUBSCRIPTION_PLANS } from "./firebase-config.js";
+    try {
+      await loadLivePricing();
+      const cards = document.querySelectorAll(".pricing-card");
+      const planKeys = ["2day", "weekly", "monthly"];
+      cards.forEach((card, idx) => {
+        const key = planKeys[idx];
+        const plan = SUBSCRIPTION_PLANS[key];
+        if (plan) {
+          const cutEl = card.querySelector(".pricing-cut-price");
+          const priceEl = card.querySelector(".pricing-price");
+          if (cutEl) cutEl.innerHTML = `&#8377;${plan.originalPrice}`;
+          if (priceEl) priceEl.innerHTML = `<span class="pricing-currency">&#8377;</span>${plan.discountedPrice}`;
+        }
+      });
+    } catch(e) {
+      console.warn("Could not load dynamic pricing:", e);
+    }
+  </script>
 </body>
 </html>

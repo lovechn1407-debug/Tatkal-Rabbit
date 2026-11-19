@@ -1442,9 +1442,16 @@ function setupAuthAndSubscription() {
   const btnOpenClientPortal = document.getElementById("btnOpenClientPortal");
   const btnDialogSyncSub = document.getElementById("btnDialogSyncSub");
   const btnDialogLogout = document.getElementById("btnDialogLogout");
+  const btnProfileUpgrade = document.getElementById("btnProfileUpgrade");
+
+  // Sign-In Modal Elements
+  const authModal = document.getElementById("authSignInModal");
+  const btnCloseAuthModal = document.getElementById("btnCloseAuthModal");
+  const btnModalGoogleLogin = document.getElementById("btnModalGoogleLogin");
+  const btnModalUnlockClipboard = document.getElementById("btnModalUnlockClipboard");
+  const btnModalPasteToken = document.getElementById("btnModalPasteToken");
 
   // Paywall elements
-  const btnPaywallGoogleLogin = document.getElementById("btnPaywallGoogleLogin");
   const btnSyncSubscriptionStatus = document.getElementById("btnSyncSubscriptionStatus");
   const btnOpenClientPage = document.getElementById("btnOpenClientPage");
   const btnPaywallPasteToken = document.getElementById("btnPaywallPasteToken");
@@ -1476,31 +1483,66 @@ function setupAuthAndSubscription() {
     }
   }
 
-  // Open User Dialog
+  // Open & Close User Profile Modal
   if (btnUserAccount && dialogUser) {
     btnUserAccount.addEventListener("click", () => {
-      if (typeof dialogUser.show === "function") {
-        dialogUser.show();
-      } else {
-        dialogUser.setAttribute("open", "");
-      }
+      dialogUser.style.display = "flex";
     });
   }
 
   if (btnCloseUserAccount && dialogUser) {
     btnCloseUserAccount.addEventListener("click", () => {
-      if (typeof dialogUser.close === "function") {
-        dialogUser.close();
-      } else {
-        dialogUser.removeAttribute("open");
-      }
+      dialogUser.style.display = "none";
     });
   }
 
-  // Handle Paywall Google Login
-  if (btnPaywallGoogleLogin) {
-    btnPaywallGoogleLogin.addEventListener("click", () => {
+  if (dialogUser) {
+    dialogUser.addEventListener("click", (e) => {
+      if (e.target === dialogUser) dialogUser.style.display = "none";
+    });
+  }
+
+  // Sign-In Modal Handlers
+  if (btnCloseAuthModal && authModal) {
+    btnCloseAuthModal.addEventListener("click", () => {
+      authModal.style.display = "none";
+    });
+  }
+
+  if (authModal) {
+    authModal.addEventListener("click", (e) => {
+      if (e.target === authModal) authModal.style.display = "none";
+    });
+  }
+
+  if (btnModalGoogleLogin) {
+    btnModalGoogleLogin.addEventListener("click", () => {
       openClientWebpage("?action=login&source=extension");
+    });
+  }
+
+  if (btnModalUnlockClipboard) {
+    btnModalUnlockClipboard.addEventListener("click", async () => {
+      const ok = await tryUnlockFromClipboard(true);
+      if (ok && authModal) authModal.style.display = "none";
+    });
+  }
+
+  if (btnModalPasteToken) {
+    btnModalPasteToken.addEventListener("click", async () => {
+      const tokenStr = prompt("Paste your Tatkal Rabbit Extension Sync Token copied from the Web Client Portal:");
+      if (!tokenStr) return;
+      const ok = await applySyncToken(tokenStr.trim());
+      if (ok && authModal) authModal.style.display = "none";
+    });
+  }
+
+  // Upgrade button in profile modal
+  if (btnProfileUpgrade) {
+    btnProfileUpgrade.addEventListener("click", () => {
+      if (dialogUser) dialogUser.style.display = "none";
+      const overlay = document.getElementById("subscriptionPaywallOverlay");
+      if (overlay) overlay.scrollIntoView({ behavior: "smooth" });
     });
   }
 
@@ -1516,8 +1558,8 @@ function setupAuthAndSubscription() {
     });
   }
 
-  // Buy Pass Buttons in Paywall
-  document.querySelectorAll(".m3-paywall-buy-btn").forEach(btn => {
+  // Buy Pass Buttons in Paywall (Supports both modern .tr-plan-btn and legacy .m3-paywall-buy-btn)
+  document.querySelectorAll(".tr-plan-btn, .m3-paywall-buy-btn").forEach(btn => {
     btn.addEventListener("click", () => {
       const plan = btn.getAttribute("data-plan") || "monthly";
       openClientWebpage(`?plan=${plan}&source=extension`);
@@ -1575,7 +1617,7 @@ function setupAuthAndSubscription() {
     });
   }
 
-  // Logout
+  // Logout (TASK 1: Show Sign-In Popup Immediately)
   if (btnDialogLogout) {
     btnDialogLogout.addEventListener("click", async () => {
       if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
@@ -1583,12 +1625,11 @@ function setupAuthAndSubscription() {
       }
       currentAuthUser = null;
       currentSubscription = null;
-      renderAuthAndSubscriptionUI();
-      if (dialogUser) {
-        if (typeof dialogUser.close === "function") dialogUser.close();
-        else dialogUser.removeAttribute("open");
-      }
+      if (dialogUser) dialogUser.style.display = "none";
       showToast("Signed out successfully");
+      renderAuthAndSubscriptionUI();
+      // SHOW SIGN-IN POPUP AGAIN IMMEDIATELY
+      if (authModal) authModal.style.display = "flex";
     });
   }
 
@@ -1601,6 +1642,9 @@ function setupAuthAndSubscription() {
         }
         if (changes.tatkal_subscription) {
           currentSubscription = changes.tatkal_subscription.newValue || null;
+        }
+        if (changes.tatkal_custom_pricing) {
+          applyCustomPricing(changes.tatkal_custom_pricing.newValue);
         }
         renderAuthAndSubscriptionUI();
       }
@@ -1657,10 +1701,15 @@ async function applySyncToken(tokenStr) {
       currentSubscription = sub;
 
       if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
-        await chrome.storage.local.set({
+        const payload = {
           tatkal_auth_user: currentAuthUser,
           tatkal_subscription: sub
-        });
+        };
+        if (decoded.pricing) payload.tatkal_custom_pricing = decoded.pricing;
+        await chrome.storage.local.set(payload);
+      }
+      if (decoded.pricing) {
+        applyCustomPricing(decoded.pricing);
       }
       renderAuthAndSubscriptionUI();
       showToast("🎉 Tatkal Rabbit Pass Verified & Unlocked!", "success");
@@ -1690,13 +1739,54 @@ async function tryUnlockFromClipboard(explicit = false) {
   return false;
 }
 
+// Dynamic Custom Pricing Update for Popup UI
+function applyCustomPricing(pricingData) {
+  if (!pricingData) return;
+  
+  if (pricingData["2day"]) {
+    const p = pricingData["2day"].discountedPrice !== undefined ? pricingData["2day"].discountedPrice : (pricingData["2day"].price || 49);
+    const c = pricingData["2day"].originalPrice || 149;
+    const elP = document.getElementById("subPrice_2day");
+    const elC = document.getElementById("subCutPrice_2day");
+    const btn = document.getElementById("subBuyBtn_2day");
+    if (elP) elP.innerHTML = `&#8377;${p}`;
+    if (elC) elC.innerHTML = `&#8377;${c}`;
+    if (btn) btn.innerHTML = `<md-icon style="font-size:14px;">shopping_cart</md-icon> <span>Buy (&#8377;${p})</span>`;
+  }
+  
+  if (pricingData["weekly"]) {
+    const p = pricingData["weekly"].discountedPrice !== undefined ? pricingData["weekly"].discountedPrice : (pricingData["weekly"].price || 119);
+    const c = pricingData["weekly"].originalPrice || 399;
+    const elP = document.getElementById("subPrice_weekly");
+    const elC = document.getElementById("subCutPrice_weekly");
+    const btn = document.getElementById("subBuyBtn_weekly");
+    if (elP) elP.innerHTML = `&#8377;${p}`;
+    if (elC) elC.innerHTML = `&#8377;${c}`;
+    if (btn) btn.innerHTML = `<md-icon style="font-size:15px;">bolt</md-icon> <span>Buy Weekly (&#8377;${p})</span>`;
+  }
+
+  if (pricingData["monthly"]) {
+    const p = pricingData["monthly"].discountedPrice !== undefined ? pricingData["monthly"].discountedPrice : (pricingData["monthly"].price || 299);
+    const c = pricingData["monthly"].originalPrice || 999;
+    const elP = document.getElementById("subPrice_monthly");
+    const elC = document.getElementById("subCutPrice_monthly");
+    const btn = document.getElementById("subBuyBtn_monthly");
+    if (elP) elP.innerHTML = `&#8377;${p}`;
+    if (elC) elC.innerHTML = `&#8377;${c}`;
+    if (btn) btn.innerHTML = `<md-icon style="font-size:14px;">stars</md-icon> <span>Buy Pro (&#8377;${p})</span>`;
+  }
+}
+
 // Refresh subscription from storage
 async function refreshSubscriptionState() {
   if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
     try {
-      const data = await chrome.storage.local.get(["tatkal_auth_user", "tatkal_subscription", "tatkal_active_sub"]);
+      const data = await chrome.storage.local.get(["tatkal_auth_user", "tatkal_subscription", "tatkal_active_sub", "tatkal_custom_pricing"]);
       currentAuthUser = data.tatkal_auth_user || null;
       currentSubscription = data.tatkal_subscription || data.tatkal_active_sub || null;
+      if (data.tatkal_custom_pricing) {
+        applyCustomPricing(data.tatkal_custom_pricing);
+      }
     } catch (e) {
       console.warn("Storage get failed:", e);
     }
@@ -1717,10 +1807,12 @@ function renderAuthAndSubscriptionUI() {
   const headerPassName = document.getElementById("headerPassName");
 
   const dialogAvatar = document.getElementById("dialogUserAvatar");
+  const dialogAvatarDot = document.getElementById("dialogAvatarStatusDot");
   const dialogName = document.getElementById("dialogUserName");
   const dialogEmail = document.getElementById("dialogUserEmail");
   const dialogBadge = document.getElementById("dialogSubStatusBadge");
   const dialogActivePlanBox = document.getElementById("dialogActivePlanBox");
+  const dialogInactivePlanBox = document.getElementById("dialogInactivePlanBox");
   const dialogActivePlanTitle = document.getElementById("dialogActivePlanTitle");
   const dialogActivePlanExpiry = document.getElementById("dialogActivePlanExpiry");
 
@@ -1751,9 +1843,13 @@ function renderAuthAndSubscriptionUI() {
     }
   }
 
-  // Update Account Dialog
+  // Update Account Profile Modal
   if (dialogAvatar) {
     dialogAvatar.src = (hasUser && currentAuthUser.photoURL) ? currentAuthUser.photoURL : "assets/rabbit_32.png";
+  }
+  if (dialogAvatarDot) {
+    if (hasActiveSub) dialogAvatarDot.classList.add("active");
+    else dialogAvatarDot.classList.remove("active");
   }
   if (dialogName) {
     dialogName.textContent = hasUser ? (currentAuthUser.displayName || currentAuthUser.email.split("@")[0]) : "Guest User";
@@ -1764,23 +1860,24 @@ function renderAuthAndSubscriptionUI() {
 
   if (dialogBadge) {
     if (!hasUser) {
-      dialogBadge.className = "m3-status-chip-sub inactive";
+      dialogBadge.className = "tr-status-pill inactive";
       dialogBadge.textContent = "Sign-In Required";
     } else if (hasActiveSub) {
-      dialogBadge.className = "m3-status-chip-sub active";
-      dialogBadge.textContent = "Active Pass";
+      dialogBadge.className = "tr-status-pill active";
+      dialogBadge.textContent = "PRO PASS ACTIVE";
     } else if (currentSubscription && currentSubscription.isSuspended) {
-      dialogBadge.className = "m3-status-chip-sub suspended";
-      dialogBadge.textContent = "Suspended";
+      dialogBadge.className = "tr-status-pill inactive";
+      dialogBadge.textContent = "Pass Suspended";
     } else {
-      dialogBadge.className = "m3-status-chip-sub inactive";
+      dialogBadge.className = "tr-status-pill inactive";
       dialogBadge.textContent = "No Active Pass";
     }
   }
 
-  if (dialogActivePlanBox) {
+  if (dialogActivePlanBox && dialogInactivePlanBox) {
     if (hasActiveSub && currentSubscription) {
       dialogActivePlanBox.style.display = "block";
+      dialogInactivePlanBox.style.display = "none";
       const planName = currentSubscription.plan ? currentSubscription.plan.toUpperCase() + " PASS" : "PRO PASS";
       if (dialogActivePlanTitle) dialogActivePlanTitle.textContent = planName;
       if (dialogActivePlanExpiry && currentSubscription.validUntil) {
@@ -1791,6 +1888,7 @@ function renderAuthAndSubscriptionUI() {
       }
     } else {
       dialogActivePlanBox.style.display = "none";
+      dialogInactivePlanBox.style.display = "block";
     }
   }
 
@@ -1811,6 +1909,16 @@ function renderAuthAndSubscriptionUI() {
     if (btnStartAutomation) {
       btnStartAutomation.disabled = false; // Keep clickable to guide user
       btnStartAutomation.innerHTML = '<md-icon slot="icon">lock</md-icon> Start Automation (Pass Required)';
+    }
+  }
+
+  // Sign-In Modal Management (Task 1: Show sign-in popup when logged out / unauthenticated)
+  const authModal = document.getElementById("authSignInModal");
+  if (authModal) {
+    if (!hasUser) {
+      authModal.style.display = "flex";
+    } else {
+      authModal.style.display = "none";
     }
   }
 }

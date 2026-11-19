@@ -341,6 +341,7 @@
       syncUserRecord, 
       isSubscriptionActive,
       parseTimestamp,
+      loadLivePricing,
       SUBSCRIPTION_PLANS 
     } from "./firebase-config.js";
 
@@ -487,7 +488,8 @@
               chrome.runtime.sendMessage(targetExtId, {
                 type: "TATKAL_AUTH_SYNC",
                 user: userObj,
-                subscription: subObj
+                subscription: subObj,
+                pricing: SUBSCRIPTION_PLANS
               }, (resp) => {
                 if (chrome.runtime.lastError) {
                   console.log("Extension connection notice:", chrome.runtime.lastError.message);
@@ -611,6 +613,30 @@
       checkoutModal.classList.add("open");
     }
 
+    // Dynamically render pricing cards from live pricing
+    function renderPricingCards() {
+      document.querySelectorAll(".pricing-card").forEach(card => {
+        const buyBtn = card.querySelector(".btnBuyPlan");
+        if (!buyBtn) return;
+        const planId = buyBtn.getAttribute("data-plan");
+        const plan = SUBSCRIPTION_PLANS[planId];
+        if (!plan) return;
+
+        const cutPriceEl = card.querySelector(".pricing-cut-price");
+        if (cutPriceEl) cutPriceEl.innerHTML = `&#8377;${plan.originalPrice}`;
+
+        const priceEl = card.querySelector(".pricing-price");
+        if (priceEl) priceEl.innerHTML = `<span class="pricing-currency">&#8377;</span>${plan.discountedPrice}`;
+
+        const iconName = planId === "monthly" ? "stars" : (planId === "weekly" ? "bolt" : "shopping_cart");
+        const planPrefix = planId === "monthly" ? "Monthly Pro" : (planId === "weekly" ? "Weekly" : "2-Day");
+        buyBtn.innerHTML = `<span class="material-symbols-outlined">${iconName}</span><span>Buy ${planPrefix} (&#8377;${plan.discountedPrice})</span>`;
+      });
+    }
+
+    // Load Live Pricing
+    loadLivePricing().then(() => renderPricingCards());
+
     document.querySelectorAll(".btnBuyPlan").forEach(btn => {
       btn.addEventListener("click", () => {
         openCheckout(btn.getAttribute("data-plan"));
@@ -704,6 +730,7 @@
           displayName: userPayload.displayName,
           photoURL: userPayload.photoURL,
           subscription: activeSubObj,
+          pricing: SUBSCRIPTION_PLANS,
           timestamp: Date.now()
         };
         const syncToken = btoa(unescape(encodeURIComponent(JSON.stringify(tokenData))));
