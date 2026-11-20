@@ -44,6 +44,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     await initData();
     setupNavigation();
     setupTipsDialog();
+    setupWindowDisplayMode();
     setupAuthAndSubscription();
     setupSiteVersionSwitcher();
     setupStationAutocomplete();
@@ -823,16 +824,42 @@ async function savePassengerState() {
   await storageManager.saveActivePassengers(activePassengers);
 }
 
+// Ensure Journey & Passenger Templates Are Saved For Background Schedulers
+async function ensureJourneyAndPassengersSaved() {
+  if (!activeJourney) {
+    activeJourney = {
+      sourceStation: "",
+      destinationStation: "",
+      journeyDate: "",
+      travelClass: "3A",
+      quota: "TQ",
+      trainNumber: "",
+      irctcSpaBase: "nget"
+    };
+  }
+  if (!activeJourney.id) {
+    activeJourney.id = "journey_" + Date.now();
+  }
+  await storageManager.upsertJourneyTemplate(activeJourney);
+  await storageManager.saveActiveJourney(activeJourney);
+  if (activePassengers && activePassengers.length > 0) {
+    await storageManager.saveActivePassengers(activePassengers);
+    await storageManager.savePassengerProfiles(activePassengers);
+  }
+}
+
 // 8. Schedulers Controls
 function setupSchedulerControls() {
+  // Tatkal Journey-Date Scheduler
   const btnSetTatkal = document.getElementById("btnSetTatkalSchedule");
   if (btnSetTatkal) {
     btnSetTatkal.addEventListener("click", async () => {
       try {
         if (!activeJourney || !activeJourney.journeyDate) {
-          alert("Please select a journey date first.");
+          alert("Please select a journey date in the Journey tab first.");
           return;
         }
+        await ensureJourneyAndPassengersSaved();
         const scheduleId = "tatkal_" + Date.now();
         const payload = {
           id: scheduleId,
@@ -849,7 +876,141 @@ function setupSchedulerControls() {
         alert(`⚡ Tatkal Auto-Start Scheduled on ${activeJourney.irctcSpaBase === 'eticket' ? 'New Site' : 'Old Site'}! The extension will automatically open IRCTC and begin booking 30 seconds before window.`);
         renderActiveSchedules();
       } catch (err) {
-        alert("Error: " + (err.message || err));
+        alert("Scheduling Error: " + (err.message || err));
+      }
+    });
+  }
+
+  // 1-Click Quick Presets: 9:00 AM Advance Booking
+  const btnAdvance9AM = document.getElementById("btnSchedAdvance9AM");
+  if (btnAdvance9AM) {
+    btnAdvance9AM.addEventListener("click", async () => {
+      try {
+        await ensureJourneyAndPassengersSaved();
+        const scheduleId = "advance_9am_" + Date.now();
+        const payload = {
+          id: scheduleId,
+          triggerTimeIst: "09:00",
+          leadTimeSeconds: 30,
+          journeyTemplateId: activeJourney.id,
+          passengerProfileIds: activePassengers.map(p => p.id),
+          irctcSpaBase: activeJourney.irctcSpaBase || "nget",
+          windowTimedBooking: {
+            openHour: 9,
+            openMinute: 0,
+            classClickSecond: 5,
+            classClickDelayMs: 100
+          }
+        };
+
+        await timedScheduler.scheduleBooking(payload);
+        alert(`📅 Advance Booking (09:00 AM) Scheduled! Browser will launch at 08:59:30 AM IST.`);
+        renderActiveSchedules();
+      } catch (err) {
+        alert("Scheduling Error: " + (err.message || err));
+      }
+    });
+  }
+
+  // 1-Click Quick Presets: 10:00 AM AC Tatkal
+  const btnTatkal10AM = document.getElementById("btnSchedTatkal10AM");
+  if (btnTatkal10AM) {
+    btnTatkal10AM.addEventListener("click", async () => {
+      try {
+        await ensureJourneyAndPassengersSaved();
+        const scheduleId = "tatkal_10am_" + Date.now();
+        const payload = {
+          id: scheduleId,
+          triggerTimeIst: "10:00",
+          leadTimeSeconds: 30,
+          journeyTemplateId: activeJourney.id,
+          passengerProfileIds: activePassengers.map(p => p.id),
+          irctcSpaBase: activeJourney.irctcSpaBase || "nget",
+          windowTimedBooking: {
+            openHour: 10,
+            openMinute: 0,
+            classClickSecond: 7,
+            classClickDelayMs: 100
+          }
+        };
+
+        await timedScheduler.scheduleBooking(payload);
+        alert(`⚡ AC Tatkal (10:00 AM) Scheduled! Browser opens at 09:59:30 AM and refreshes class at 10:00:07 AM IST.`);
+        renderActiveSchedules();
+      } catch (err) {
+        alert("Scheduling Error: " + (err.message || err));
+      }
+    });
+  }
+
+  // 1-Click Quick Presets: 11:00 AM Sleeper Tatkal
+  const btnTatkal11AM = document.getElementById("btnSchedTatkal11AM");
+  if (btnTatkal11AM) {
+    btnTatkal11AM.addEventListener("click", async () => {
+      try {
+        await ensureJourneyAndPassengersSaved();
+        const scheduleId = "tatkal_11am_" + Date.now();
+        const payload = {
+          id: scheduleId,
+          triggerTimeIst: "11:00",
+          leadTimeSeconds: 30,
+          journeyTemplateId: activeJourney.id,
+          passengerProfileIds: activePassengers.map(p => p.id),
+          irctcSpaBase: activeJourney.irctcSpaBase || "nget",
+          windowTimedBooking: {
+            openHour: 11,
+            openMinute: 0,
+            classClickSecond: 7,
+            classClickDelayMs: 100
+          }
+        };
+
+        await timedScheduler.scheduleBooking(payload);
+        alert(`⚡ Sleeper / Non-AC Tatkal (11:00 AM) Scheduled! Browser opens at 10:59:30 AM and refreshes class at 11:00:07 AM IST.`);
+        renderActiveSchedules();
+      } catch (err) {
+        alert("Scheduling Error: " + (err.message || err));
+      }
+    });
+  }
+
+  // Custom Time Scheduler
+  const btnCustomSched = document.getElementById("btnSetCustomSchedule");
+  if (btnCustomSched) {
+    btnCustomSched.addEventListener("click", async () => {
+      try {
+        const timeInput = document.getElementById("inputCustomScheduleTime");
+        const rawTime = timeInput ? timeInput.value.trim() : "";
+        if (!rawTime) {
+          alert("Please select a target booking time (HH:MM).");
+          return;
+        }
+
+        const formattedTime = validateTimeStr(rawTime);
+        const [h, m] = formattedTime.split(":").map(Number);
+
+        await ensureJourneyAndPassengersSaved();
+        const scheduleId = "custom_" + Date.now();
+        const payload = {
+          id: scheduleId,
+          triggerTimeIst: formattedTime,
+          leadTimeSeconds: 30,
+          journeyTemplateId: activeJourney.id,
+          passengerProfileIds: activePassengers.map(p => p.id),
+          irctcSpaBase: activeJourney.irctcSpaBase || "nget",
+          windowTimedBooking: {
+            openHour: h,
+            openMinute: m,
+            classClickSecond: 5,
+            classClickDelayMs: 100
+          }
+        };
+
+        await timedScheduler.scheduleBooking(payload);
+        alert(`⏰ Custom Booking (${formattedTime} IST) Scheduled! Browser will launch 30 seconds before target time.`);
+        renderActiveSchedules();
+      } catch (err) {
+        alert("Scheduling Error: " + (err.message || err));
       }
     });
   }
@@ -906,9 +1067,15 @@ async function renderActiveSchedules() {
   });
 
   activeTimed.forEach(s => {
+    let typeLabel = "Timed Alarm";
+    if (s.id.includes("advance_9am")) typeLabel = "Advance Booking (9 AM)";
+    else if (s.id.includes("tatkal_10am")) typeLabel = "AC Tatkal (10 AM)";
+    else if (s.id.includes("tatkal_11am")) typeLabel = "Sleeper Tatkal (11 AM)";
+    else if (s.id.includes("custom_")) typeLabel = `Custom Alarm (${s.triggerTimeIst})`;
+
     html += `
       <div class="m3-row" style="justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--md-sys-color-surface-container-highest);">
-        <span>⏰ <b>Timed Alarm</b>: ${s.triggerTimeIst} IST</span>
+        <span>⏰ <b>${typeLabel}</b>: Target ${s.triggerTimeIst} IST (Starts 30s before)</span>
         <md-outlined-button class="btn-cancel-timed" data-id="${s.id}"><md-icon slot="icon">close</md-icon>Cancel</md-outlined-button>
       </div>
     `;
@@ -929,6 +1096,141 @@ async function renderActiveSchedules() {
       renderActiveSchedules();
     });
   });
+}
+
+// Window Display Mode, Resizing & Split-Screen Docking
+function setupWindowDisplayMode() {
+  const isWindowMode = window.location.search.includes("mode=window");
+  if (isWindowMode) {
+    document.documentElement.classList.add("mode-window");
+    document.body.classList.add("mode-window");
+  }
+
+  const btnWindow = document.getElementById("btnWindowDisplayMode");
+  const popover = document.getElementById("popoverWindowOptions");
+  const btnClose = document.getElementById("btnCloseWindowPopover");
+
+  if (btnWindow && popover) {
+    btnWindow.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const isVisible = popover.style.display !== "none";
+      popover.style.display = isVisible ? "none" : "flex";
+    });
+
+    if (btnClose) {
+      btnClose.addEventListener("click", () => {
+        popover.style.display = "none";
+      });
+    }
+
+    document.addEventListener("click", (e) => {
+      if (popover.style.display !== "none" && !popover.contains(e.target) && !btnWindow.contains(e.target)) {
+        popover.style.display = "none";
+      }
+    });
+  }
+
+  // Load and apply saved size
+  chrome.storage.local.get(["popup_window_size"], (res) => {
+    const size = res.popup_window_size || "default";
+    applyWindowSize(size, false);
+  });
+
+  // Size buttons
+  const sizeBtns = document.querySelectorAll(".m3-size-btn");
+  sizeBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const size = btn.dataset.size || "default";
+      applyWindowSize(size, true);
+    });
+  });
+
+  // Transfer buttons
+  const btnSplit = document.getElementById("btnTransferSplitScreen");
+  if (btnSplit) {
+    btnSplit.addEventListener("click", () => {
+      if (popover) popover.style.display = "none";
+      const targetWidth = 520;
+      const screenW = window.screen.availWidth || 1366;
+      const screenH = window.screen.availHeight || 768;
+      const targetLeft = Math.max(0, screenW - targetWidth);
+
+      if (chrome.windows?.create) {
+        chrome.windows.create({
+          url: chrome.runtime.getURL("index.html?mode=window"),
+          type: "popup",
+          left: targetLeft,
+          top: 0,
+          width: targetWidth,
+          height: screenH,
+          focused: true
+        }, () => {
+          window.close();
+        });
+      } else {
+        window.open(chrome.runtime.getURL("index.html?mode=window"), "_blank", `width=${targetWidth},height=${screenH},left=${targetLeft},top=0`);
+        window.close();
+      }
+    });
+  }
+
+  const btnPopup = document.getElementById("btnTransferPopup");
+  if (btnPopup) {
+    btnPopup.addEventListener("click", () => {
+      if (popover) popover.style.display = "none";
+      if (isWindowMode) {
+        alert("To use extension popup mode, close this window and click the Tatkal Rabbit icon in your Chrome toolbar.");
+        window.close();
+      } else {
+        alert("You are currently in Extension Popup mode!");
+      }
+    });
+  }
+}
+
+function applyWindowSize(size, save = true) {
+  const sizeDimensions = {
+    small: { w: 480, h: 560 },
+    medium: { w: 580, h: 600 },
+    default: { w: 650, h: 600 }
+  };
+
+  const dim = sizeDimensions[size] || sizeDimensions.default;
+
+  // Update active state on size buttons
+  document.querySelectorAll(".m3-size-btn").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.size === size);
+  });
+
+  const isWindowMode = window.location.search.includes("mode=window");
+  if (!isWindowMode) {
+    document.documentElement.classList.remove("size-small", "size-medium", "size-default");
+    document.body.classList.remove("size-small", "size-medium", "size-default");
+    document.documentElement.classList.add(`size-${size}`);
+    document.body.classList.add(`size-${size}`);
+
+    document.documentElement.style.width = `${dim.w}px`;
+    document.documentElement.style.height = `${dim.h}px`;
+    document.body.style.width = `${dim.w}px`;
+    document.body.style.height = `${dim.h}px`;
+  } else {
+    // In detached window mode, resize actual chrome window
+    if (chrome.windows?.getCurrent) {
+      chrome.windows.getCurrent(win => {
+        if (win?.id) {
+          const screenW = window.screen.availWidth || 1366;
+          chrome.windows.update(win.id, {
+            width: dim.w,
+            left: Math.max(0, screenW - dim.w)
+          });
+        }
+      });
+    }
+  }
+
+  if (save) {
+    chrome.storage.local.set({ popup_window_size: size });
+  }
 }
 
 // 9. Preferences Controls

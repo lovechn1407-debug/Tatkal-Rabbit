@@ -2,10 +2,10 @@ import{f as e,l as t,n,o as r,r as i,t as a,v as o,x as s}from"./logger-Cl8-E4U8
 import{c,n as l,o as u,s as d,t as f,v as p,y as m}from"./timed-booking.scheduler-BbyfB0iu.js";
 
 async function h(e,t){
-  let r=await i.getJourneyTemplateById(e);
+  let r=(await i.getJourneyTemplateById(e))||(await i.getActiveJourney());
   if(!r)return null;
   let a=await i.getPassengersByIds(t);
-  if(a.length===0&&(a=await i.getActivePassengers()),a.length===0)return null;
+  if((!a||a.length===0)&&(a=await i.getActivePassengers()),!a||a.length===0)return null;
   let o=await i.getSettings(),s;
   return o.autoFillLogin&&(s=await n()??void 0),{journey:r,passengers:a,loginCredentials:s};
 }
@@ -113,23 +113,15 @@ async function S(e,t){
 
   if(e.type==="GET_STATUS")return C(n);
 
-  if(e.type==="STOP_AUTOMATION"){
-    let r=b??n;
-    if(r)await O(r,e);
-    b=null;
-    await i.saveAutomationSnapshot({context:{state:"IDLE",suspended:!1},statusMessage:"Automation stopped",tabId:void 0,updatedAt:new Date().toISOString()});
-    return{ok:!0,message:"Automation stopped"};
-  }
-
   let r=b??n;
   if(!r)return{ok:!1,error:"No automation tab found. Open IRCTC and try again."};
   let res=await O(r,e);
   if(res.ok&&res.data){
     let t=res.data;
-    e.type==="RESUME_AUTOMATION"&&await T({
+    (e.type==="STOP_AUTOMATION"||e.type==="RESUME_AUTOMATION")&&await T({
       context:t,
       state:t.state,
-      message:"Automation resumed"
+      message:e.type==="STOP_AUTOMATION"?t.suspended?"Automation stopped — click Start to run again or Resume to continue":"Automation stopped":"Automation resumed"
     },r);
   }
   return res;

@@ -80,7 +80,12 @@ function R(e,t=new Date,n=0){
     s=e.getUTCFullYear();c=e.getUTCMonth();l=e.getUTCDate();
   }
   let f=new Date(Date.UTC(s,c,l,r,i,0)-L*60*1e3);
-  return new Date(f.getTime()-n*1e3);
+  let res=new Date(f.getTime()-n*1e3);
+  if(res.getTime()<=Date.now()){
+    let e2=new Date(Date.UTC(s,c,l)+864e5);
+    res=new Date(Date.UTC(e2.getUTCFullYear(),e2.getUTCMonth(),e2.getUTCDate(),r,i,0)-L*60*1e3-n*1e3);
+  }
+  return res;
 }
 
 function z(e){
@@ -99,7 +104,9 @@ function B(e){
 var V=new r("TimedBookingScheduler"),H="timed-booking-",U=new class{
   async scheduleBooking(e,t){
     let r=R(e.triggerTimeIst,new Date,e.leadTimeSeconds??0);
-    if(r.getTime()<=Date.now())throw Error("Scheduled time has already passed for today");
+    if(r.getTime()<=Date.now()){
+      r=new Date(r.getTime()+864e5);
+    }
     let i={...e,scheduledFor:r.toISOString(),enabled:!0};
     await chrome.alarms.create(`${H}${e.id}`,{when:r.getTime()});
     await n.upsertTimedBookingSchedule(i);

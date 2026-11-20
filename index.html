@@ -33,6 +33,71 @@
         <span id="istClockText">--:--:--</span>
       </div>
 
+      <!-- Window Size & Split-Screen Transfer Button -->
+      <div class="m3-window-menu-wrapper" style="position: relative;">
+        <md-icon-button id="btnWindowDisplayMode" title="Window Size & Display Options">
+          <md-icon>open_in_new</md-icon>
+        </md-icon-button>
+
+        <!-- Window Options Popover -->
+        <div id="popoverWindowOptions" class="m3-window-popover" style="display: none;">
+          <div class="m3-popover-header">
+            <div class="m3-popover-title-row">
+              <md-icon style="font-size: 16px; color: var(--md-sys-color-primary);">aspect_ratio</md-icon>
+              <span class="m3-popover-title">Window & Display</span>
+            </div>
+            <button type="button" class="m3-popover-close-btn" id="btnCloseWindowPopover" title="Close">×</button>
+          </div>
+
+          <!-- Section 1: Resize Window -->
+          <div class="m3-popover-section">
+            <div class="m3-popover-section-label">RESIZE WINDOW</div>
+            <div class="m3-window-size-grid">
+              <button type="button" class="m3-size-btn" data-size="small">
+                <span class="m3-size-name">Small</span>
+                <span class="m3-size-dim">480 × 560</span>
+              </button>
+              <button type="button" class="m3-size-btn" data-size="medium">
+                <span class="m3-size-name">Medium</span>
+                <span class="m3-size-dim">580 × 600</span>
+              </button>
+              <button type="button" class="m3-size-btn active" data-size="default">
+                <span class="m3-size-name">Default</span>
+                <span class="m3-size-dim">650 × 600</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="m3-popover-divider"></div>
+
+          <!-- Section 2: Transfer Window -->
+          <div class="m3-popover-section">
+            <div class="m3-popover-section-label">TRANSFER WINDOW</div>
+            <div class="m3-transfer-options-list">
+              <button type="button" class="m3-transfer-card" id="btnTransferPopup">
+                <div class="m3-transfer-icon-box">
+                  <md-icon>tab</md-icon>
+                </div>
+                <div class="m3-transfer-content">
+                  <div class="m3-transfer-heading">Extension Popup</div>
+                  <div class="m3-transfer-desc">Standard Chrome toolbar drop-down</div>
+                </div>
+              </button>
+
+              <button type="button" class="m3-transfer-card" id="btnTransferSplitScreen">
+                <div class="m3-transfer-icon-box">
+                  <md-icon>dock_to_right</md-icon>
+                </div>
+                <div class="m3-transfer-content">
+                  <div class="m3-transfer-heading">Split-Screen (Right Side)</div>
+                  <div class="m3-transfer-desc">Pinned side-by-side with IRCTC</div>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Tips, FAQ & Guidelines Button -->
       <md-icon-button id="btnOpenTips" title="Tips, FAQ, Caution & Guide">
         <md-icon>tips_and_updates</md-icon>
@@ -565,14 +630,71 @@
 
     <!-- PANE 5: TATKAL CLOCK & SCHEDULER -->
     <section id="pane-scheduler" class="m3-pane">
+      <!-- Tatkal Countdown Card -->
       <div class="m3-card" style="text-align: center;">
         <span id="tatkalBannerTitle" class="m3-headline">⚡ Tatkal Opening Countdown</span>
         <div id="tatkalCountdownTimer" class="m3-countdown-display">00:00:00</div>
-        <div class="m3-supporting-text" style="margin-bottom: 14px;">Synced to Indian Standard Time (IST)</div>
+        <div class="m3-supporting-text" style="margin-bottom: 12px;">Synced to Indian Standard Time (IST)</div>
 
-        <div class="m3-row" style="justify-content: center; gap: 12px;">
-          <md-filled-tonal-button id="btnSetTatkalSchedule">
-            <md-icon slot="icon">alarm_add</md-icon>Schedule Tatkal Auto-Start (30s Before Window)
+        <div class="m3-row" style="justify-content: center; gap: 8px;">
+          <md-filled-tonal-button id="btnSetTatkalSchedule" title="Calculates opening date & time based on journey date">
+            <md-icon slot="icon">alarm_add</md-icon>Schedule by Journey Date (Tatkal)
+          </md-filled-tonal-button>
+        </div>
+      </div>
+
+      <!-- Quick 1-Click Booking Schedulers (9 AM Advance, 10 AM AC Tatkal, 11 AM Non-AC Tatkal) -->
+      <div class="m3-card">
+        <div class="m3-section-headline">
+          <md-icon>bolt</md-icon>
+          <span>Quick Booking Presets (Starts 30s Before Window)</span>
+        </div>
+        <p class="m3-supporting-text" style="margin-bottom: 12px;">
+          One-click scheduling for official Indian Railways reservation windows. Starts browser, fills journey & preps train 30s before:
+        </p>
+        <div class="m3-quick-sched-grid">
+          <!-- 9:00 AM Advance Booking -->
+          <button type="button" class="m3-sched-preset-card" id="btnSchedAdvance9AM">
+            <div class="m3-sched-preset-badge">ADVANCE</div>
+            <div class="m3-sched-preset-time">09:00 AM</div>
+            <div class="m3-sched-preset-name">Advance Booking</div>
+            <div class="m3-sched-preset-sub">Auto-starts at 08:59:30 AM</div>
+          </button>
+
+          <!-- 10:00 AM AC Tatkal -->
+          <button type="button" class="m3-sched-preset-card highlight-ac" id="btnSchedTatkal10AM">
+            <div class="m3-sched-preset-badge ac">AC TATKAL</div>
+            <div class="m3-sched-preset-time">10:00 AM</div>
+            <div class="m3-sched-preset-name">AC Classes (1A/2A/3A/CC)</div>
+            <div class="m3-sched-preset-sub">Starts 09:59:30 AM • Sync 10:00:07</div>
+          </button>
+
+          <!-- 11:00 AM Sleeper Tatkal -->
+          <button type="button" class="m3-sched-preset-card highlight-sl" id="btnSchedTatkal11AM">
+            <div class="m3-sched-preset-badge sl">SLEEPER TATKAL</div>
+            <div class="m3-sched-preset-time">11:00 AM</div>
+            <div class="m3-sched-preset-name">Non-AC (SL / 2S)</div>
+            <div class="m3-sched-preset-sub">Starts 10:59:30 AM • Sync 11:00:07</div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Custom Time Scheduler -->
+      <div class="m3-card">
+        <div class="m3-section-headline">
+          <md-icon>schedule</md-icon>
+          <span>Custom Time Scheduler</span>
+        </div>
+        <p class="m3-supporting-text" style="margin-bottom: 10px;">
+          Set any specific opening or reservation time (24-hour IST). Automation launches 30 seconds prior:
+        </p>
+        <div class="m3-custom-sched-row">
+          <div class="m3-time-input-group">
+            <label for="inputCustomScheduleTime" class="m3-label-text">Target Time (IST):</label>
+            <input type="time" id="inputCustomScheduleTime" value="10:00" class="m3-input m3-time-input" />
+          </div>
+          <md-filled-tonal-button id="btnSetCustomSchedule">
+            <md-icon slot="icon">alarm_add</md-icon>Schedule Custom Time
           </md-filled-tonal-button>
         </div>
       </div>
