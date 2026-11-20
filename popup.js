@@ -848,6 +848,37 @@ async function ensureJourneyAndPassengersSaved() {
   }
 }
 
+// Get Schedule Metadata (Template Name or Active Filled Details)
+function getScheduleMetadata() {
+  const select = document.getElementById("selectJourneyTemplate");
+  const selectedTemplateId = select ? select.value : "";
+  let templateName = "";
+
+  if (selectedTemplateId) {
+    const found = journeyTemplates.find(t => t.id === selectedTemplateId);
+    if (found) {
+      templateName = found.name || `Plan (${found.sourceStation} → ${found.destinationStation})`;
+    }
+  } else if (activeJourney?.name) {
+    templateName = activeJourney.name;
+  }
+
+  const isUsingActiveFilled = !templateName;
+  const routeSummary = `${activeJourney?.sourceStation || "SRC"} → ${activeJourney?.destinationStation || "DST"}`;
+  const trainSummary = activeJourney?.trainNumber ? `Train #${activeJourney.trainNumber}` : "";
+  const classQuotaSummary = `${activeJourney?.travelClass || "3A"} (${activeJourney?.quota || "TQ"})`;
+  const psgnCount = (activePassengers && activePassengers.length) || 0;
+
+  return {
+    templateName: templateName || null,
+    isUsingActiveFilled: isUsingActiveFilled,
+    routeSummary: routeSummary,
+    trainSummary: trainSummary,
+    classQuotaSummary: classQuotaSummary,
+    psgnCount: psgnCount
+  };
+}
+
 // 8. Schedulers Controls
 function setupSchedulerControls() {
   // Tatkal Journey-Date Scheduler
@@ -860,12 +891,19 @@ function setupSchedulerControls() {
           return;
         }
         await ensureJourneyAndPassengersSaved();
+        const meta = getScheduleMetadata();
         const scheduleId = "tatkal_" + Date.now();
         const payload = {
           id: scheduleId,
           journeyTemplateId: activeJourney.id,
           passengerProfileIds: activePassengers.map(p => p.id),
-          irctcSpaBase: activeJourney.irctcSpaBase || "nget"
+          irctcSpaBase: activeJourney.irctcSpaBase || "nget",
+          templateName: meta.templateName,
+          isUsingActiveFilled: meta.isUsingActiveFilled,
+          routeSummary: meta.routeSummary,
+          trainSummary: meta.trainSummary,
+          classQuotaSummary: meta.classQuotaSummary,
+          psgnCount: meta.psgnCount
         };
 
         await tatkalScheduler.scheduleBooking(payload, {
@@ -873,7 +911,8 @@ function setupSchedulerControls() {
           travelClass: activeJourney.travelClass || "3A"
         });
 
-        alert(`⚡ Tatkal Auto-Start Scheduled on ${activeJourney.irctcSpaBase === 'eticket' ? 'New Site' : 'Old Site'}! The extension will automatically open IRCTC and begin booking 30 seconds before window.`);
+        const usingDesc = meta.templateName ? `Saved Template: "${meta.templateName}"` : `Active Filled Details (${meta.routeSummary})`;
+        alert(`⚡ Tatkal Auto-Start Scheduled on ${activeJourney.irctcSpaBase === 'eticket' ? 'New Site' : 'Old Site'}!\nUsing: ${usingDesc}\nThe extension will automatically open IRCTC and begin booking 30 seconds before window.`);
         renderActiveSchedules();
       } catch (err) {
         alert("Scheduling Error: " + (err.message || err));
@@ -887,6 +926,7 @@ function setupSchedulerControls() {
     btnAdvance9AM.addEventListener("click", async () => {
       try {
         await ensureJourneyAndPassengersSaved();
+        const meta = getScheduleMetadata();
         const scheduleId = "advance_9am_" + Date.now();
         const payload = {
           id: scheduleId,
@@ -895,6 +935,12 @@ function setupSchedulerControls() {
           journeyTemplateId: activeJourney.id,
           passengerProfileIds: activePassengers.map(p => p.id),
           irctcSpaBase: activeJourney.irctcSpaBase || "nget",
+          templateName: meta.templateName,
+          isUsingActiveFilled: meta.isUsingActiveFilled,
+          routeSummary: meta.routeSummary,
+          trainSummary: meta.trainSummary,
+          classQuotaSummary: meta.classQuotaSummary,
+          psgnCount: meta.psgnCount,
           windowTimedBooking: {
             openHour: 9,
             openMinute: 0,
@@ -904,7 +950,8 @@ function setupSchedulerControls() {
         };
 
         await timedScheduler.scheduleBooking(payload);
-        alert(`📅 Advance Booking (09:00 AM) Scheduled! Browser will launch at 08:59:30 AM IST.`);
+        const usingDesc = meta.templateName ? `Template "${meta.templateName}"` : `Active Filled Details (${meta.routeSummary})`;
+        alert(`📅 Advance Booking (09:00 AM) Scheduled!\nUsing: ${usingDesc}\nBrowser will launch at 08:59:30 AM IST.`);
         renderActiveSchedules();
       } catch (err) {
         alert("Scheduling Error: " + (err.message || err));
@@ -918,6 +965,7 @@ function setupSchedulerControls() {
     btnTatkal10AM.addEventListener("click", async () => {
       try {
         await ensureJourneyAndPassengersSaved();
+        const meta = getScheduleMetadata();
         const scheduleId = "tatkal_10am_" + Date.now();
         const payload = {
           id: scheduleId,
@@ -926,6 +974,12 @@ function setupSchedulerControls() {
           journeyTemplateId: activeJourney.id,
           passengerProfileIds: activePassengers.map(p => p.id),
           irctcSpaBase: activeJourney.irctcSpaBase || "nget",
+          templateName: meta.templateName,
+          isUsingActiveFilled: meta.isUsingActiveFilled,
+          routeSummary: meta.routeSummary,
+          trainSummary: meta.trainSummary,
+          classQuotaSummary: meta.classQuotaSummary,
+          psgnCount: meta.psgnCount,
           windowTimedBooking: {
             openHour: 10,
             openMinute: 0,
@@ -935,7 +989,8 @@ function setupSchedulerControls() {
         };
 
         await timedScheduler.scheduleBooking(payload);
-        alert(`⚡ AC Tatkal (10:00 AM) Scheduled! Browser opens at 09:59:30 AM and refreshes class at 10:00:07 AM IST.`);
+        const usingDesc = meta.templateName ? `Template "${meta.templateName}"` : `Active Filled Details (${meta.routeSummary})`;
+        alert(`⚡ AC Tatkal (10:00 AM) Scheduled!\nUsing: ${usingDesc}\nBrowser opens at 09:59:30 AM and syncs class at 10:00:07 AM IST.`);
         renderActiveSchedules();
       } catch (err) {
         alert("Scheduling Error: " + (err.message || err));
@@ -949,6 +1004,7 @@ function setupSchedulerControls() {
     btnTatkal11AM.addEventListener("click", async () => {
       try {
         await ensureJourneyAndPassengersSaved();
+        const meta = getScheduleMetadata();
         const scheduleId = "tatkal_11am_" + Date.now();
         const payload = {
           id: scheduleId,
@@ -957,6 +1013,12 @@ function setupSchedulerControls() {
           journeyTemplateId: activeJourney.id,
           passengerProfileIds: activePassengers.map(p => p.id),
           irctcSpaBase: activeJourney.irctcSpaBase || "nget",
+          templateName: meta.templateName,
+          isUsingActiveFilled: meta.isUsingActiveFilled,
+          routeSummary: meta.routeSummary,
+          trainSummary: meta.trainSummary,
+          classQuotaSummary: meta.classQuotaSummary,
+          psgnCount: meta.psgnCount,
           windowTimedBooking: {
             openHour: 11,
             openMinute: 0,
@@ -966,7 +1028,8 @@ function setupSchedulerControls() {
         };
 
         await timedScheduler.scheduleBooking(payload);
-        alert(`⚡ Sleeper / Non-AC Tatkal (11:00 AM) Scheduled! Browser opens at 10:59:30 AM and refreshes class at 11:00:07 AM IST.`);
+        const usingDesc = meta.templateName ? `Template "${meta.templateName}"` : `Active Filled Details (${meta.routeSummary})`;
+        alert(`⚡ Sleeper / Non-AC Tatkal (11:00 AM) Scheduled!\nUsing: ${usingDesc}\nBrowser opens at 10:59:30 AM and syncs class at 11:00:07 AM IST.`);
         renderActiveSchedules();
       } catch (err) {
         alert("Scheduling Error: " + (err.message || err));
@@ -990,6 +1053,7 @@ function setupSchedulerControls() {
         const [h, m] = formattedTime.split(":").map(Number);
 
         await ensureJourneyAndPassengersSaved();
+        const meta = getScheduleMetadata();
         const scheduleId = "custom_" + Date.now();
         const payload = {
           id: scheduleId,
@@ -998,6 +1062,12 @@ function setupSchedulerControls() {
           journeyTemplateId: activeJourney.id,
           passengerProfileIds: activePassengers.map(p => p.id),
           irctcSpaBase: activeJourney.irctcSpaBase || "nget",
+          templateName: meta.templateName,
+          isUsingActiveFilled: meta.isUsingActiveFilled,
+          routeSummary: meta.routeSummary,
+          trainSummary: meta.trainSummary,
+          classQuotaSummary: meta.classQuotaSummary,
+          psgnCount: meta.psgnCount,
           windowTimedBooking: {
             openHour: h,
             openMinute: m,
@@ -1007,7 +1077,8 @@ function setupSchedulerControls() {
         };
 
         await timedScheduler.scheduleBooking(payload);
-        alert(`⏰ Custom Booking (${formattedTime} IST) Scheduled! Browser will launch 30 seconds before target time.`);
+        const usingDesc = meta.templateName ? `Template "${meta.templateName}"` : `Active Filled Details (${meta.routeSummary})`;
+        alert(`⏰ Custom Booking (${formattedTime} IST) Scheduled!\nUsing: ${usingDesc}\nBrowser will launch 30 seconds before target time.`);
         renderActiveSchedules();
       } catch (err) {
         alert("Scheduling Error: " + (err.message || err));
@@ -1051,32 +1122,84 @@ async function renderActiveSchedules() {
   const activeTimed = (timedList || []).filter(s => s.enabled);
 
   if (activeTatkal.length === 0 && activeTimed.length === 0) {
-    listEl.textContent = "No active alarms scheduled.";
+    listEl.innerHTML = `<div class="m3-supporting-text" style="text-align: center; padding: 12px 0;">No active alarms scheduled.</div>`;
     return;
   }
 
   let html = "";
+
   activeTatkal.forEach(s => {
     const siteTag = s.irctcSpaBase === "eticket" ? "New Site" : "Old Site";
+    const planText = s.templateName
+      ? `<span class="m3-sched-tag template"><md-icon style="font-size: 13px;">bookmark</md-icon>Template: <b>${s.templateName}</b></span>`
+      : `<span class="m3-sched-tag active-filled"><md-icon style="font-size: 13px;">edit_note</md-icon>Using <b>Active Filled Details</b></span>`;
+
+    const routeText = s.routeSummary || (activeJourney ? `${activeJourney.sourceStation} → ${activeJourney.destinationStation}` : "");
+    const classText = s.classQuotaSummary || (activeJourney ? `${activeJourney.travelClass || "3A"} (${activeJourney.quota || "TQ"})` : "");
+    const psgnText = s.psgnCount !== undefined ? `${s.psgnCount} Psgn${s.psgnCount === 1 ? "" : "s"}` : `${activePassengers.length} Psgn`;
+
     html += `
-      <div class="m3-row" style="justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--md-sys-color-surface-container-highest);">
-        <span>⚡ <b>Tatkal Alarm (${siteTag})</b>: ${new Date(s.scheduledFor).toLocaleTimeString()} IST</span>
-        <md-outlined-button class="btn-cancel-tatkal" data-id="${s.id}"><md-icon slot="icon">close</md-icon>Cancel</md-outlined-button>
+      <div class="m3-sched-item-card">
+        <div class="m3-sched-item-top">
+          <div class="m3-sched-title-group">
+            <span class="m3-sched-time-title">⚡ <b>Tatkal Alarm (${siteTag})</b></span>
+            <span class="m3-sched-time-sub">Scheduled for ${new Date(s.scheduledFor).toLocaleTimeString()} IST</span>
+          </div>
+          <md-outlined-button class="btn-cancel-tatkal m3-sched-cancel-btn" data-id="${s.id}">
+            <md-icon slot="icon">close</md-icon>Cancel
+          </md-outlined-button>
+        </div>
+        <div class="m3-sched-meta-box">
+          <div class="m3-sched-plan-row">${planText}</div>
+          <div class="m3-sched-sub-row">
+            <span>${routeText}</span>
+            <span>•</span>
+            <span>${classText}</span>
+            <span>•</span>
+            <span>${psgnText}</span>
+          </div>
+        </div>
       </div>
     `;
   });
 
   activeTimed.forEach(s => {
     let typeLabel = "Timed Alarm";
-    if (s.id.includes("advance_9am")) typeLabel = "Advance Booking (9 AM)";
-    else if (s.id.includes("tatkal_10am")) typeLabel = "AC Tatkal (10 AM)";
-    else if (s.id.includes("tatkal_11am")) typeLabel = "Sleeper Tatkal (11 AM)";
-    else if (s.id.includes("custom_")) typeLabel = `Custom Alarm (${s.triggerTimeIst})`;
+    let iconName = "alarm";
+    if (s.id.includes("advance_9am")) { typeLabel = "Advance Booking (9 AM)"; iconName = "history_edu"; }
+    else if (s.id.includes("tatkal_10am")) { typeLabel = "AC Tatkal (10 AM)"; iconName = "ac_unit"; }
+    else if (s.id.includes("tatkal_11am")) { typeLabel = "Sleeper Tatkal (11 AM)"; iconName = "bed"; }
+    else if (s.id.includes("custom_")) { typeLabel = `Custom Alarm (${s.triggerTimeIst})`; iconName = "schedule"; }
+
+    const planText = s.templateName
+      ? `<span class="m3-sched-tag template"><md-icon style="font-size: 13px;">bookmark</md-icon>Template: <b>${s.templateName}</b></span>`
+      : `<span class="m3-sched-tag active-filled"><md-icon style="font-size: 13px;">edit_note</md-icon>Using <b>Active Filled Details</b></span>`;
+
+    const routeText = s.routeSummary || (activeJourney ? `${activeJourney.sourceStation} → ${activeJourney.destinationStation}` : "");
+    const classText = s.classQuotaSummary || (activeJourney ? `${activeJourney.travelClass || "3A"} (${activeJourney.quota || "TQ"})` : "");
+    const psgnText = s.psgnCount !== undefined ? `${s.psgnCount} Psgn${s.psgnCount === 1 ? "" : "s"}` : `${activePassengers.length} Psgn`;
 
     html += `
-      <div class="m3-row" style="justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--md-sys-color-surface-container-highest);">
-        <span>⏰ <b>${typeLabel}</b>: Target ${s.triggerTimeIst} IST (Starts 30s before)</span>
-        <md-outlined-button class="btn-cancel-timed" data-id="${s.id}"><md-icon slot="icon">close</md-icon>Cancel</md-outlined-button>
+      <div class="m3-sched-item-card">
+        <div class="m3-sched-item-top">
+          <div class="m3-sched-title-group">
+            <span class="m3-sched-time-title"><md-icon style="font-size: 14px;">${iconName}</md-icon> <b>${typeLabel}</b></span>
+            <span class="m3-sched-time-sub">Target ${s.triggerTimeIst} IST (Starts 30s before)</span>
+          </div>
+          <md-outlined-button class="btn-cancel-timed m3-sched-cancel-btn" data-id="${s.id}">
+            <md-icon slot="icon">close</md-icon>Cancel
+          </md-outlined-button>
+        </div>
+        <div class="m3-sched-meta-box">
+          <div class="m3-sched-plan-row">${planText}</div>
+          <div class="m3-sched-sub-row">
+            <span>${routeText}</span>
+            <span>•</span>
+            <span>${classText}</span>
+            <span>•</span>
+            <span>${psgnText}</span>
+          </div>
+        </div>
       </div>
     `;
   });
@@ -1098,12 +1221,12 @@ async function renderActiveSchedules() {
   });
 }
 
-// Window Display Mode, Resizing & Split-Screen Docking
+// Window Display Mode, Resizing & Side Panel Docking
 function setupWindowDisplayMode() {
-  const isWindowMode = window.location.search.includes("mode=window");
-  if (isWindowMode) {
-    document.documentElement.classList.add("mode-window");
-    document.body.classList.add("mode-window");
+  const isSidePanel = window.location.search.includes("mode=sidepanel");
+  if (isSidePanel) {
+    document.documentElement.classList.add("mode-sidepanel");
+    document.body.classList.add("mode-sidepanel");
   }
 
   const btnWindow = document.getElementById("btnWindowDisplayMode");
@@ -1145,54 +1268,58 @@ function setupWindowDisplayMode() {
     });
   });
 
-  // Transfer buttons
-  const btnSplit = document.getElementById("btnTransferSplitScreen");
-  if (btnSplit) {
-    btnSplit.addEventListener("click", () => {
+  // Transfer button: Chrome Side Panel (Inside the SAME window on the right side)
+  const btnSidePanel = document.getElementById("btnTransferSidePanel");
+  if (btnSidePanel) {
+    if (isSidePanel) {
+      btnSidePanel.classList.add("active");
+    }
+    btnSidePanel.addEventListener("click", async () => {
       if (popover) popover.style.display = "none";
-      const targetWidth = 520;
-      const screenW = window.screen.availWidth || 1366;
-      const screenH = window.screen.availHeight || 768;
-      const targetLeft = Math.max(0, screenW - targetWidth);
-
-      if (chrome.windows?.create) {
-        chrome.windows.create({
-          url: chrome.runtime.getURL("index.html?mode=window"),
-          type: "popup",
-          left: targetLeft,
-          top: 0,
-          width: targetWidth,
-          height: screenH,
-          focused: true
-        }, () => {
+      if (isSidePanel) {
+        alert("You are already using Chrome Side Panel mode!");
+        return;
+      }
+      try {
+        if (chrome.sidePanel?.open) {
+          const currentWin = await chrome.windows.getCurrent();
+          await chrome.sidePanel.open({ windowId: currentWin.id });
           window.close();
-        });
-      } else {
-        window.open(chrome.runtime.getURL("index.html?mode=window"), "_blank", `width=${targetWidth},height=${screenH},left=${targetLeft},top=0`);
-        window.close();
+        } else {
+          alert("Chrome Side Panel is supported on Chrome 114+");
+        }
+      } catch (err) {
+        console.warn("Could not open side panel:", err);
+        alert("Chrome Side Panel opened or you can click Chrome's Side Panel icon on the top right!");
       }
     });
   }
 
+  // Transfer button: Standard Extension Popup
   const btnPopup = document.getElementById("btnTransferPopup");
   if (btnPopup) {
+    if (!isSidePanel) {
+      btnPopup.classList.add("active");
+    }
     btnPopup.addEventListener("click", () => {
       if (popover) popover.style.display = "none";
-      if (isWindowMode) {
-        alert("To use extension popup mode, close this window and click the Tatkal Rabbit icon in your Chrome toolbar.");
-        window.close();
+      if (isSidePanel) {
+        alert("To return to standard popup mode, close the Side Panel (click X at top right) and click the Tatkal Rabbit icon in your Chrome toolbar.");
       } else {
-        alert("You are currently in Extension Popup mode!");
+        alert("You are already in Extension Popup mode!");
       }
     });
   }
 }
 
 function applyWindowSize(size, save = true) {
+  const isSidePanel = window.location.search.includes("mode=sidepanel");
+  if (isSidePanel) return; // Side panel size is managed by Chrome and user dragging
+
   const sizeDimensions = {
-    small: { w: 480, h: 560 },
-    medium: { w: 580, h: 600 },
-    default: { w: 650, h: 600 }
+    small: { w: 420, h: 540 },
+    medium: { w: 520, h: 580 },
+    default: { w: 640, h: 600 }
   };
 
   const dim = sizeDimensions[size] || sizeDimensions.default;
@@ -1202,31 +1329,15 @@ function applyWindowSize(size, save = true) {
     btn.classList.toggle("active", btn.dataset.size === size);
   });
 
-  const isWindowMode = window.location.search.includes("mode=window");
-  if (!isWindowMode) {
-    document.documentElement.classList.remove("size-small", "size-medium", "size-default");
-    document.body.classList.remove("size-small", "size-medium", "size-default");
-    document.documentElement.classList.add(`size-${size}`);
-    document.body.classList.add(`size-${size}`);
+  document.documentElement.classList.remove("size-small", "size-medium", "size-default");
+  document.body.classList.remove("size-small", "size-medium", "size-default");
+  document.documentElement.classList.add(`size-${size}`);
+  document.body.classList.add(`size-${size}`);
 
-    document.documentElement.style.width = `${dim.w}px`;
-    document.documentElement.style.height = `${dim.h}px`;
-    document.body.style.width = `${dim.w}px`;
-    document.body.style.height = `${dim.h}px`;
-  } else {
-    // In detached window mode, resize actual chrome window
-    if (chrome.windows?.getCurrent) {
-      chrome.windows.getCurrent(win => {
-        if (win?.id) {
-          const screenW = window.screen.availWidth || 1366;
-          chrome.windows.update(win.id, {
-            width: dim.w,
-            left: Math.max(0, screenW - dim.w)
-          });
-        }
-      });
-    }
-  }
+  document.documentElement.style.width = `${dim.w}px`;
+  document.documentElement.style.height = `${dim.h}px`;
+  document.body.style.width = `${dim.w}px`;
+  document.body.style.height = `${dim.h}px`;
 
   if (save) {
     chrome.storage.local.set({ popup_window_size: size });

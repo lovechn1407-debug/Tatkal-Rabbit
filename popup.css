@@ -259,17 +259,17 @@ md-assist-chip {
   font-weight: 500;
 }
 
-/* Natural Content-Width Filter Chips for Quota & Travel Class (Matches Reference Design) */
+/* Natural Content-Width Filter Chips for Quota & Travel Class (M3 Style) */
 .m3-quota-class-card {
-  background-color: #ebf3fa !important;
-  border: 1px solid #d9e6f2 !important;
-  border-radius: 14px !important;
+  background-color: var(--md-sys-color-surface-container) !important;
+  border: none !important;
+  border-radius: 16px !important;
   padding: 14px 16px !important;
 }
 
 [data-theme="dark"] .m3-quota-class-card {
-  background-color: #0d1526 !important;
-  border: 1px solid #1e293b !important;
+  background-color: var(--md-sys-color-surface-container) !important;
+  border: none !important;
 }
 
 .m3-quota-class-card .m3-section-headline {
@@ -358,8 +358,8 @@ md-switch {
   align-items: center;
   justify-content: space-between;
   padding: 6px 12px;
-  background-color: #f1f4f9;
-  border-bottom: 1px solid #e2e8f0;
+  background-color: var(--md-sys-color-surface-container);
+  border: none !important;
   flex-shrink: 0;
   gap: 8px;
   box-sizing: border-box;
@@ -367,8 +367,8 @@ md-switch {
 }
 
 [data-theme="dark"] .m3-top-bar {
-  background-color: #0c111d;
-  border-bottom: 1px solid #1e293b;
+  background-color: var(--md-sys-color-surface-container);
+  border: none !important;
 }
 
 .m3-brand {
@@ -568,7 +568,15 @@ md-tabs {
   --md-primary-tab-active-indicator-color: var(--md-sys-color-primary);
   --md-primary-tab-active-indicator-height: 3px;
   flex-shrink: 0;
-  border-bottom: 1px solid var(--md-sys-color-surface-container-high);
+  border: none !important;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+md-tabs::-webkit-scrollbar {
+  display: none;
 }
 
 /* 8. Scrollable Content Area */
@@ -691,20 +699,19 @@ md-tabs {
 }
 
 .m3-meta-tag {
-  background-color: var(--md-sys-color-surface);
+  background-color: var(--md-sys-color-surface-container-high);
   color: var(--md-sys-color-on-surface);
   font-size: 10.5px;
   font-weight: 600;
-  padding: 4px 6px;
-  border-radius: 8px;
-  border: 1px solid var(--md-sys-color-outline-variant);
+  padding: 4px 8px;
+  border-radius: 9999px;
+  border: none !important;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 4px;
   flex: 1 1 0px;
   white-space: nowrap;
-  box-shadow: 0 1px 2px var(--md-sys-color-shadow);
 }
 
 .m3-meta-tag md-icon {
@@ -722,7 +729,7 @@ md-tabs {
   background-color: var(--md-sys-color-surface-container-high);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  border-top: 1px solid var(--md-sys-color-surface-container-highest);
+  border: none !important;
   padding: 8px 16px 10px 16px;
   display: flex;
   flex-direction: column;
@@ -943,9 +950,9 @@ md-tabs {
 }
 
 .m3-gateway-card {
-  background-color: var(--md-sys-color-surface);
-  border: 1px solid var(--md-sys-color-outline-variant);
-  border-radius: 12px;
+  background-color: var(--md-sys-color-surface-container-high);
+  border: none !important;
+  border-radius: 14px;
   padding: 10px 6px;
   display: flex;
   flex-direction: column;
@@ -958,14 +965,14 @@ md-tabs {
 }
 
 .m3-gateway-card:hover {
-  background-color: var(--md-sys-color-surface-container);
-  border-color: var(--md-sys-color-outline);
+  background-color: var(--md-sys-color-surface-container-highest);
+  transform: translateY(-2px);
 }
 
 .m3-gateway-card.selected {
   background-color: var(--md-sys-color-primary-container);
-  border-color: var(--md-sys-color-primary);
-  box-shadow: 0 2px 8px var(--md-sys-color-shadow);
+  color: var(--md-sys-color-on-primary-container);
+  box-shadow: 0 4px 12px rgba(11, 87, 208, 0.25);
 }
 
 .m3-gw-logo {
@@ -1755,10 +1762,10 @@ md-chip-set {
 .tr-profile-modal-card {
   width: 100%;
   max-width: 440px;
-  background: var(--md-sys-color-surface);
-  border: 1px solid var(--md-sys-color-outline-variant);
-  border-radius: 20px;
-  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.4);
+  background: var(--md-sys-color-surface-container-high);
+  border: none !important;
+  border-radius: 28px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
   animation: trScaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   overflow: hidden;
   display: flex;
@@ -1766,16 +1773,16 @@ md-chip-set {
 }
 
 [data-theme="dark"] .tr-profile-modal-card {
-  background: #141a29;
-  border-color: rgba(255, 255, 255, 0.12);
+  background: var(--md-sys-color-surface-container-high);
+  border: none !important;
 }
 
 .tr-modal-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 18px;
-  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  padding: 16px 20px;
+  border: none !important;
   background: var(--md-sys-color-surface-container);
 }
 
@@ -1809,10 +1816,10 @@ md-chip-set {
   display: flex;
   align-items: center;
   gap: 14px;
-  background: var(--md-sys-color-surface-container-high);
+  background: var(--md-sys-color-surface-container);
   padding: 14px;
-  border-radius: 14px;
-  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 18px;
+  border: none !important;
 }
 
 .tr-avatar-wrap {
@@ -2013,18 +2020,18 @@ md-chip-set {
 .tr-auth-modal-card {
   width: 100%;
   max-width: 420px;
-  background: var(--md-sys-color-surface);
-  border: 1px solid var(--md-sys-color-outline-variant);
-  border-radius: 22px;
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+  background: var(--md-sys-color-surface-container-high);
+  border: none !important;
+  border-radius: 28px;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
   animation: trScaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  padding: 16px 20px 24px 20px;
+  padding: 18px 24px 28px 24px;
   box-sizing: border-box;
 }
 
 [data-theme="dark"] .tr-auth-modal-card {
-  background: #141a29;
-  border-color: rgba(255, 255, 255, 0.12);
+  background: var(--md-sys-color-surface-container-high);
+  border: none !important;
 }
 
 .tr-auth-content {
@@ -2094,7 +2101,7 @@ md-chip-set {
 }
 
 /* ==========================================================================
-   Window Display Popover, Window Resizing & Split-Screen Docking
+   Window Display Popover, Window Resizing & Chrome Side Panel Docking
    ========================================================================== */
 .m3-window-menu-wrapper {
   position: relative;
@@ -2106,11 +2113,11 @@ md-chip-set {
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
-  width: 300px;
+  width: 280px;
   background: var(--md-sys-color-surface-container-high);
-  border: 1px solid var(--md-sys-color-outline-variant);
-  border-radius: 16px;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+  border: none !important;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
   padding: 14px;
   z-index: 99999;
   display: flex;
@@ -2175,7 +2182,7 @@ md-chip-set {
 }
 
 .m3-popover-section-label {
-  font-size: 10.5px;
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.6px;
   text-transform: uppercase;
@@ -2190,8 +2197,8 @@ md-chip-set {
 
 .m3-size-btn {
   background: var(--md-sys-color-surface-container);
-  border: 1px solid var(--md-sys-color-outline-variant);
-  border-radius: 10px;
+  border: none !important;
+  border-radius: 12px;
   padding: 8px 4px;
   cursor: pointer;
   display: flex;
@@ -2203,12 +2210,10 @@ md-chip-set {
 
 .m3-size-btn:hover {
   background: var(--md-sys-color-surface-container-highest);
-  border-color: var(--md-sys-color-primary);
 }
 
 .m3-size-btn.active {
   background: var(--md-sys-color-primary-container);
-  border-color: var(--md-sys-color-primary);
 }
 
 .m3-size-btn.active .m3-size-name {
@@ -2235,6 +2240,7 @@ md-chip-set {
   height: 1px;
   background: var(--md-sys-color-surface-container-highest);
   margin: 2px 0;
+  border: none !important;
 }
 
 .m3-transfer-options-list {
@@ -2249,23 +2255,27 @@ md-chip-set {
   gap: 10px;
   padding: 9px 12px;
   background: var(--md-sys-color-surface-container);
-  border: 1px solid var(--md-sys-color-outline-variant);
-  border-radius: 10px;
+  border: none !important;
+  border-radius: 14px;
   cursor: pointer;
   text-align: left;
   transition: all 0.18s ease;
   width: 100%;
+  box-sizing: border-box;
 }
 
 .m3-transfer-card:hover {
   background: var(--md-sys-color-surface-container-highest);
-  border-color: var(--md-sys-color-primary);
   transform: translateY(-1px);
 }
 
 .m3-transfer-card.active {
-  border-color: var(--md-sys-color-primary);
   background: var(--md-sys-color-primary-container);
+}
+
+.m3-transfer-card.active .m3-transfer-heading {
+  color: var(--md-sys-color-primary);
+  font-weight: 700;
 }
 
 .m3-transfer-icon-box {
@@ -2301,54 +2311,122 @@ md-chip-set {
   text-overflow: ellipsis;
 }
 
-/* Standalone Split-Screen Window Mode */
+/* Chrome Side Panel Mode & Detached Window Mode */
+html.mode-sidepanel,
+body.mode-sidepanel,
 html.mode-window,
 body.mode-window {
   width: 100% !important;
+  max-width: 100% !important;
   height: 100vh !important;
-  max-height: 100vh !important;
   min-height: 100vh !important;
+  max-height: 100vh !important;
   border-radius: 0 !important;
   box-shadow: none !important;
+  overflow: hidden !important;
 }
 
-/* Sizing presets on html/body */
+/* Sizing presets on html/body for popup */
 html.size-small, body.size-small {
-  width: 480px;
-  height: 560px;
-  min-height: 560px;
-  max-height: 560px;
+  width: 420px;
+  height: 540px;
+  min-height: 540px;
+  max-height: 540px;
 }
 
 html.size-medium, body.size-medium {
-  width: 580px;
-  height: 600px;
-  min-height: 600px;
-  max-height: 600px;
+  width: 520px;
+  height: 580px;
+  min-height: 580px;
+  max-height: 580px;
 }
 
 html.size-default, body.size-default {
-  width: 650px;
+  width: 640px;
   height: 600px;
   min-height: 600px;
   max-height: 600px;
 }
 
-/* ==========================================================================
-   Quick Scheduler Presets & Custom Scheduler Inputs
-   ========================================================================== */
+/* Responsive Scaling: Prevents any button, header or tab overflow */
+.size-small .m3-header-brand-img,
+.mode-sidepanel .m3-header-brand-img,
+@media (max-width: 520px) {
+  .m3-top-bar {
+    padding: 6px 10px;
+    gap: 6px;
+  }
+
+  .m3-header-brand-img {
+    height: 25px;
+    max-width: 90px;
+  }
+
+  .m3-top-actions {
+    gap: 3px;
+  }
+
+  .m3-top-actions md-icon-button {
+    width: 28px;
+    height: 28px;
+    --md-icon-button-state-layer-width: 28px;
+    --md-icon-button-state-layer-height: 28px;
+    --md-icon-button-icon-size: 16px;
+  }
+
+  .m3-segment-btn {
+    padding: 3px 6px;
+    font-size: 10px;
+  }
+
+  .m3-clock-chip {
+    padding: 3px 6px;
+    font-size: 10px;
+  }
+}
+
+.size-small .m3-segment-btn span,
+.mode-sidepanel .m3-segment-btn span,
+@media (max-width: 440px) {
+  .m3-segment-btn span {
+    display: none;
+  }
+
+  .m3-header-brand-img {
+    height: 22px;
+    max-width: 80px;
+  }
+
+  .m3-clock-chip {
+    padding: 2px 5px;
+    font-size: 9.5px;
+  }
+}
+
+.size-small md-primary-tab,
+.mode-sidepanel md-primary-tab,
+@media (max-width: 520px) {
+  md-primary-tab {
+    padding: 0 6px !important;
+    font-size: 11px !important;
+  }
+}
+
+/* Quick Scheduler Presets */
 .m3-quick-sched-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
   margin-top: 6px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .m3-sched-preset-card {
   position: relative;
   background: var(--md-sys-color-surface-container);
-  border: 1px solid var(--md-sys-color-outline-variant);
-  border-radius: 12px;
+  border: none !important;
+  border-radius: 14px;
   padding: 12px 10px;
   cursor: pointer;
   text-align: left;
@@ -2361,25 +2439,8 @@ html.size-default, body.size-default {
 
 .m3-sched-preset-card:hover {
   transform: translateY(-2px);
-  border-color: var(--md-sys-color-primary);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
   background: var(--md-sys-color-surface-container-high);
-}
-
-.m3-sched-preset-card.highlight-ac {
-  border-color: rgba(37, 99, 235, 0.35);
-}
-
-.m3-sched-preset-card.highlight-ac:hover {
-  border-color: #2563eb;
-}
-
-.m3-sched-preset-card.highlight-sl {
-  border-color: rgba(16, 185, 129, 0.35);
-}
-
-.m3-sched-preset-card.highlight-sl:hover {
-  border-color: #10b981;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
 }
 
 .m3-sched-preset-badge {
@@ -2423,11 +2484,23 @@ html.size-default, body.size-default {
   line-height: 1.3;
 }
 
+.size-small .m3-quick-sched-grid,
+.mode-sidepanel .m3-quick-sched-grid,
+@media (max-width: 520px) {
+  .m3-quick-sched-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}
+
+/* Custom Scheduler Controls */
 .m3-custom-sched-row {
   display: flex;
   align-items: flex-end;
   gap: 12px;
   margin-top: 6px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .m3-time-input-group {
@@ -2440,18 +2513,121 @@ html.size-default, body.size-default {
 .m3-time-input {
   height: 42px;
   padding: 6px 12px;
-  border-radius: 10px;
-  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 12px;
+  border: none !important;
   background: var(--md-sys-color-surface-container);
   color: var(--md-sys-color-on-surface);
   font-family: inherit;
   font-size: 15px;
   font-weight: 600;
   outline: none;
-  transition: border-color 0.18s ease;
+  transition: all 0.18s ease;
 }
 
 .m3-time-input:focus {
-  border-color: var(--md-sys-color-primary);
   background: var(--md-sys-color-surface-container-high);
+  box-shadow: 0 0 0 2px var(--md-sys-color-primary);
+}
+
+.size-small .m3-custom-sched-row,
+.mode-sidepanel .m3-custom-sched-row,
+@media (max-width: 520px) {
+  .m3-custom-sched-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .m3-custom-sched-row md-filled-tonal-button {
+    width: 100%;
+  }
+}
+
+/* Active Schedules List Items (Material 3 Cards) */
+.m3-sched-item-card {
+  background-color: var(--md-sys-color-surface-container-high);
+  border-radius: 14px;
+  padding: 10px 14px;
+  margin-bottom: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border: none !important;
+  transition: all 0.2s ease;
+}
+
+.m3-sched-item-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.m3-sched-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.m3-sched-time-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--md-sys-color-on-surface);
+}
+
+.m3-sched-time-sub {
+  font-size: 10.5px;
+  color: var(--md-sys-color-primary);
+  font-weight: 600;
+}
+
+.m3-sched-cancel-btn {
+  --md-outlined-button-container-shape: 10px;
+  height: 30px;
+  font-size: 11px;
+  padding: 0 10px;
+}
+
+.m3-sched-meta-box {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background-color: var(--md-sys-color-surface-container);
+  border-radius: 10px;
+  padding: 6px 10px;
+}
+
+.m3-sched-plan-row {
+  display: flex;
+  align-items: center;
+}
+
+.m3-sched-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 7px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.m3-sched-tag.template {
+  background-color: rgba(11, 87, 208, 0.12);
+  color: var(--md-sys-color-primary);
+}
+
+.m3-sched-tag.active-filled {
+  background-color: rgba(16, 185, 129, 0.14);
+  color: #10b981;
+}
+
+.m3-sched-sub-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10.5px;
+  color: var(--md-sys-color-on-surface-variant);
+  font-weight: 500;
 }
