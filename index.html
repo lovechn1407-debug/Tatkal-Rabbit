@@ -20,11 +20,13 @@
       <div class="m3-segmented-control">
         <button type="button" id="btnSiteNget" class="m3-segment-btn active" title="Old IRCTC Website (/nget)">
           <md-icon style="font-size:14px;">desktop_windows</md-icon>
-          <span>Old Site</span>
+          <span class="site-label-full">Old Site</span>
+          <span class="site-label-short">Old</span>
         </button>
         <button type="button" id="btnSiteEticket" class="m3-segment-btn" title="New IRCTC Website (/eticket)">
           <md-icon style="font-size:14px;">web</md-icon>
-          <span>New Site</span>
+          <span class="site-label-full">New Site</span>
+          <span class="site-label-short">New</span>
         </button>
       </div>
 
@@ -130,15 +132,18 @@
     </md-primary-tab>
     <md-primary-tab id="tabBtn-preferences">
       <md-icon slot="icon">tune</md-icon>
-      Preferences
+      <span class="tab-label-full">Preferences</span>
+      <span class="tab-label-short">Prefs</span>
     </md-primary-tab>
     <md-primary-tab id="tabBtn-credentials">
       <md-icon slot="icon">lock</md-icon>
-      Credentials & Pay
+      <span class="tab-label-full">Credentials & Pay</span>
+      <span class="tab-label-short">Credentials</span>
     </md-primary-tab>
     <md-primary-tab id="tabBtn-scheduler">
       <md-icon slot="icon">alarm</md-icon>
-      Tatkal Clock
+      <span class="tab-label-full">Tatkal Clock</span>
+      <span class="tab-label-short">Clock</span>
     </md-primary-tab>
   </md-tabs>
 
@@ -425,12 +430,12 @@
 
     <!-- PANE 2: PASSENGERS -->
     <section id="pane-passengers" class="m3-pane">
-      <div class="m3-card m3-row" style="justify-content: space-between; align-items: center;">
+      <div class="m3-card m3-psgn-header-card">
         <span id="psgnCounterLabel" class="m3-section-headline" style="margin: 0;">
           <md-icon>group</md-icon>
           <span>Passengers (1/6)</span>
         </span>
-        <div class="m3-row" style="gap: 8px;">
+        <div class="m3-psgn-header-actions">
           <md-text-button id="btnSavePsgnPreset">
             <md-icon slot="icon">save</md-icon>Save Preset
           </md-text-button>
@@ -747,7 +752,7 @@
 
   <!-- Sticky Bottom Action Dock with Automation Visuals Placed BELOW the Buttons -->
   <footer class="m3-bottom-dock">
-    <!-- Master Action Bar: Stop/Start Buttons & Status in the EXACT SAME ROW -->
+    <!-- Master Action Bar: Stop/Start Buttons & Status -->
     <div class="m3-dock-main-row">
       <div class="m3-dock-buttons">
         <md-filled-button id="btnStartAutomation" class="m3-btn-start">
@@ -763,18 +768,20 @@
         </md-outlined-button>
       </div>
 
-      <div class="m3-dock-status-center">
-        <span id="headerStatusDot" class="m3-status-dot active"></span>
-        <span id="headerStatusText" class="m3-status-badge">Ready</span>
-        <span class="m3-status-divider">•</span>
-        <span id="footerStatusText" class="m3-status-msg">Ready to automate</span>
-      </div>
+      <div class="m3-dock-info-bar">
+        <div class="m3-dock-status-center">
+          <span id="headerStatusDot" class="m3-status-dot active"></span>
+          <span id="headerStatusText" class="m3-status-badge">Ready</span>
+          <span class="m3-status-divider">•</span>
+          <span id="footerStatusText" class="m3-status-msg">Ready to automate</span>
+        </div>
 
-      <div class="m3-dock-right">
-        <div id="footerStepIndicator" class="m3-step-indicator">Step 0/6</div>
-        <md-icon-button id="btnDashOpenIrctc" title="Open IRCTC in New Tab">
-          <md-icon>open_in_new</md-icon>
-        </md-icon-button>
+        <div class="m3-dock-right">
+          <div id="footerStepIndicator" class="m3-step-indicator">Step 0/6</div>
+          <md-icon-button id="btnDashOpenIrctc" title="Open IRCTC in New Tab">
+            <md-icon>open_in_new</md-icon>
+          </md-icon-button>
+        </div>
       </div>
     </div>
 

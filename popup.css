@@ -781,6 +781,15 @@ md-tabs::-webkit-scrollbar {
   white-space: nowrap;
 }
 
+.m3-dock-info-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
 .m3-dock-status-center {
   display: flex;
   align-items: center;
@@ -1167,6 +1176,36 @@ md-chip-set {
   justify-content: center;
   font-size: 11px;
   font-weight: 800;
+}
+
+/* Passenger Form Grid */
+.passenger-form-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.psgn-field-full {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.psgn-field-row {
+  display: grid;
+  grid-template-columns: 85px 1fr;
+  gap: 8px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.psgn-field-row-pref {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* 15. Status Indicator Dots */
@@ -2318,6 +2357,7 @@ html.mode-window,
 body.mode-window {
   width: 100% !important;
   max-width: 100% !important;
+  min-width: 0 !important;
   height: 100vh !important;
   min-height: 100vh !important;
   max-height: 100vh !important;
@@ -2346,70 +2386,6 @@ html.size-default, body.size-default {
   height: 600px;
   min-height: 600px;
   max-height: 600px;
-}
-
-/* Responsive Scaling: Prevents any button, header or tab overflow */
-.size-small .m3-header-brand-img,
-.mode-sidepanel .m3-header-brand-img,
-@media (max-width: 520px) {
-  .m3-top-bar {
-    padding: 6px 10px;
-    gap: 6px;
-  }
-
-  .m3-header-brand-img {
-    height: 25px;
-    max-width: 90px;
-  }
-
-  .m3-top-actions {
-    gap: 3px;
-  }
-
-  .m3-top-actions md-icon-button {
-    width: 28px;
-    height: 28px;
-    --md-icon-button-state-layer-width: 28px;
-    --md-icon-button-state-layer-height: 28px;
-    --md-icon-button-icon-size: 16px;
-  }
-
-  .m3-segment-btn {
-    padding: 3px 6px;
-    font-size: 10px;
-  }
-
-  .m3-clock-chip {
-    padding: 3px 6px;
-    font-size: 10px;
-  }
-}
-
-.size-small .m3-segment-btn span,
-.mode-sidepanel .m3-segment-btn span,
-@media (max-width: 440px) {
-  .m3-segment-btn span {
-    display: none;
-  }
-
-  .m3-header-brand-img {
-    height: 22px;
-    max-width: 80px;
-  }
-
-  .m3-clock-chip {
-    padding: 2px 5px;
-    font-size: 9.5px;
-  }
-}
-
-.size-small md-primary-tab,
-.mode-sidepanel md-primary-tab,
-@media (max-width: 520px) {
-  md-primary-tab {
-    padding: 0 6px !important;
-    font-size: 11px !important;
-  }
 }
 
 /* Quick Scheduler Presets */
@@ -2484,15 +2460,6 @@ html.size-default, body.size-default {
   line-height: 1.3;
 }
 
-.size-small .m3-quick-sched-grid,
-.mode-sidepanel .m3-quick-sched-grid,
-@media (max-width: 520px) {
-  .m3-quick-sched-grid {
-    grid-template-columns: 1fr;
-    gap: 8px;
-  }
-}
-
 /* Custom Scheduler Controls */
 .m3-custom-sched-row {
   display: flex;
@@ -2527,18 +2494,6 @@ html.size-default, body.size-default {
 .m3-time-input:focus {
   background: var(--md-sys-color-surface-container-high);
   box-shadow: 0 0 0 2px var(--md-sys-color-primary);
-}
-
-.size-small .m3-custom-sched-row,
-.mode-sidepanel .m3-custom-sched-row,
-@media (max-width: 520px) {
-  .m3-custom-sched-row {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .m3-custom-sched-row md-filled-tonal-button {
-    width: 100%;
-  }
 }
 
 /* Active Schedules List Items (Material 3 Cards) */
@@ -2630,4 +2585,407 @@ html.size-default, body.size-default {
   font-size: 10.5px;
   color: var(--md-sys-color-on-surface-variant);
   font-weight: 500;
+}
+
+/* ==========================================================================
+   Full Responsiveness: Side Panel, Small Window & Phone Screens (< 520px)
+   ========================================================================== */
+
+.size-small .m3-top-bar,
+.mode-sidepanel .m3-top-bar {
+  padding: 4px 6px !important;
+  gap: 3px !important;
+}
+
+.size-small .m3-header-brand-img,
+.mode-sidepanel .m3-header-brand-img {
+  height: 22px !important;
+  max-width: 72px !important;
+}
+
+.size-small .m3-segmented-control,
+.mode-sidepanel .m3-segmented-control {
+  padding: 2px !important;
+  gap: 1px !important;
+}
+
+.size-small .m3-segment-btn,
+.mode-sidepanel .m3-segment-btn {
+  padding: 2px 5px !important;
+  font-size: 9.5px !important;
+  gap: 2px !important;
+}
+
+.size-small .m3-segment-btn md-icon,
+.mode-sidepanel .m3-segment-btn md-icon {
+  font-size: 12px !important;
+}
+
+.size-small .site-label-full,
+.mode-sidepanel .site-label-full {
+  display: none !important;
+}
+
+.size-small .site-label-short,
+.mode-sidepanel .site-label-short {
+  display: inline !important;
+}
+
+.size-small .m3-clock-chip,
+.mode-sidepanel .m3-clock-chip {
+  padding: 2px 4px !important;
+  font-size: 9px !important;
+}
+
+.size-small .m3-top-actions,
+.mode-sidepanel .m3-top-actions {
+  gap: 2px !important;
+}
+
+.size-small .m3-top-actions md-icon-button,
+.mode-sidepanel .m3-top-actions md-icon-button {
+  width: 26px !important;
+  height: 26px !important;
+  --md-icon-button-state-layer-width: 26px !important;
+  --md-icon-button-state-layer-height: 26px !important;
+  --md-icon-button-icon-size: 15px !important;
+}
+
+.size-small .tr-avatar-wrapper,
+.mode-sidepanel .tr-avatar-wrapper {
+  width: 26px !important;
+  height: 26px !important;
+}
+
+.size-small .m3-header-avatar-img,
+.mode-sidepanel .m3-header-avatar-img {
+  width: 24px !important;
+  height: 24px !important;
+}
+
+.size-small md-tabs,
+.mode-sidepanel md-tabs {
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+}
+
+.size-small md-primary-tab,
+.mode-sidepanel md-primary-tab {
+  --md-primary-tab-container-height: 42px !important;
+  padding: 0 4px !important;
+  min-width: 0 !important;
+  font-size: 10px !important;
+}
+
+.size-small md-primary-tab md-icon,
+.mode-sidepanel md-primary-tab md-icon {
+  font-size: 15px !important;
+}
+
+.size-small .tab-label-full,
+.mode-sidepanel .tab-label-full {
+  display: none !important;
+}
+
+.size-small .tab-label-short,
+.mode-sidepanel .tab-label-short {
+  display: inline !important;
+}
+
+.size-small .m3-content-area,
+.mode-sidepanel .m3-content-area {
+  padding: 8px 10px 145px 10px !important;
+}
+
+.size-small .m3-card,
+.mode-sidepanel .m3-card {
+  padding: 10px 10px !important;
+  margin-bottom: 8px !important;
+  border-radius: 12px !important;
+}
+
+.size-small .passenger-card,
+.mode-sidepanel .passenger-card {
+  padding: 10px 10px !important;
+  margin-bottom: 8px !important;
+}
+
+.size-small .psgn-field-row-pref,
+.mode-sidepanel .psgn-field-row-pref {
+  grid-template-columns: 1fr !important;
+  gap: 8px !important;
+}
+
+.size-small .m3-grid-2,
+.mode-sidepanel .m3-grid-2 {
+  grid-template-columns: 1fr !important;
+  gap: 8px !important;
+}
+
+.size-small .m3-quick-sched-grid,
+.mode-sidepanel .m3-quick-sched-grid {
+  grid-template-columns: 1fr !important;
+  gap: 8px !important;
+}
+
+.size-small .m3-custom-sched-row,
+.mode-sidepanel .m3-custom-sched-row {
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 8px !important;
+}
+
+.size-small .m3-custom-sched-row md-filled-tonal-button,
+.mode-sidepanel .m3-custom-sched-row md-filled-tonal-button {
+  width: 100% !important;
+}
+
+.size-small .m3-bottom-dock,
+.mode-sidepanel .m3-bottom-dock {
+  padding: 6px 10px 8px 10px !important;
+}
+
+.size-small .m3-dock-main-row,
+.mode-sidepanel .m3-dock-main-row {
+  flex-direction: column-reverse !important;
+  gap: 5px !important;
+  width: 100% !important;
+}
+
+.size-small .m3-dock-buttons,
+.mode-sidepanel .m3-dock-buttons {
+  width: 100% !important;
+  display: flex !important;
+  gap: 6px !important;
+}
+
+.size-small .m3-dock-buttons md-filled-button,
+.size-small .m3-dock-buttons md-outlined-button,
+.size-small .m3-dock-buttons md-filled-tonal-button,
+.mode-sidepanel .m3-dock-buttons md-filled-button,
+.mode-sidepanel .m3-dock-buttons md-outlined-button,
+.mode-sidepanel .m3-dock-buttons md-filled-tonal-button {
+  flex: 1 !important;
+  width: 100% !important;
+  --md-filled-button-container-height: 36px !important;
+  font-size: 12px !important;
+}
+
+.size-small .m3-dock-info-bar,
+.mode-sidepanel .m3-dock-info-bar {
+  width: 100% !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+}
+
+.size-small .m3-dock-status-center,
+.mode-sidepanel .m3-dock-status-center {
+  font-size: 10.5px !important;
+}
+
+.size-small .m3-step-indicator,
+.mode-sidepanel .m3-step-indicator {
+  font-size: 9.5px !important;
+  padding: 2px 6px !important;
+}
+
+.size-small .m3-dock-right md-icon-button,
+.mode-sidepanel .m3-dock-right md-icon-button {
+  width: 24px !important;
+  height: 24px !important;
+  --md-icon-button-state-layer-width: 24px !important;
+  --md-icon-button-state-layer-height: 24px !important;
+  --md-icon-button-icon-size: 14px !important;
+}
+
+/* Media Query Support for Any Narrow Window Width <= 520px */
+@media (max-width: 520px) {
+  .m3-top-bar {
+    padding: 4px 6px !important;
+    gap: 3px !important;
+  }
+
+  .m3-header-brand-img {
+    height: 22px !important;
+    max-width: 72px !important;
+  }
+
+  .m3-segmented-control {
+    padding: 2px !important;
+    gap: 1px !important;
+  }
+
+  .m3-segment-btn {
+    padding: 2px 5px !important;
+    font-size: 9.5px !important;
+    gap: 2px !important;
+  }
+
+  .m3-segment-btn md-icon {
+    font-size: 12px !important;
+  }
+
+  .site-label-full {
+    display: none !important;
+  }
+
+  .site-label-short {
+    display: inline !important;
+  }
+
+  .m3-clock-chip {
+    padding: 2px 4px !important;
+    font-size: 9px !important;
+  }
+
+  .m3-top-actions {
+    gap: 2px !important;
+  }
+
+  .m3-top-actions md-icon-button {
+    width: 26px !important;
+    height: 26px !important;
+    --md-icon-button-state-layer-width: 26px !important;
+    --md-icon-button-state-layer-height: 26px !important;
+    --md-icon-button-icon-size: 15px !important;
+  }
+
+  .tr-avatar-wrapper {
+    width: 26px !important;
+    height: 26px !important;
+  }
+
+  .m3-header-avatar-img {
+    width: 24px !important;
+    height: 24px !important;
+  }
+
+  md-tabs {
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+  }
+
+  md-primary-tab {
+    --md-primary-tab-container-height: 42px !important;
+    padding: 0 4px !important;
+    min-width: 0 !important;
+    font-size: 10px !important;
+  }
+
+  md-primary-tab md-icon {
+    font-size: 15px !important;
+  }
+
+  .tab-label-full {
+    display: none !important;
+  }
+
+  .tab-label-short {
+    display: inline !important;
+  }
+
+  .m3-content-area {
+    padding: 8px 10px 145px 10px !important;
+  }
+
+  .m3-card {
+    padding: 10px 10px !important;
+    margin-bottom: 8px !important;
+    border-radius: 12px !important;
+  }
+
+  .passenger-card {
+    padding: 10px 10px !important;
+    margin-bottom: 8px !important;
+  }
+
+  .psgn-field-row-pref {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+
+  .m3-grid-2 {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+
+  .m3-quick-sched-grid {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+
+  .m3-custom-sched-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+  }
+
+  .m3-custom-sched-row md-filled-tonal-button {
+    width: 100% !important;
+  }
+
+  .m3-bottom-dock {
+    padding: 6px 10px 8px 10px !important;
+  }
+
+  .m3-dock-main-row {
+    flex-direction: column-reverse !important;
+    gap: 5px !important;
+    width: 100% !important;
+  }
+
+  .m3-dock-buttons {
+    width: 100% !important;
+    display: flex !important;
+    gap: 6px !important;
+  }
+
+  .m3-dock-buttons md-filled-button,
+  .m3-dock-buttons md-outlined-button,
+  .m3-dock-buttons md-filled-tonal-button {
+    flex: 1 !important;
+    width: 100% !important;
+    --md-filled-button-container-height: 36px !important;
+    font-size: 12px !important;
+  }
+
+  .m3-dock-info-bar {
+    width: 100% !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+  }
+
+  .m3-dock-status-center {
+    font-size: 10.5px !important;
+  }
+
+  .m3-step-indicator {
+    font-size: 9.5px !important;
+    padding: 2px 6px !important;
+  }
+
+  .m3-dock-right md-icon-button {
+    width: 24px !important;
+    height: 24px !important;
+    --md-icon-button-state-layer-width: 24px !important;
+    --md-icon-button-state-layer-height: 24px !important;
+    --md-icon-button-icon-size: 14px !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .m3-clock-chip {
+    display: none !important;
+  }
+  .m3-station-grid {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 6px !important;
+  }
+  .m3-swap-btn {
+    align-self: center !important;
+    transform: rotate(90deg) !important;
+  }
 }

@@ -207,6 +207,13 @@ function setupNavigation() {
       switchTab(mainTabs.activeTabIndex);
     });
 
+    mainTabs.addEventListener("wheel", (e) => {
+      if (e.deltaY !== 0) {
+        mainTabs.scrollLeft += e.deltaY;
+        e.preventDefault();
+      }
+    }, { passive: false });
+
     panes.forEach((name, i) => {
       const btn = document.getElementById(`tabBtn-${name}`);
       if (btn) {
@@ -686,24 +693,30 @@ function renderPassengerCards() {
         </div>
         ${activePassengers.length > 1 ? `<md-icon-button class="btn-remove-psgn" data-idx="${idx}" title="Remove Passenger"><md-icon>delete_outline</md-icon></md-icon-button>` : ""}
       </div>
-      <div class="m3-grid-2">
-        <md-outlined-text-field class="psgn-name" label="Full Name" value="${psgn.name || ""}" placeholder="As per Govt ID (Max 16 chars)" maxlength="16"></md-outlined-text-field>
-        <md-outlined-text-field class="psgn-age" type="number" label="Age" value="${psgn.age || 25}" min="1" max="125"></md-outlined-text-field>
-        <md-outlined-select class="psgn-gender" label="Gender">
-          <md-select-option value="M" ${psgn.gender === "M" ? "selected" : ""}><div slot="headline">Male (M)</div></md-select-option>
-          <md-select-option value="F" ${psgn.gender === "F" ? "selected" : ""}><div slot="headline">Female (F)</div></md-select-option>
-          <md-select-option value="T" ${psgn.gender === "T" ? "selected" : ""}><div slot="headline">Transgender (T)</div></md-select-option>
-        </md-outlined-select>
-        <md-outlined-select class="psgn-berth" label="Berth Preference">
-          ${berthOptions.map(b => `<md-select-option value="${b.value}" ${psgn.berthPreference === b.value ? "selected" : ""}><div slot="headline">${b.label}</div></md-select-option>`).join("")}
-        </md-outlined-select>
-        <md-outlined-select class="psgn-meal" label="Meal Preference" style="grid-column: 1 / -1;">
-          <md-select-option value="V" ${psgn.foodChoice === "V" ? "selected" : ""}><div slot="headline">Veg</div></md-select-option>
-          <md-select-option value="N" ${psgn.foodChoice === "N" ? "selected" : ""}><div slot="headline">Non-Veg</div></md-select-option>
-          <md-select-option value="J" ${psgn.foodChoice === "J" ? "selected" : ""}><div slot="headline">Jain Meal</div></md-select-option>
-          <md-select-option value="F" ${psgn.foodChoice === "F" ? "selected" : ""}><div slot="headline">Veg Diabetic</div></md-select-option>
-          <md-select-option value="G" ${psgn.foodChoice === "G" ? "selected" : ""}><div slot="headline">Non-Veg Diabetic</div></md-select-option>
-        </md-outlined-select>
+      <div class="passenger-form-grid">
+        <div class="psgn-field-full">
+          <md-outlined-text-field class="psgn-name" label="Full Name" value="${psgn.name || ""}" placeholder="As per Govt ID (Max 16 chars)" maxlength="16"></md-outlined-text-field>
+        </div>
+        <div class="psgn-field-row">
+          <md-outlined-text-field class="psgn-age" type="number" label="Age" value="${psgn.age || 25}" min="1" max="125"></md-outlined-text-field>
+          <md-outlined-select class="psgn-gender" label="Gender">
+            <md-select-option value="M" ${psgn.gender === "M" ? "selected" : ""}><div slot="headline">Male (M)</div></md-select-option>
+            <md-select-option value="F" ${psgn.gender === "F" ? "selected" : ""}><div slot="headline">Female (F)</div></md-select-option>
+            <md-select-option value="T" ${psgn.gender === "T" ? "selected" : ""}><div slot="headline">Transgender (T)</div></md-select-option>
+          </md-outlined-select>
+        </div>
+        <div class="psgn-field-row-pref">
+          <md-outlined-select class="psgn-berth" label="Berth Preference">
+            ${berthOptions.map(b => `<md-select-option value="${b.value}" ${psgn.berthPreference === b.value ? "selected" : ""}><div slot="headline">${b.label}</div></md-select-option>`).join("")}
+          </md-outlined-select>
+          <md-outlined-select class="psgn-meal" label="Meal Preference">
+            <md-select-option value="V" ${psgn.foodChoice === "V" ? "selected" : ""}><div slot="headline">Veg</div></md-select-option>
+            <md-select-option value="N" ${psgn.foodChoice === "N" ? "selected" : ""}><div slot="headline">Non-Veg</div></md-select-option>
+            <md-select-option value="J" ${psgn.foodChoice === "J" ? "selected" : ""}><div slot="headline">Jain Meal</div></md-select-option>
+            <md-select-option value="F" ${psgn.foodChoice === "F" ? "selected" : ""}><div slot="headline">Veg Diabetic</div></md-select-option>
+            <md-select-option value="G" ${psgn.foodChoice === "G" ? "selected" : ""}><div slot="headline">Non-Veg Diabetic</div></md-select-option>
+          </md-outlined-select>
+        </div>
       </div>
       ${psgn.age >= 1 && psgn.age <= 11 ? `
         <div class="m3-switch-row" style="margin-top: 8px;">
