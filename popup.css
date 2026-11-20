@@ -692,10 +692,10 @@ md-tabs::-webkit-scrollbar {
 .m3-route-meta-pills {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 6px;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   width: 100%;
+  box-sizing: border-box;
 }
 
 .m3-meta-tag {
@@ -703,15 +703,24 @@ md-tabs::-webkit-scrollbar {
   color: var(--md-sys-color-on-surface);
   font-size: 10.5px;
   font-weight: 600;
-  padding: 4px 8px;
+  padding: 3px 8px;
   border-radius: 9999px;
   border: none !important;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 4px;
-  flex: 1 1 0px;
+  flex: 0 1 auto;
   white-space: nowrap;
+}
+
+.m3-pay-method-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 8px 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .m3-meta-tag md-icon {
@@ -2228,51 +2237,88 @@ md-chip-set {
   color: var(--md-sys-color-on-surface-variant);
 }
 
-.m3-window-size-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
+/* UI Zoom & Scale Slider */
+.m3-zoom-badge {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--md-sys-color-primary);
+  background: var(--md-sys-color-primary-container);
+  padding: 2px 8px;
+  border-radius: 9999px;
 }
 
-.m3-size-btn {
-  background: var(--md-sys-color-surface-container);
-  border: none !important;
-  border-radius: 12px;
-  padding: 8px 4px;
-  cursor: pointer;
+.m3-zoom-control-box {
   display: flex;
   flex-direction: column;
+  gap: 8px;
+  background: var(--md-sys-color-surface-container);
+  padding: 10px 12px;
+  border-radius: 12px;
+}
+
+.m3-zoom-slider-row {
+  display: flex;
   align-items: center;
-  gap: 3px;
-  transition: all 0.18s ease;
+  gap: 8px;
+  width: 100%;
 }
 
-.m3-size-btn:hover {
+.m3-zoom-slider {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 3px;
   background: var(--md-sys-color-surface-container-highest);
+  outline: none;
+  cursor: pointer;
+  margin: 0;
 }
 
-.m3-size-btn.active {
-  background: var(--md-sys-color-primary-container);
+.m3-zoom-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--md-sys-color-primary);
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  transition: transform 0.15s ease, background 0.15s ease;
 }
 
-.m3-size-btn.active .m3-size-name {
-  color: var(--md-sys-color-primary);
-  font-weight: 700;
+.m3-zoom-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
 }
 
-.m3-size-btn.active .m3-size-dim {
-  color: var(--md-sys-color-on-primary-container);
+.m3-zoom-ticks {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  gap: 2px;
 }
 
-.m3-size-name {
-  font-size: 11.5px;
+.zoom-tick-btn {
+  background: transparent;
+  border: none;
+  font-size: 10px;
   font-weight: 600;
+  color: var(--md-sys-color-on-surface-variant);
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+}
+
+.zoom-tick-btn:hover {
+  background: var(--md-sys-color-surface-container-highest);
   color: var(--md-sys-color-on-surface);
 }
 
-.m3-size-dim {
-  font-size: 9.5px;
-  color: var(--md-sys-color-on-surface-variant);
+.zoom-tick-btn.active {
+  background: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-primary);
+  font-weight: 700;
 }
 
 .m3-popover-divider {
@@ -2388,64 +2434,176 @@ html.size-default, body.size-default {
   max-height: 600px;
 }
 
-/* Quick Scheduler Presets */
+/* ==========================================================================
+   Material Design 3 Scheduler Pane Styles
+   ========================================================================== */
+
+/* 1. Tatkal Hero Countdown Card */
+.m3-sched-hero-card {
+  background: linear-gradient(135deg, var(--md-sys-color-surface-container-high) 0%, var(--md-sys-color-surface-container) 100%) !important;
+  border-radius: 18px !important;
+  padding: 16px !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+}
+
+.m3-sched-hero-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.m3-live-ist-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.12);
+  padding: 3px 8px;
+  border-radius: 9999px;
+}
+
+.m3-pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 0 rgba(16, 185, 129, 0.7);
+  animation: pulseLiveDot 2s infinite;
+}
+
+@keyframes pulseLiveDot {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 7px rgba(16, 185, 129, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+.m3-clock-digits-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 0 14px 0;
+  text-align: center;
+}
+
+.m3-countdown-display {
+  font-size: 38px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  color: var(--md-sys-color-primary);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  text-shadow: 0 2px 8px rgba(11, 87, 208, 0.15);
+}
+
+[data-theme="dark"] .m3-countdown-display {
+  text-shadow: 0 2px 12px rgba(168, 199, 250, 0.25);
+}
+
+.m3-countdown-subtext {
+  font-size: 11px;
+  color: var(--md-sys-color-on-surface-variant);
+  margin-top: 6px;
+  font-weight: 500;
+}
+
+.m3-sched-hero-btn {
+  width: 100%;
+  --md-filled-button-container-height: 42px;
+  --md-filled-button-container-shape: 12px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* 2. 1-Click Booking Schedulers (Material 3 Cards) */
 .m3-quick-sched-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
-  margin-top: 6px;
   width: 100%;
   box-sizing: border-box;
 }
 
 .m3-sched-preset-card {
   position: relative;
-  background: var(--md-sys-color-surface-container);
-  border: none !important;
+  background: var(--md-sys-color-surface-container-high);
+  border: 1px solid var(--md-sys-color-surface-container-highest) !important;
   border-radius: 14px;
-  padding: 12px 10px;
+  padding: 12px;
   cursor: pointer;
-  text-align: left;
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 6px;
+  text-align: left;
   transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
-  overflow: hidden;
+  box-sizing: border-box;
 }
 
 .m3-sched-preset-card:hover {
   transform: translateY(-2px);
-  background: var(--md-sys-color-surface-container-high);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+  background: var(--md-sys-color-surface-container-highest);
+  box-shadow: 0 6px 16px var(--md-sys-color-shadow);
+  border-color: var(--md-sys-color-primary) !important;
 }
 
-.m3-sched-preset-badge {
-  font-size: 9px;
+.m3-sched-preset-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  width: 100%;
+}
+
+.m3-sched-badge-m3 {
+  font-size: 9.5px;
   font-weight: 700;
   letter-spacing: 0.5px;
-  padding: 2px 6px;
+  padding: 3px 7px;
   border-radius: 6px;
-  background: var(--md-sys-color-surface-container-highest);
-  color: var(--md-sys-color-on-surface-variant);
-  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
-.m3-sched-preset-badge.ac {
-  background: rgba(37, 99, 235, 0.15);
-  color: #3b82f6;
+.m3-sched-badge-m3.advance {
+  background: rgba(147, 51, 234, 0.12);
+  color: #9333ea;
 }
 
-.m3-sched-preset-badge.sl {
-  background: rgba(16, 185, 129, 0.15);
+.m3-sched-badge-m3.ac {
+  background: rgba(11, 87, 208, 0.14);
+  color: var(--md-sys-color-primary);
+}
+
+.m3-sched-badge-m3.sl {
+  background: rgba(16, 185, 129, 0.14);
   color: #10b981;
 }
 
+.m3-sched-sub-mini {
+  font-size: 9.5px;
+  color: var(--md-sys-color-on-surface-variant);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
 .m3-sched-preset-time {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 800;
   color: var(--md-sys-color-on-surface);
   letter-spacing: -0.3px;
   line-height: 1.1;
+  margin-top: 2px;
 }
 
 .m3-sched-preset-name {
@@ -2460,12 +2618,11 @@ html.size-default, body.size-default {
   line-height: 1.3;
 }
 
-/* Custom Scheduler Controls */
+/* 3. Custom Time Scheduler */
 .m3-custom-sched-row {
   display: flex;
   align-items: flex-end;
   gap: 12px;
-  margin-top: 6px;
   width: 100%;
   box-sizing: border-box;
 }
@@ -2477,36 +2634,102 @@ html.size-default, body.size-default {
   flex: 1;
 }
 
-.m3-time-input {
-  height: 42px;
-  padding: 6px 12px;
+.m3-time-picker-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--md-sys-color-surface-container-high);
   border-radius: 12px;
+  padding: 0 12px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  transition: all 0.2s ease;
+}
+
+.m3-time-picker-wrap:focus-within {
+  border-color: var(--md-sys-color-primary);
+  box-shadow: 0 0 0 2px var(--md-sys-color-primary-container);
+}
+
+.m3-time-input {
+  flex: 1;
+  height: 42px;
   border: none !important;
-  background: var(--md-sys-color-surface-container);
+  background: transparent;
   color: var(--md-sys-color-on-surface);
   font-family: inherit;
   font-size: 15px;
   font-weight: 600;
   outline: none;
-  transition: all 0.18s ease;
 }
 
-.m3-time-input:focus {
+/* 4. Tatkal Window Timing & Info Grid */
+.m3-sched-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-top: 8px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.m3-sched-info-tile {
   background: var(--md-sys-color-surface-container-high);
-  box-shadow: 0 0 0 2px var(--md-sys-color-primary);
+  border-radius: 12px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  box-sizing: border-box;
 }
 
-/* Active Schedules List Items (Material 3 Cards) */
+.m3-sched-info-tile strong {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--md-sys-color-on-surface);
+}
+
+.m3-sched-plan-container {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--md-sys-color-surface-container-highest);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.m3-sched-plan-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  font-size: 11.5px;
+  font-weight: 600;
+  background: var(--md-sys-color-surface-container-high);
+  color: var(--md-sys-color-on-surface);
+}
+
+.m3-sched-plan-tag.is-active {
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+}
+
+.m3-sched-plan-tag.is-template {
+  background: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+}
+
+/* 5. Active Schedules List Cards */
 .m3-sched-item-card {
   background-color: var(--md-sys-color-surface-container-high);
   border-radius: 14px;
-  padding: 10px 14px;
+  padding: 12px 14px;
   margin-bottom: 8px;
   display: flex;
   flex-direction: column;
   gap: 6px;
   border: none !important;
-  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
 }
 
 .m3-sched-item-top {
@@ -2526,7 +2749,7 @@ html.size-default, body.size-default {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--md-sys-color-on-surface);
 }
@@ -2591,24 +2814,43 @@ html.size-default, body.size-default {
    Full Responsiveness: Side Panel, Small Window & Phone Screens (< 520px)
    ========================================================================== */
 
+/* Universal width enforcement to prevent any horizontal overflow/clipping */
+html.is-narrow,
+body.is-narrow,
+html.mode-sidepanel,
+body.mode-sidepanel,
+html.mode-window,
+body.mode-window,
+html.size-small,
+body.size-small {
+  width: 100% !important;
+  max-width: 100vw !important;
+  min-width: 0 !important;
+  overflow-x: hidden !important;
+}
+
+.is-narrow .m3-top-bar,
 .size-small .m3-top-bar,
 .mode-sidepanel .m3-top-bar {
   padding: 4px 6px !important;
   gap: 3px !important;
 }
 
+.is-narrow .m3-header-brand-img,
 .size-small .m3-header-brand-img,
 .mode-sidepanel .m3-header-brand-img {
   height: 22px !important;
   max-width: 72px !important;
 }
 
+.is-narrow .m3-segmented-control,
 .size-small .m3-segmented-control,
 .mode-sidepanel .m3-segmented-control {
   padding: 2px !important;
   gap: 1px !important;
 }
 
+.is-narrow .m3-segment-btn,
 .size-small .m3-segment-btn,
 .mode-sidepanel .m3-segment-btn {
   padding: 2px 5px !important;
@@ -2616,32 +2858,38 @@ html.size-default, body.size-default {
   gap: 2px !important;
 }
 
+.is-narrow .m3-segment-btn md-icon,
 .size-small .m3-segment-btn md-icon,
 .mode-sidepanel .m3-segment-btn md-icon {
   font-size: 12px !important;
 }
 
+.is-narrow .site-label-full,
 .size-small .site-label-full,
 .mode-sidepanel .site-label-full {
   display: none !important;
 }
 
+.is-narrow .site-label-short,
 .size-small .site-label-short,
 .mode-sidepanel .site-label-short {
   display: inline !important;
 }
 
+.is-narrow .m3-clock-chip,
 .size-small .m3-clock-chip,
 .mode-sidepanel .m3-clock-chip {
   padding: 2px 4px !important;
   font-size: 9px !important;
 }
 
+.is-narrow .m3-top-actions,
 .size-small .m3-top-actions,
 .mode-sidepanel .m3-top-actions {
   gap: 2px !important;
 }
 
+.is-narrow .m3-top-actions md-icon-button,
 .size-small .m3-top-actions md-icon-button,
 .mode-sidepanel .m3-top-actions md-icon-button {
   width: 26px !important;
@@ -2651,83 +2899,159 @@ html.size-default, body.size-default {
   --md-icon-button-icon-size: 15px !important;
 }
 
+.is-narrow .tr-avatar-wrapper,
 .size-small .tr-avatar-wrapper,
 .mode-sidepanel .tr-avatar-wrapper {
   width: 26px !important;
   height: 26px !important;
 }
 
+.is-narrow .m3-header-avatar-img,
 .size-small .m3-header-avatar-img,
 .mode-sidepanel .m3-header-avatar-img {
   width: 24px !important;
   height: 24px !important;
 }
 
+.is-narrow .tr-avatar-days-badge,
+.size-small .tr-avatar-days-badge,
+.mode-sidepanel .tr-avatar-days-badge {
+  max-width: 32px !important;
+  font-size: 8px !important;
+  padding: 1px 3px !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+  text-overflow: ellipsis !important;
+}
+
+.is-narrow md-tabs,
 .size-small md-tabs,
 .mode-sidepanel md-tabs {
   overflow-x: auto !important;
   overflow-y: hidden !important;
 }
 
+.is-narrow md-primary-tab,
 .size-small md-primary-tab,
 .mode-sidepanel md-primary-tab {
-  --md-primary-tab-container-height: 42px !important;
+  --md-primary-tab-container-height: 40px !important;
   padding: 0 4px !important;
   min-width: 0 !important;
   font-size: 10px !important;
 }
 
+.is-narrow md-primary-tab md-icon,
 .size-small md-primary-tab md-icon,
 .mode-sidepanel md-primary-tab md-icon {
   font-size: 15px !important;
 }
 
+.is-narrow .tab-label-full,
 .size-small .tab-label-full,
 .mode-sidepanel .tab-label-full {
   display: none !important;
 }
 
+.is-narrow .tab-label-short,
 .size-small .tab-label-short,
 .mode-sidepanel .tab-label-short {
   display: inline !important;
 }
 
+.is-narrow .m3-content-area,
 .size-small .m3-content-area,
 .mode-sidepanel .m3-content-area {
   padding: 8px 10px 145px 10px !important;
+  overflow-x: hidden !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
 }
 
+.is-narrow .m3-card,
 .size-small .m3-card,
 .mode-sidepanel .m3-card {
   padding: 10px 10px !important;
   margin-bottom: 8px !important;
   border-radius: 12px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
 }
 
+.is-narrow .m3-station-grid,
+.size-small .m3-station-grid,
+.mode-sidepanel .m3-station-grid {
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 6px !important;
+}
+
+.is-narrow .m3-swap-btn,
+.size-small .m3-swap-btn,
+.mode-sidepanel .m3-swap-btn {
+  align-self: center !important;
+  transform: rotate(90deg) !important;
+}
+
+.is-narrow .passenger-card,
 .size-small .passenger-card,
 .mode-sidepanel .passenger-card {
   padding: 10px 10px !important;
   margin-bottom: 8px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
 }
 
+.is-narrow .m3-psgn-header-card,
+.size-small .m3-psgn-header-card,
+.mode-sidepanel .m3-psgn-header-card {
+  flex-wrap: wrap !important;
+  gap: 6px !important;
+}
+
+.is-narrow .m3-psgn-header-actions,
+.size-small .m3-psgn-header-actions,
+.mode-sidepanel .m3-psgn-header-actions {
+  flex-wrap: wrap !important;
+  gap: 4px !important;
+}
+
+.is-narrow .psgn-field-row-pref,
 .size-small .psgn-field-row-pref,
 .mode-sidepanel .psgn-field-row-pref {
   grid-template-columns: 1fr !important;
   gap: 8px !important;
 }
 
+.is-narrow .m3-grid-2,
 .size-small .m3-grid-2,
 .mode-sidepanel .m3-grid-2 {
   grid-template-columns: 1fr !important;
   gap: 8px !important;
 }
 
+.is-narrow .tr-plans-grid,
+.size-small .tr-plans-grid,
+.mode-sidepanel .tr-plans-grid {
+  grid-template-columns: 1fr !important;
+  gap: 8px !important;
+}
+
+.is-narrow .m3-quick-sched-grid,
 .size-small .m3-quick-sched-grid,
 .mode-sidepanel .m3-quick-sched-grid {
   grid-template-columns: 1fr !important;
   gap: 8px !important;
 }
 
+.is-narrow .m3-sched-info-grid,
+.size-small .m3-sched-info-grid,
+.mode-sidepanel .m3-sched-info-grid {
+  grid-template-columns: 1fr !important;
+  gap: 6px !important;
+}
+
+.is-narrow .m3-custom-sched-row,
 .size-small .m3-custom-sched-row,
 .mode-sidepanel .m3-custom-sched-row {
   flex-direction: column !important;
@@ -2735,16 +3059,19 @@ html.size-default, body.size-default {
   gap: 8px !important;
 }
 
+.is-narrow .m3-custom-sched-row md-filled-tonal-button,
 .size-small .m3-custom-sched-row md-filled-tonal-button,
 .mode-sidepanel .m3-custom-sched-row md-filled-tonal-button {
   width: 100% !important;
 }
 
+.is-narrow .m3-bottom-dock,
 .size-small .m3-bottom-dock,
 .mode-sidepanel .m3-bottom-dock {
   padding: 6px 10px 8px 10px !important;
 }
 
+.is-narrow .m3-dock-main-row,
 .size-small .m3-dock-main-row,
 .mode-sidepanel .m3-dock-main-row {
   flex-direction: column-reverse !important;
@@ -2752,6 +3079,7 @@ html.size-default, body.size-default {
   width: 100% !important;
 }
 
+.is-narrow .m3-dock-buttons,
 .size-small .m3-dock-buttons,
 .mode-sidepanel .m3-dock-buttons {
   width: 100% !important;
@@ -2759,6 +3087,9 @@ html.size-default, body.size-default {
   gap: 6px !important;
 }
 
+.is-narrow .m3-dock-buttons md-filled-button,
+.is-narrow .m3-dock-buttons md-outlined-button,
+.is-narrow .m3-dock-buttons md-filled-tonal-button,
 .size-small .m3-dock-buttons md-filled-button,
 .size-small .m3-dock-buttons md-outlined-button,
 .size-small .m3-dock-buttons md-filled-tonal-button,
@@ -2771,6 +3102,7 @@ html.size-default, body.size-default {
   font-size: 12px !important;
 }
 
+.is-narrow .m3-dock-info-bar,
 .size-small .m3-dock-info-bar,
 .mode-sidepanel .m3-dock-info-bar {
   width: 100% !important;
@@ -2779,17 +3111,20 @@ html.size-default, body.size-default {
   align-items: center !important;
 }
 
+.is-narrow .m3-dock-status-center,
 .size-small .m3-dock-status-center,
 .mode-sidepanel .m3-dock-status-center {
   font-size: 10.5px !important;
 }
 
+.is-narrow .m3-step-indicator,
 .size-small .m3-step-indicator,
 .mode-sidepanel .m3-step-indicator {
   font-size: 9.5px !important;
   padding: 2px 6px !important;
 }
 
+.is-narrow .m3-dock-right md-icon-button,
 .size-small .m3-dock-right md-icon-button,
 .mode-sidepanel .m3-dock-right md-icon-button {
   width: 24px !important;
@@ -2801,6 +3136,13 @@ html.size-default, body.size-default {
 
 /* Media Query Support for Any Narrow Window Width <= 520px */
 @media (max-width: 520px) {
+  html, body {
+    width: 100% !important;
+    max-width: 100vw !important;
+    min-width: 0 !important;
+    overflow-x: hidden !important;
+  }
+
   .m3-top-bar {
     padding: 4px 6px !important;
     gap: 3px !important;
@@ -2861,13 +3203,22 @@ html.size-default, body.size-default {
     height: 24px !important;
   }
 
+  .tr-avatar-days-badge {
+    max-width: 32px !important;
+    font-size: 8px !important;
+    padding: 1px 3px !important;
+    overflow: hidden !important;
+    white-space: nowrap !important;
+    text-overflow: ellipsis !important;
+  }
+
   md-tabs {
     overflow-x: auto !important;
     overflow-y: hidden !important;
   }
 
   md-primary-tab {
-    --md-primary-tab-container-height: 42px !important;
+    --md-primary-tab-container-height: 40px !important;
     padding: 0 4px !important;
     min-width: 0 !important;
     font-size: 10px !important;
@@ -2887,17 +3238,46 @@ html.size-default, body.size-default {
 
   .m3-content-area {
     padding: 8px 10px 145px 10px !important;
+    overflow-x: hidden !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   .m3-card {
     padding: 10px 10px !important;
     margin-bottom: 8px !important;
     border-radius: 12px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+
+  .m3-station-grid {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 6px !important;
+  }
+
+  .m3-swap-btn {
+    align-self: center !important;
+    transform: rotate(90deg) !important;
   }
 
   .passenger-card {
     padding: 10px 10px !important;
     margin-bottom: 8px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .m3-psgn-header-card {
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+  }
+
+  .m3-psgn-header-actions {
+    flex-wrap: wrap !important;
+    gap: 4px !important;
   }
 
   .psgn-field-row-pref {
@@ -2910,9 +3290,19 @@ html.size-default, body.size-default {
     gap: 8px !important;
   }
 
+  .tr-plans-grid {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+
   .m3-quick-sched-grid {
     grid-template-columns: 1fr !important;
     gap: 8px !important;
+  }
+
+  .m3-sched-info-grid {
+    grid-template-columns: 1fr !important;
+    gap: 6px !important;
   }
 
   .m3-custom-sched-row {
@@ -2975,17 +3365,8 @@ html.size-default, body.size-default {
   }
 }
 
-@media (max-width: 360px) {
+@media (max-width: 380px) {
   .m3-clock-chip {
     display: none !important;
-  }
-  .m3-station-grid {
-    flex-direction: column !important;
-    align-items: stretch !important;
-    gap: 6px !important;
-  }
-  .m3-swap-btn {
-    align-self: center !important;
-    transform: rotate(90deg) !important;
   }
 }

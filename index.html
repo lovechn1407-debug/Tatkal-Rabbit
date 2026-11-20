@@ -51,22 +51,25 @@
             <button type="button" class="m3-popover-close-btn" id="btnCloseWindowPopover" title="Close">×</button>
           </div>
 
-          <!-- Section 1: Resize Window -->
+          <!-- Section 1: UI Zoom Scale Slider (50% to 100%) -->
           <div class="m3-popover-section">
-            <div class="m3-popover-section-label">RESIZE WINDOW</div>
-            <div class="m3-window-size-grid">
-              <button type="button" class="m3-size-btn" data-size="small">
-                <span class="m3-size-name">Small</span>
-                <span class="m3-size-dim">420 × 540</span>
-              </button>
-              <button type="button" class="m3-size-btn" data-size="medium">
-                <span class="m3-size-name">Medium</span>
-                <span class="m3-size-dim">520 × 580</span>
-              </button>
-              <button type="button" class="m3-size-btn active" data-size="default">
-                <span class="m3-size-name">Default</span>
-                <span class="m3-size-dim">640 × 600</span>
-              </button>
+            <div class="m3-popover-title-row" style="justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span class="m3-popover-section-label" style="margin: 0;">UI ZOOM & SCALE</span>
+              <span id="zoomValueBadge" class="m3-zoom-badge">100% (Default)</span>
+            </div>
+            <div class="m3-zoom-control-box">
+              <div class="m3-zoom-slider-row">
+                <md-icon style="font-size: 16px; color: var(--md-sys-color-on-surface-variant);">zoom_out</md-icon>
+                <input type="range" id="sliderZoom" min="0" max="4" step="1" value="4" class="m3-zoom-slider" />
+                <md-icon style="font-size: 16px; color: var(--md-sys-color-on-surface-variant);">zoom_in</md-icon>
+              </div>
+              <div class="m3-zoom-ticks">
+                <button type="button" class="zoom-tick-btn" data-idx="0">50%</button>
+                <button type="button" class="zoom-tick-btn" data-idx="1">60%</button>
+                <button type="button" class="zoom-tick-btn" data-idx="2">70%</button>
+                <button type="button" class="zoom-tick-btn" data-idx="3">80%</button>
+                <button type="button" class="zoom-tick-btn active" data-idx="4">100%</button>
+              </div>
             </div>
           </div>
 
@@ -132,18 +135,15 @@
     </md-primary-tab>
     <md-primary-tab id="tabBtn-preferences">
       <md-icon slot="icon">tune</md-icon>
-      <span class="tab-label-full">Preferences</span>
-      <span class="tab-label-short">Prefs</span>
+      Preferences
     </md-primary-tab>
     <md-primary-tab id="tabBtn-credentials">
       <md-icon slot="icon">lock</md-icon>
-      <span class="tab-label-full">Credentials & Pay</span>
-      <span class="tab-label-short">Credentials</span>
+      Credentials
     </md-primary-tab>
     <md-primary-tab id="tabBtn-scheduler">
       <md-icon slot="icon">alarm</md-icon>
-      <span class="tab-label-full">Tatkal Clock</span>
-      <span class="tab-label-short">Clock</span>
+      Scheduler
     </md-primary-tab>
   </md-tabs>
 
@@ -388,7 +388,6 @@
           <md-filter-chip class="pill-option" data-quota="PT" label="Premium Tatkal (PT)"></md-filter-chip>
           <md-filter-chip class="pill-option" data-quota="GN" label="General (GN)"></md-filter-chip>
           <md-filter-chip class="pill-option" data-quota="LD" label="Ladies (LD)"></md-filter-chip>
-          <div class="m3-chip-row-break"></div>
           <md-filter-chip class="pill-option" data-quota="SS" label="Senior Citizen (SS)"></md-filter-chip>
         </md-chip-set>
 
@@ -401,7 +400,6 @@
           <md-filter-chip class="pill-option selected" data-class="3A" label="AC 3 Tier (3A)" selected></md-filter-chip>
           <md-filter-chip class="pill-option" data-class="2A" label="AC 2 Tier (2A)"></md-filter-chip>
           <md-filter-chip class="pill-option" data-class="1A" label="AC First Class (1A)"></md-filter-chip>
-          <div class="m3-chip-row-break"></div>
           <md-filter-chip class="pill-option" data-class="3E" label="AC 3 Economy (3E)"></md-filter-chip>
           <md-filter-chip class="pill-option" data-class="CC" label="Chair Car (CC)"></md-filter-chip>
           <md-filter-chip class="pill-option" data-class="2S" label="Second Sitting (2S)"></md-filter-chip>
@@ -592,8 +590,8 @@
           <md-icon>payment</md-icon>
           <span>Payment Method & Instant Gateway</span>
         </div>
-        <div class="m3-row" style="gap: 10px; margin: 8px 0;">
-          <md-filter-chip id="chipPayUpi" label="BHIM / UPI / QR Code (Fastest)" selected></md-filter-chip>
+        <div class="m3-pay-method-chips">
+          <md-filter-chip id="chipPayUpi" label="UPI / QR Code (Fastest)" selected></md-filter-chip>
           <md-filter-chip id="chipPayWallet" label="IRCTC iMudra / Wallet"></md-filter-chip>
         </div>
 
@@ -635,56 +633,84 @@
 
     <!-- PANE 5: TATKAL CLOCK & SCHEDULER -->
     <section id="pane-scheduler" class="m3-pane">
-      <!-- Tatkal Countdown Card -->
-      <div class="m3-card" style="text-align: center;">
-        <span id="tatkalBannerTitle" class="m3-headline">⚡ Tatkal Opening Countdown</span>
-        <div id="tatkalCountdownTimer" class="m3-countdown-display">00:00:00</div>
-        <div class="m3-supporting-text" style="margin-bottom: 12px;">Synced to Indian Standard Time (IST)</div>
-
-        <div class="m3-row" style="justify-content: center; gap: 8px;">
-          <md-filled-tonal-button id="btnSetTatkalSchedule" title="Calculates opening date & time based on journey date">
-            <md-icon slot="icon">alarm_add</md-icon>Schedule by Journey Date (Tatkal)
-          </md-filled-tonal-button>
+      <!-- Tatkal Countdown Hero Card (Pure Material 3) -->
+      <div class="m3-card m3-sched-hero-card">
+        <div class="m3-sched-hero-header">
+          <div class="m3-section-headline" style="margin: 0;">
+            <md-icon style="color: var(--md-sys-color-primary);">timer</md-icon>
+            <span>Tatkal Opening Countdown</span>
+          </div>
+          <span class="m3-live-ist-chip">
+            <span class="m3-pulse-dot"></span>
+            LIVE IST
+          </span>
         </div>
+
+        <div class="m3-clock-digits-container">
+          <div id="tatkalCountdownTimer" class="m3-countdown-display">00:00:00</div>
+          <div class="m3-countdown-subtext">Synced to Official Indian Railway (IST) Server Clock</div>
+        </div>
+
+        <md-filled-button id="btnSetTatkalSchedule" class="m3-sched-hero-btn" title="Calculates opening date & time based on journey date">
+          <md-icon slot="icon">alarm_add</md-icon>Schedule by Journey Date (Tatkal)
+        </md-filled-button>
       </div>
 
-      <!-- Quick 1-Click Booking Schedulers (9 AM Advance, 10 AM AC Tatkal, 11 AM Non-AC Tatkal) -->
+      <!-- Quick 1-Click Booking Schedulers (Material 3 Cards) -->
       <div class="m3-card">
         <div class="m3-section-headline">
           <md-icon>bolt</md-icon>
-          <span>Quick Booking Presets (Starts 30s Before Window)</span>
+          <span>Quick 1-Click Booking Schedulers</span>
         </div>
         <p class="m3-supporting-text" style="margin-bottom: 12px;">
           One-click scheduling for official Indian Railways reservation windows. Starts browser, fills journey & preps train 30s before:
         </p>
         <div class="m3-quick-sched-grid">
           <!-- 9:00 AM Advance Booking -->
-          <button type="button" class="m3-sched-preset-card" id="btnSchedAdvance9AM">
-            <div class="m3-sched-preset-badge">ADVANCE</div>
+          <div class="m3-sched-preset-card" id="btnSchedAdvance9AM" role="button" tabindex="0">
+            <div class="m3-sched-preset-top">
+              <span class="m3-sched-badge-m3 advance">
+                <md-icon style="font-size: 13px;">history_edu</md-icon>
+                ADVANCE
+              </span>
+              <span class="m3-sched-sub-mini">08:59:30 AM Launch</span>
+            </div>
             <div class="m3-sched-preset-time">09:00 AM</div>
-            <div class="m3-sched-preset-name">Advance Booking</div>
-            <div class="m3-sched-preset-sub">Auto-starts at 08:59:30 AM</div>
-          </button>
+            <div class="m3-sched-preset-name">General Advance Booking</div>
+            <div class="m3-sched-preset-sub">Opens 120 days prior for all general reservations</div>
+          </div>
 
           <!-- 10:00 AM AC Tatkal -->
-          <button type="button" class="m3-sched-preset-card highlight-ac" id="btnSchedTatkal10AM">
-            <div class="m3-sched-preset-badge ac">AC TATKAL</div>
+          <div class="m3-sched-preset-card highlight-ac" id="btnSchedTatkal10AM" role="button" tabindex="0">
+            <div class="m3-sched-preset-top">
+              <span class="m3-sched-badge-m3 ac">
+                <md-icon style="font-size: 13px;">ac_unit</md-icon>
+                AC TATKAL
+              </span>
+              <span class="m3-sched-sub-mini">09:59:30 AM Launch</span>
+            </div>
             <div class="m3-sched-preset-time">10:00 AM</div>
-            <div class="m3-sched-preset-name">AC Classes (1A/2A/3A/CC)</div>
-            <div class="m3-sched-preset-sub">Starts 09:59:30 AM • Sync 10:00:07</div>
-          </button>
+            <div class="m3-sched-preset-name">AC Classes (1A / 2A / 3A / CC)</div>
+            <div class="m3-sched-preset-sub">Opens 1 day prior • Class click at 10:00:07 AM</div>
+          </div>
 
           <!-- 11:00 AM Sleeper Tatkal -->
-          <button type="button" class="m3-sched-preset-card highlight-sl" id="btnSchedTatkal11AM">
-            <div class="m3-sched-preset-badge sl">SLEEPER TATKAL</div>
+          <div class="m3-sched-preset-card highlight-sl" id="btnSchedTatkal11AM" role="button" tabindex="0">
+            <div class="m3-sched-preset-top">
+              <span class="m3-sched-badge-m3 sl">
+                <md-icon style="font-size: 13px;">bed</md-icon>
+                SLEEPER TATKAL
+              </span>
+              <span class="m3-sched-sub-mini">10:59:30 AM Launch</span>
+            </div>
             <div class="m3-sched-preset-time">11:00 AM</div>
-            <div class="m3-sched-preset-name">Non-AC (SL / 2S)</div>
-            <div class="m3-sched-preset-sub">Starts 10:59:30 AM • Sync 11:00:07</div>
-          </button>
+            <div class="m3-sched-preset-name">Non-AC (SL / 2S Classes)</div>
+            <div class="m3-sched-preset-sub">Opens 1 day prior • Class click at 11:00:07 AM</div>
+          </div>
         </div>
       </div>
 
-      <!-- Custom Time Scheduler -->
+      <!-- Custom Time Scheduler (Material 3 Card) -->
       <div class="m3-card">
         <div class="m3-section-headline">
           <md-icon>schedule</md-icon>
@@ -696,7 +722,10 @@
         <div class="m3-custom-sched-row">
           <div class="m3-time-input-group">
             <label for="inputCustomScheduleTime" class="m3-label-text">Target Time (IST):</label>
-            <input type="time" id="inputCustomScheduleTime" value="10:00" class="m3-input m3-time-input" />
+            <div class="m3-time-picker-wrap">
+              <md-icon style="font-size: 18px; color: var(--md-sys-color-primary);">access_time</md-icon>
+              <input type="time" id="inputCustomScheduleTime" value="10:00" class="m3-input m3-time-input" />
+            </div>
           </div>
           <md-filled-tonal-button id="btnSetCustomSchedule">
             <md-icon slot="icon">alarm_add</md-icon>Schedule Custom Time
@@ -704,35 +733,35 @@
         </div>
       </div>
 
-      <!-- Tatkal Info -->
+      <!-- Tatkal Info Tiles (Material 3 Grid) -->
       <div class="m3-card">
         <div class="m3-section-headline">
           <md-icon>info</md-icon>
           <span>Tatkal Window Timing</span>
         </div>
-        <div class="m3-grid-2">
-          <div>
+        <div class="m3-sched-info-grid">
+          <div class="m3-sched-info-tile">
             <div class="m3-label-text">Current Class:</div>
             <strong id="schedClassType">3A (AC Class)</strong>
           </div>
-          <div>
+          <div class="m3-sched-info-tile">
             <div class="m3-label-text">Window Opening:</div>
             <strong id="schedOpenTime">10:00:00 AM IST</strong>
           </div>
-          <div>
+          <div class="m3-sched-info-tile">
             <div class="m3-label-text">Target Website:</div>
             <strong id="schedSiteLabel">Old Site (/nget)</strong>
           </div>
-          <div>
+          <div class="m3-sched-info-tile">
             <div class="m3-label-text">Next Opening:</div>
             <strong id="schedAlarmTime">Calculating...</strong>
           </div>
         </div>
 
         <!-- Plan / Template in effect -->
-        <div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--md-sys-color-surface-container-highest);">
+        <div class="m3-sched-plan-container">
           <div class="m3-label-text">Booking Plan for Automation:</div>
-          <div id="schedSelectedPlanBadge" class="m3-sched-plan-tag is-active" style="margin-top: 6px; display: inline-flex;">
+          <div id="schedSelectedPlanBadge" class="m3-sched-plan-tag is-active">
             <md-icon style="font-size: 15px;">edit_note</md-icon>
             <span id="schedSelectedPlanText">No template selected — using active filled contents</span>
           </div>

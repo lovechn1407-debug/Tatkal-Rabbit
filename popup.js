@@ -1256,11 +1256,30 @@ async function renderActiveSchedules() {
 
 // Window Display Mode, Resizing & Side Panel Docking
 function setupWindowDisplayMode() {
-  const isSidePanel = window.location.search.includes("mode=sidepanel");
-  if (isSidePanel) {
-    document.documentElement.classList.add("mode-sidepanel");
-    document.body.classList.add("mode-sidepanel");
+  function updateViewportResponsiveness() {
+    const isNarrow = window.innerWidth <= 540;
+    document.documentElement.classList.toggle("is-narrow", isNarrow);
+    document.body.classList.toggle("is-narrow", isNarrow);
+
+    const isSidePanel = window.location.search.includes("mode=sidepanel");
+    if (isSidePanel) {
+      document.documentElement.classList.add("mode-sidepanel");
+      document.body.classList.add("mode-sidepanel");
+    }
+    const isWindow = window.location.search.includes("mode=window");
+    if (isWindow) {
+      document.documentElement.classList.add("mode-window");
+      document.body.classList.add("mode-window");
+    }
+
+    const contentArea = document.querySelector(".m3-content-area");
+    if (contentArea) contentArea.scrollLeft = 0;
   }
+
+  window.addEventListener("resize", updateViewportResponsiveness);
+  updateViewportResponsiveness();
+
+  const isSidePanel = window.location.search.includes("mode=sidepanel");
 
   const btnWindow = document.getElementById("btnWindowDisplayMode");
   const popover = document.getElementById("popoverWindowOptions");
@@ -1286,18 +1305,28 @@ function setupWindowDisplayMode() {
     });
   }
 
-  // Load and apply saved size
-  chrome.storage.local.get(["popup_window_size"], (res) => {
-    const size = res.popup_window_size || "default";
-    applyWindowSize(size, false);
+  // Load and apply saved zoom
+  chrome.storage.local.get(["app_zoom_level"], (res) => {
+    const zoom = res.app_zoom_level || 100;
+    applyZoom(zoom, false);
   });
 
-  // Size buttons
-  const sizeBtns = document.querySelectorAll(".m3-size-btn");
-  sizeBtns.forEach(btn => {
+  // Zoom Slider Dragger
+  const slider = document.getElementById("sliderZoom");
+  if (slider) {
+    slider.addEventListener("input", () => {
+      const idx = parseInt(slider.value, 10);
+      const pct = ZOOM_LEVELS[idx] || 100;
+      applyZoom(pct, true);
+    });
+  }
+
+  // Zoom Tick Buttons
+  document.querySelectorAll(".zoom-tick-btn").forEach(btn => {
     btn.addEventListener("click", () => {
-      const size = btn.dataset.size || "default";
-      applyWindowSize(size, true);
+      const idx = parseInt(btn.dataset.idx, 10);
+      const pct = ZOOM_LEVELS[idx] || 100;
+      applyZoom(pct, true);
     });
   });
 
@@ -1381,35 +1410,38 @@ function setupWindowDisplayMode() {
   }
 }
 
-function applyWindowSize(size, save = true) {
-  const isSidePanel = window.location.search.includes("mode=sidepanel");
-  if (isSidePanel) return; // Side panel size is managed by Chrome and user dragging
+const ZOOM_LEVELS = [50, 60, 70, 80, 100];
 
-  const sizeDimensions = {
-    small: { w: 420, h: 540 },
-    medium: { w: 520, h: 580 },
-    default: { w: 640, h: 600 }
-  };
+function applyZoom(pct, save = true) {
+  const clamped = ZOOM_LEVELS.includes(pct) ? pct : 100;
+  const scale = clamped / 100;
 
-  const dim = sizeDimensions[size] || sizeDimensions.default;
+  // Apply native zoom to documentElement so all elements, fonts, cards scale down
+  document.documentElement.style.zoom = scale.toString();
 
-  // Update active state on size buttons
-  document.querySelectorAll(".m3-size-btn").forEach(btn => {
-    btn.classList.toggle("active", btn.dataset.size === size);
+  // Reset any horizontal scroll
+  const contentArea = document.querySelector(".m3-content-area");
+  if (contentArea) contentArea.scrollLeft = 0;
+
+  // Update slider position & badge
+  const slider = document.getElementById("sliderZoom");
+  const badge = document.getElementById("zoomValueBadge");
+  const idx = ZOOM_LEVELS.indexOf(clamped);
+
+  if (slider && idx !== -1) {
+    slider.value = idx.toString();
+  }
+  if (badge) {
+    badge.textContent = clamped === 100 ? "100% (Default)" : `${clamped}%`;
+  }
+
+  document.querySelectorAll(".zoom-tick-btn").forEach(btn => {
+    const btnIdx = parseInt(btn.dataset.idx, 10);
+    btn.classList.toggle("active", btnIdx === idx);
   });
 
-  document.documentElement.classList.remove("size-small", "size-medium", "size-default");
-  document.body.classList.remove("size-small", "size-medium", "size-default");
-  document.documentElement.classList.add(`size-${size}`);
-  document.body.classList.add(`size-${size}`);
-
-  document.documentElement.style.width = `${dim.w}px`;
-  document.documentElement.style.height = `${dim.h}px`;
-  document.body.style.width = `${dim.w}px`;
-  document.body.style.height = `${dim.h}px`;
-
   if (save) {
-    chrome.storage.local.set({ popup_window_size: size });
+    chrome.storage.local.set({ app_zoom_level: clamped });
   }
 }
 
@@ -2456,7 +2488,7 @@ function renderAuthAndSubscriptionUI() {
       if (exp) {
         const diffMs = exp.getTime() - Date.now();
         const daysLeft = Math.max(1, Math.ceil(diffMs / (24 * 60 * 60 * 1000)));
-        daysText.textContent = `${daysLeft}D`;
+        daysText.textContent = daysLeft > 999 ? "999+D" : `${daysLeft}D`;
         if (daysBadge) daysBadge.title = `Active Pass: ${daysLeft} days remaining`;
       } else {
         daysText.textContent = "PRO";
