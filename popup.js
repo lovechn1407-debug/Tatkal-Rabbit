@@ -36,6 +36,40 @@ let currentTheme = "dark";
 let currentAuthUser = null;
 let currentSubscription = null;
 
+// Material Design 3 Toast / Snackbar System
+function showToast(message, type = "info") {
+  let container = document.getElementById("m3ToastContainer");
+  if (!container) {
+    container = document.createElement("div");
+    container.id = "m3ToastContainer";
+    container.className = "m3-toast-container";
+    document.body.appendChild(container);
+  }
+
+  const toast = document.createElement("div");
+  toast.className = `m3-toast m3-toast-${type}`;
+
+  const iconName = type === "error" ? "error" : type === "warning" ? "warning" : type === "success" ? "check_circle" : "info";
+  toast.innerHTML = `
+    <md-icon style="font-size: 18px;">${iconName}</md-icon>
+    <span class="m3-toast-msg">${message}</span>
+  `;
+
+  container.appendChild(toast);
+
+  requestAnimationFrame(() => {
+    toast.classList.add("visible");
+  });
+
+  setTimeout(() => {
+    toast.classList.remove("visible");
+    setTimeout(() => {
+      toast.remove();
+    }, 300);
+  }, 4000);
+}
+window.showToast = showToast;
+
 // Initialize on Load
 document.addEventListener("DOMContentLoaded", async () => {
   try {
@@ -1257,20 +1291,22 @@ async function renderActiveSchedules() {
 // Window Display Mode, Resizing & Side Panel Docking
 function setupWindowDisplayMode() {
   function updateViewportResponsiveness() {
-    const isNarrow = window.innerWidth <= 540;
-    document.documentElement.classList.toggle("is-narrow", isNarrow);
-    document.body.classList.toggle("is-narrow", isNarrow);
-
     const isSidePanel = window.location.search.includes("mode=sidepanel");
+    const isWindow = window.location.search.includes("mode=window");
+
     if (isSidePanel) {
       document.documentElement.classList.add("mode-sidepanel");
       document.body.classList.add("mode-sidepanel");
     }
-    const isWindow = window.location.search.includes("mode=window");
     if (isWindow) {
       document.documentElement.classList.add("mode-window");
       document.body.classList.add("mode-window");
     }
+
+    // Only side panels and detached windows can be narrow; popup has fixed 650px canvas
+    const isNarrow = (isSidePanel || isWindow) && window.innerWidth <= 540;
+    document.documentElement.classList.toggle("is-narrow", isNarrow);
+    document.body.classList.toggle("is-narrow", isNarrow);
 
     const contentArea = document.querySelector(".m3-content-area");
     if (contentArea) contentArea.scrollLeft = 0;
