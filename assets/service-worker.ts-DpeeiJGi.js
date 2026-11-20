@@ -40,6 +40,25 @@ async function x(){
   if(e?.tabId)try{await chrome.tabs.get(e.tabId),b=e.tabId}catch{b=null}
 }
 
+chrome.storage?.local?.get(["window_display_mode"],res=>{
+  if(res?.window_display_mode==="sidepanel"){
+    try{
+      chrome.sidePanel?.setPanelBehavior?.({openPanelOnActionClick:!0});
+      chrome.action?.setPopup?.({popup:""});
+    }catch{}
+  }
+});
+
+chrome.action?.onClicked?.addListener?.(async tab=>{
+  try{
+    if(chrome.sidePanel?.open&&tab?.windowId){
+      await chrome.sidePanel.open({windowId:tab.windowId});
+    }
+  }catch(err){
+    v.warn("action onClicked sidePanel: "+(err instanceof Error?err.message:err));
+  }
+});
+
 chrome.runtime.onMessage.addListener((e,t,n)=>(
   S(e,t.tab?.id)
     .then(e=>n(e))
@@ -109,6 +128,43 @@ async function S(e,t){
       data&&await T({context:data,state:data.state,message:"Automation started"},n);
     }
     return t;
+  }
+
+  if(e.type==="OPEN_SIDE_PANEL"){
+    try{
+      let winId=e.windowId;
+      if(!winId){
+        let [activeTab]=await chrome.tabs.query({active:!0,currentWindow:!0});
+        winId=activeTab?.windowId;
+      }
+      if(!winId){
+        let win=await chrome.windows.getCurrent();
+        winId=win?.id;
+      }
+      if(chrome.sidePanel?.open&&winId){
+        await chrome.sidePanel.open({windowId:winId});
+        return{ok:!0};
+      }
+    }catch(err){
+      v.warn("Failed to open sidePanel: "+(err instanceof Error?err.message:err));
+    }
+    return{ok:!1};
+  }
+
+  if(e.type==="SET_PANEL_BEHAVIOR"){
+    try{
+      if(chrome.sidePanel?.setPanelBehavior){
+        await chrome.sidePanel.setPanelBehavior({openPanelOnActionClick:!!e.openOnActionClick});
+      }
+      if(chrome.action?.setPopup){
+        await chrome.action.setPopup({popup:e.openOnActionClick?"":"index.html"});
+      }
+      await chrome.storage.local.set({window_display_mode:e.openOnActionClick?"sidepanel":"popup"});
+      return{ok:!0};
+    }catch(err){
+      v.warn("Failed to setPanelBehavior: "+(err instanceof Error?err.message:err));
+    }
+    return{ok:!1};
   }
 
   if(e.type==="GET_STATUS")return C(n);

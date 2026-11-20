@@ -490,7 +490,11 @@ function setupJourneyControls() {
   if (selectPlan) {
     selectPlan.addEventListener("change", (e) => {
       const id = selectPlan.value;
-      if (!id) return;
+      if (!id) {
+        if (activeJourney) delete activeJourney.name;
+        updateSchedulerDetails();
+        return;
+      }
       const found = journeyTemplates.find(j => j.id === id);
       if (found) {
         activeJourney = { ...found };
@@ -498,6 +502,7 @@ function setupJourneyControls() {
         populateJourneyUI();
         renderPassengerCards();
         updateHeroRouteCard();
+        updateSchedulerDetails();
         saveJourneyState();
       }
     });
@@ -859,8 +864,6 @@ function getScheduleMetadata() {
     if (found) {
       templateName = found.name || `Plan (${found.sourceStation} → ${found.destinationStation})`;
     }
-  } else if (activeJourney?.name) {
-    templateName = activeJourney.name;
   }
 
   const isUsingActiveFilled = !templateName;
@@ -911,7 +914,7 @@ function setupSchedulerControls() {
           travelClass: activeJourney.travelClass || "3A"
         });
 
-        const usingDesc = meta.templateName ? `Saved Template: "${meta.templateName}"` : `Active Filled Details (${meta.routeSummary})`;
+        const usingDesc = meta.templateName ? `Saved Template: "${meta.templateName}"` : `No template selected — using active filled contents (${meta.routeSummary})`;
         alert(`⚡ Tatkal Auto-Start Scheduled on ${activeJourney.irctcSpaBase === 'eticket' ? 'New Site' : 'Old Site'}!\nUsing: ${usingDesc}\nThe extension will automatically open IRCTC and begin booking 30 seconds before window.`);
         renderActiveSchedules();
       } catch (err) {
@@ -950,7 +953,7 @@ function setupSchedulerControls() {
         };
 
         await timedScheduler.scheduleBooking(payload);
-        const usingDesc = meta.templateName ? `Template "${meta.templateName}"` : `Active Filled Details (${meta.routeSummary})`;
+        const usingDesc = meta.templateName ? `Template: "${meta.templateName}"` : `No template selected — using active filled contents (${meta.routeSummary})`;
         alert(`📅 Advance Booking (09:00 AM) Scheduled!\nUsing: ${usingDesc}\nBrowser will launch at 08:59:30 AM IST.`);
         renderActiveSchedules();
       } catch (err) {
@@ -989,7 +992,7 @@ function setupSchedulerControls() {
         };
 
         await timedScheduler.scheduleBooking(payload);
-        const usingDesc = meta.templateName ? `Template "${meta.templateName}"` : `Active Filled Details (${meta.routeSummary})`;
+        const usingDesc = meta.templateName ? `Template: "${meta.templateName}"` : `No template selected — using active filled contents (${meta.routeSummary})`;
         alert(`⚡ AC Tatkal (10:00 AM) Scheduled!\nUsing: ${usingDesc}\nBrowser opens at 09:59:30 AM and syncs class at 10:00:07 AM IST.`);
         renderActiveSchedules();
       } catch (err) {
@@ -1028,7 +1031,7 @@ function setupSchedulerControls() {
         };
 
         await timedScheduler.scheduleBooking(payload);
-        const usingDesc = meta.templateName ? `Template "${meta.templateName}"` : `Active Filled Details (${meta.routeSummary})`;
+        const usingDesc = meta.templateName ? `Template: "${meta.templateName}"` : `No template selected — using active filled contents (${meta.routeSummary})`;
         alert(`⚡ Sleeper / Non-AC Tatkal (11:00 AM) Scheduled!\nUsing: ${usingDesc}\nBrowser opens at 10:59:30 AM and syncs class at 11:00:07 AM IST.`);
         renderActiveSchedules();
       } catch (err) {
@@ -1077,7 +1080,7 @@ function setupSchedulerControls() {
         };
 
         await timedScheduler.scheduleBooking(payload);
-        const usingDesc = meta.templateName ? `Template "${meta.templateName}"` : `Active Filled Details (${meta.routeSummary})`;
+        const usingDesc = meta.templateName ? `Template: "${meta.templateName}"` : `No template selected — using active filled contents (${meta.routeSummary})`;
         alert(`⏰ Custom Booking (${formattedTime} IST) Scheduled!\nUsing: ${usingDesc}\nBrowser will launch 30 seconds before target time.`);
         renderActiveSchedules();
       } catch (err) {
@@ -1107,6 +1110,23 @@ function updateSchedulerDetails() {
       alarmTimeEl.textContent = "Window already passed for this date";
     }
   }
+
+  const planBadgeEl = document.getElementById("schedSelectedPlanBadge");
+  const planTextEl = document.getElementById("schedSelectedPlanText");
+  if (planBadgeEl && planTextEl) {
+    const meta = getScheduleMetadata();
+    if (meta.templateName) {
+      planBadgeEl.className = "m3-sched-plan-tag is-template";
+      const icon = planBadgeEl.querySelector("md-icon");
+      if (icon) icon.textContent = "bookmark";
+      planTextEl.innerHTML = `Template Selected: <b>${meta.templateName}</b>`;
+    } else {
+      planBadgeEl.className = "m3-sched-plan-tag is-active";
+      const icon = planBadgeEl.querySelector("md-icon");
+      if (icon) icon.textContent = "edit_note";
+      planTextEl.innerHTML = `No template selected — using <b>active filled contents</b> (${meta.routeSummary || "Journey Details"})`;
+    }
+  }
 }
 
 async function renderActiveSchedules() {
@@ -1132,7 +1152,7 @@ async function renderActiveSchedules() {
     const siteTag = s.irctcSpaBase === "eticket" ? "New Site" : "Old Site";
     const planText = s.templateName
       ? `<span class="m3-sched-tag template"><md-icon style="font-size: 13px;">bookmark</md-icon>Template: <b>${s.templateName}</b></span>`
-      : `<span class="m3-sched-tag active-filled"><md-icon style="font-size: 13px;">edit_note</md-icon>Using <b>Active Filled Details</b></span>`;
+      : `<span class="m3-sched-tag active-filled"><md-icon style="font-size: 13px;">edit_note</md-icon>No template selected — using <b>active filled contents</b></span>`;
 
     const routeText = s.routeSummary || (activeJourney ? `${activeJourney.sourceStation} → ${activeJourney.destinationStation}` : "");
     const classText = s.classQuotaSummary || (activeJourney ? `${activeJourney.travelClass || "3A"} (${activeJourney.quota || "TQ"})` : "");
@@ -1173,7 +1193,7 @@ async function renderActiveSchedules() {
 
     const planText = s.templateName
       ? `<span class="m3-sched-tag template"><md-icon style="font-size: 13px;">bookmark</md-icon>Template: <b>${s.templateName}</b></span>`
-      : `<span class="m3-sched-tag active-filled"><md-icon style="font-size: 13px;">edit_note</md-icon>Using <b>Active Filled Details</b></span>`;
+      : `<span class="m3-sched-tag active-filled"><md-icon style="font-size: 13px;">edit_note</md-icon>No template selected — using <b>active filled contents</b></span>`;
 
     const routeText = s.routeSummary || (activeJourney ? `${activeJourney.sourceStation} → ${activeJourney.destinationStation}` : "");
     const classText = s.classQuotaSummary || (activeJourney ? `${activeJourney.travelClass || "3A"} (${activeJourney.quota || "TQ"})` : "");
@@ -1281,16 +1301,46 @@ function setupWindowDisplayMode() {
         return;
       }
       try {
-        if (chrome.sidePanel?.open) {
+        let currentWinId = null;
+        try {
           const currentWin = await chrome.windows.getCurrent();
-          await chrome.sidePanel.open({ windowId: currentWin.id });
-          window.close();
-        } else {
-          alert("Chrome Side Panel is supported on Chrome 114+");
+          currentWinId = currentWin?.id;
+        } catch {}
+
+        // 1. Tell background to enable side panel on toolbar click & store preference
+        try {
+          await chrome.runtime.sendMessage({
+            type: "SET_PANEL_BEHAVIOR",
+            openOnActionClick: true
+          });
+        } catch {}
+
+        // 2. Open side panel immediately
+        let opened = false;
+        try {
+          if (chrome.sidePanel?.open && currentWinId) {
+            await chrome.sidePanel.open({ windowId: currentWinId });
+            opened = true;
+          }
+        } catch (directErr) {
+          console.warn("Direct sidePanel.open in popup failed, delegating to background:", directErr);
         }
+
+        if (!opened) {
+          try {
+            const resp = await chrome.runtime.sendMessage({
+              type: "OPEN_SIDE_PANEL",
+              windowId: currentWinId
+            });
+            if (resp?.ok) opened = true;
+          } catch {}
+        }
+
+        // Close popup window cleanly
+        window.close();
       } catch (err) {
         console.warn("Could not open side panel:", err);
-        alert("Chrome Side Panel opened or you can click Chrome's Side Panel icon on the top right!");
+        window.close();
       }
     });
   }
@@ -1301,10 +1351,16 @@ function setupWindowDisplayMode() {
     if (!isSidePanel) {
       btnPopup.classList.add("active");
     }
-    btnPopup.addEventListener("click", () => {
+    btnPopup.addEventListener("click", async () => {
       if (popover) popover.style.display = "none";
       if (isSidePanel) {
-        alert("To return to standard popup mode, close the Side Panel (click X at top right) and click the Tatkal Rabbit icon in your Chrome toolbar.");
+        try {
+          await chrome.runtime.sendMessage({
+            type: "SET_PANEL_BEHAVIOR",
+            openOnActionClick: false
+          });
+        } catch {}
+        alert("Switched to Extension Popup mode!\nClick the Tatkal Rabbit icon in your Chrome toolbar to open as a floating popup.");
       } else {
         alert("You are already in Extension Popup mode!");
       }
